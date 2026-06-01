@@ -1,0 +1,904 @@
+import React, { useState, useEffect } from 'react';
+import { api } from '../../lib/api';
+import { FileText, Users, Car, Search, Download, Printer, Filter, ChevronLeft, ChevronRight, Eye, RefreshCw, AlertCircle } from 'lucide-react';
+import { JobCardDetailView } from '../jobCards/JobCardDetailView';
+
+export function ReportsView() {
+  const [activeSubTab, setActiveSubTab] = useState<'jobCards' | 'customers' | 'vehicles'>('jobCards');
+  
+  // Modals / Details state
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+
+  return (
+    <div className="space-y-6 text-right" dir="rtl">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-black tracking-tight text-white">مركز التقارير والإحصائيات</h1>
+        <p className="text-sm text-zinc-400">تحليل كروت الاستقبال، بيانات العملاء، سجلات صيانة المركبات وعمليات التوثيق بالورشة.</p>
+      </div>
+
+      {/* Sub tabs Navigation */}
+      <div className="flex border-b border-zinc-900 pb-px gap-4">
+        <button
+          onClick={() => setActiveSubTab('jobCards')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 cursor-pointer ${
+            activeSubTab === 'jobCards'
+              ? 'border-primary text-white bg-primary/5'
+              : 'border-transparent text-zinc-500 hover:text-white'
+          }`}
+        >
+          <FileText size={14} /> كروت الاستقبال وصيانة السيارات
+        </button>
+        <button
+          onClick={() => setActiveSubTab('customers')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 cursor-pointer ${
+            activeSubTab === 'customers'
+              ? 'border-primary text-white bg-primary/5'
+              : 'border-transparent text-zinc-500 hover:text-white'
+          }`}
+        >
+          <Users size={14} /> تقارير حركة العملاء
+        </button>
+        <button
+          onClick={() => setActiveSubTab('vehicles')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 cursor-pointer ${
+            activeSubTab === 'vehicles'
+              ? 'border-primary text-white bg-primary/5'
+              : 'border-transparent text-zinc-500 hover:text-white'
+          }`}
+        >
+          <Car size={14} /> تقارير المركبات المسجلة
+        </button>
+      </div>
+
+      {/* Sub tabs contents */}
+      {activeSubTab === 'jobCards' && <JobCardsReportTab onViewJob={setSelectedJob} />}
+      {activeSubTab === 'customers' && <CustomersReportTab onViewJob={setSelectedJob} />}
+      {activeSubTab === 'vehicles' && <VehiclesReportTab onViewJob={setSelectedJob} />}
+
+      {/* Fullscreen detail modal overlay */}
+      {selectedJob && (
+        <JobCardDetailView
+          job={selectedJob}
+          onClose={() => setSelectedJob(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/* =========================================================================
+   1. JOB CARDS REPORT VIEW
+   ========================================================================= */
+interface SubReportProps {
+  onViewJob: (job: any) => void;
+}
+
+function JobCardsReportTab({ onViewJob }: SubReportProps) {
+  const [data, setData] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [showWhatsAppAlert, setShowWhatsAppAlert] = useState(false);
+
+  // Filters
+  const [status, setStatus] = useState('');
+  const [approvalStatus, setApprovalStatus] = useState('');
+  const [technician, setTechnician] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Sorting
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Debouncing search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPagination((p) => ({ ...p, page: 1 }));
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  useEffect(() => {
+    loadJobCards();
+  }, [debouncedSearch, status, approvalStatus, technician, startDate, endDate, pagination.page, sortBy, sortOrder]);
+
+  async function loadJobCards() {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: debouncedSearch,
+        status,
+        approvalStatus,
+        technicianName: technician,
+        startDate,
+        endDate,
+        sortBy,
+        sortOrder
+      });
+
+      const res = await api.get(`/reports/job-cards?${queryParams.toString()}`);
+      setData(res.data.data.jobCards || []);
+      setPagination(res.data.data.pagination);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Export Excel and Share via WhatsApp
+  function handleExportExcelAndWhatsApp() {
+    if (data.length === 0) return;
+    
+    const title = 'تقرير كروت استقبال وصيانة السيارات - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString('ar-EG');
+    
+    const rowsHtml = data.map((job) => `
+      <tr>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${job.jobNumber}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${job.customer?.fullName || ''}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">+${job.customer?.mobileNumber || ''}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px;">${job.vehicle?.brand || ''} ${job.vehicle?.model || ''}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${job.vehicle?.plateNumber || ''}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${job.estimatedCost || '0'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px;">${approvalStatusLabels[job.approvalStatus] || job.approvalStatus}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px;">${statusLabels[job.status] || job.status}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${new Date(job.entryDate).toLocaleDateString('ar-EG')}</td>
+      </tr>
+    `).join('');
+
+    const excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+        <style>
+          table { border-collapse: collapse; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><td colspan="9" class="title-row">${title}</td></tr>
+          <tr><td colspan="9">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr></tr>
+          <thead>
+            <tr>
+              <th>رقم الكرت</th>
+              <th>اسم العميل</th>
+              <th>رقم الهاتف</th>
+              <th>السيارة</th>
+              <th>رقم اللوحة</th>
+              <th>التكلفة (ريال)</th>
+              <th>حالة الاعتماد</th>
+              <th>حالة العمل</th>
+              <th>تاريخ الدخول</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `reports-job-cards-${new Date().toISOString().slice(0, 10)}.xls`);
+    link.click();
+    
+    setShowWhatsAppAlert(true);
+  }
+
+  const statusLabels: Record<string, string> = {
+    RECEIVED: 'تم الاستلام',
+    INSPECTION: 'قيد الفحص',
+    WAITING_APPROVAL: 'انتظار الموافقة',
+    IN_PROGRESS: 'تحت الإصلاح',
+    COMPLETED: 'تم الإصلاح',
+    DELIVERED: 'تم التسليم'
+  };
+
+  const approvalStatusLabels: Record<string, string> = {
+    PENDING: 'انتظار الاعتماد',
+    APPROVED: 'تمت الموافقة',
+    REJECTED: 'مرفوض'
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Filter panel */}
+      <div className="glass-panel rounded-xl p-5 border border-zinc-900 space-y-4">
+        <div className="flex items-center gap-2 text-sm font-bold text-white mb-2">
+          <Filter size={16} className="text-primary" /> تصفية وفلترة متقدمة
+        </div>
+        
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-5 text-right">
+          {/* Search */}
+          <div className="col-span-2 md:col-span-1">
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">بحث شامل</label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="رقم الكرت، العميل، اللوحة..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white placeholder-zinc-600 focus:outline-none"
+              />
+              <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">حالة الكرت</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
+            >
+              <option value="">كل الحالات</option>
+              {Object.entries(statusLabels).map(([val, label]) => (
+                <option key={val} value={val}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Approval */}
+          <div>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">حالة اعتماد الإصلاح</label>
+            <select
+              value={approvalStatus}
+              onChange={(e) => setApprovalStatus(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
+            >
+              <option value="">كل الموافقات</option>
+              {Object.entries(approvalStatusLabels).map(([val, label]) => (
+                <option key={val} value={val}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date range */}
+          <div>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">من تاريخ</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">إلى تاريخ</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-2 border-t border-zinc-900">
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportExcelAndWhatsApp}
+              disabled={data.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm"
+            >
+              📊 تصدير Excel ومشاركة واتساب
+            </button>
+            <button
+              onClick={() => window.print()}
+              disabled={data.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white rounded text-xs font-semibold cursor-pointer transition"
+            >
+              <Printer size={12} /> طباعة القائمة
+            </button>
+          </div>
+          
+          <button
+            onClick={() => {
+              setSearch('');
+              setStatus('');
+              setApprovalStatus('');
+              setStartDate('');
+              setEndDate('');
+              setTechnician('');
+            }}
+            className="text-xs text-zinc-500 hover:text-zinc-300 font-bold"
+          >
+            إعادة تعيين الفلاتر
+          </button>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right text-xs">
+            <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
+              <tr>
+                <th className="p-3">رقم الكرت</th>
+                <th className="p-3">العميل</th>
+                <th className="p-3">السيارة</th>
+                <th className="p-3">اللوحة</th>
+                <th className="p-3">التكلفة (ريال)</th>
+                <th className="p-3">حالة الاعتماد</th>
+                <th className="p-3">الحالة</th>
+                <th className="p-3">تاريخ الدخول</th>
+                <th className="p-3 text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-16"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-24"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-12"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-14"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-16"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                    <td className="p-3"><div className="h-7 bg-zinc-900 rounded w-10 mx-auto"></div></td>
+                  </tr>
+                ))
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center text-zinc-600 font-bold">
+                    <AlertCircle size={24} className="mx-auto mb-2 text-zinc-700" />
+                    لا توجد كروت عمل مطابقة لخيارات الفلترة والبحث الحالية.
+                  </td>
+                </tr>
+              ) : (
+                data.map((job) => (
+                  <tr key={job.id} className="hover:bg-zinc-900/30 transition">
+                    <td className="p-3 font-semibold font-mono text-zinc-400">{job.jobNumber}</td>
+                    <td className="p-3 font-bold text-white">{job.customer?.fullName}</td>
+                    <td className="p-3 text-zinc-400">{job.vehicle?.brand} {job.vehicle?.model}</td>
+                    <td className="p-3 text-zinc-500 font-mono">{job.vehicle?.plateNumber}</td>
+                    <td className="p-3 font-bold text-zinc-300 font-mono">
+                      {Number(job.estimatedCost) || 0}
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        job.approvalStatus === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400' :
+                        job.approvalStatus === 'REJECTED' ? 'bg-red-500/10 text-red-400' :
+                        'bg-yellow-500/10 text-yellow-500'
+                      }`}>
+                        {approvalStatusLabels[job.approvalStatus] || job.approvalStatus}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        job.status === 'COMPLETED' ? 'bg-green-500/10 text-green-400' :
+                        job.status === 'IN_PROGRESS' ? 'bg-blue-500/10 text-blue-400' :
+                        job.status === 'WAITING_APPROVAL' ? 'bg-yellow-500/10 text-yellow-400' :
+                        'bg-zinc-800 text-zinc-400'
+                      }`}>
+                        {statusLabels[job.status] || job.status}
+                      </span>
+                    </td>
+                    <td className="p-3 text-zinc-400 font-mono">{new Date(job.entryDate).toLocaleDateString('ar-EG')}</td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => onViewJob(job)}
+                        className="p-1 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
+                        title="عرض كامل كرت العمل"
+                      >
+                        <Eye size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination block */}
+        <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
+          <div className="text-zinc-500 text-[11px] font-semibold">
+            عرض {data.length} من أصل {pagination.total} كرت استقبال
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
+              disabled={pagination.page <= 1}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <span className="text-xs text-zinc-400 font-bold font-mono">
+              صفحة {pagination.page} من {pagination.pages}
+            </span>
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
+              disabled={pagination.page >= pagination.pages}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Alert Modal for WhatsApp Excel Sharing */}
+      {showWhatsAppAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir="rtl">
+          <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
+            <div className="space-y-2">
+              <span className="text-3xl">📊</span>
+              <h3 className="text-lg font-black text-white">تم تحميل شيت Excel بنجاح!</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                الخطوة التالية: سنقوم بفتح محادثة الواتساب الآن. يرجى سحب وإرفاق ملف الإكسيل الذي تم تحميله في المحادثة المفتوحة لإرساله فورًا.
+              </p>
+            </div>
+
+            <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 text-xs text-right space-y-2 text-zinc-300">
+              <p>• اسم الملف المحمل: <span className="font-mono text-emerald-400 font-bold">{`reports-job-cards-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
+              <p>• كيفية الإرسال: بعد النقر على الزر بالأسفل، اضغط على زر المشبك 📎 أو الإرفاق في واتساب واختر التقرير من قائمة التنزيلات (Downloads).</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer"
+              >
+                إلغاء
+              </button>
+              <a
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent('السلام عليكم، مرفق لكم تقرير كروت صيانة المركبات الصادر من نظام Au2Ka CRM 🚗')}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                📲 فتح المحادثة على واتساب
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================================
+   2. CUSTOMERS REPORT VIEW
+   ========================================================================= */
+function CustomersReportTab({ onViewJob }: SubReportProps) {
+  const [data, setData] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [showWhatsAppAlert, setShowWhatsAppAlert] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPagination((p) => ({ ...p, page: 1 }));
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  useEffect(() => {
+    loadCustomers();
+  }, [debouncedSearch, pagination.page]);
+
+  async function loadCustomers() {
+    try {
+      setLoading(true);
+      const res = await api.get(`/reports/customers?page=${pagination.page}&limit=${pagination.limit}&search=${debouncedSearch}`);
+      setData(res.data.data.customers || []);
+      setPagination(res.data.data.pagination);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Export Excel and Share via WhatsApp
+  function handleExportExcelAndWhatsApp() {
+    if (data.length === 0) return;
+    const title = 'تقرير حركة العملاء بالكامل - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString('ar-EG');
+    const rowsHtml = data.map((c) => `
+      <tr>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${c.fullName}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">+${c.mobileNumber}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.vehiclesCount}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.jobCardsCount}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString('ar-EG') : 'لا يوجد'}</td>
+      </tr>
+    `).join('');
+
+    const excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+        <style>
+          table { border-collapse: collapse; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><td colspan="5" class="title-row">${title}</td></tr>
+          <tr><td colspan="5">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr></tr>
+          <thead>
+            <tr>
+              <th>الاسم الكامل للعميل</th>
+              <th>رقم الجوال</th>
+              <th>عدد السيارات</th>
+              <th>إجمالي الكروت</th>
+              <th>تاريخ آخر زيارة</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `reports-customers-${new Date().toISOString().slice(0, 10)}.xls`);
+    link.click();
+    
+    setShowWhatsAppAlert(true);
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Search Header */}
+      <div className="flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="relative w-72">
+            <input
+              type="text"
+              placeholder="البحث عن عميل بالاسم أو الجوال..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white focus:outline-none"
+            />
+            <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+          </div>
+          <button
+            onClick={handleExportExcelAndWhatsApp}
+            disabled={data.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm shrink-0"
+          >
+            📊 تصدير Excel ومشاركة واتساب
+          </button>
+        </div>
+        <div className="text-xs text-zinc-500">تحليل فترات الزيارة وسجل حركة الكروت لكل عميل بالورشة.</div>
+      </div>
+
+      <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right text-xs">
+            <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
+              <tr>
+                <th className="p-3">الاسم الكامل للعميل</th>
+                <th className="p-3">رقم الجوال</th>
+                <th className="p-3">عدد السيارات</th>
+                <th className="p-3">إجمالي الكروت</th>
+                <th className="p-3">تاريخ آخر زيارة</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-24"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-10"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-10"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                  </tr>
+                ))
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-zinc-600 font-semibold">
+                    لا يوجد عملاء مسجلين حالياً.
+                  </td>
+                </tr>
+              ) : (
+                data.map((c) => (
+                  <tr key={c.id} className="hover:bg-zinc-900/30 transition">
+                    <td className="p-3 font-bold text-white">{c.fullName}</td>
+                    <td className="p-3 text-zinc-400 font-mono">+{c.mobileNumber}</td>
+                    <td className="p-3 font-semibold text-zinc-400 font-mono">{c.vehiclesCount}</td>
+                    <td className="p-3 font-semibold text-zinc-400 font-mono">{c.jobCardsCount}</td>
+                    <td className="p-3 text-zinc-400 font-mono">
+                      {c.lastVisit ? new Date(c.lastVisit).toLocaleDateString('ar-EG') : 'لا يوجد'}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
+          <div className="text-zinc-500 text-[11px] font-semibold">
+            عرض {data.length} من أصل {pagination.total} عميل
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
+              disabled={pagination.page <= 1}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <span className="text-xs text-zinc-400 font-bold font-mono">
+              صفحة {pagination.page} من {pagination.pages}
+            </span>
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
+              disabled={pagination.page >= pagination.pages}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
+   3. VEHICLES REPORT VIEW
+   ========================================================================= */
+function VehiclesReportTab({ onViewJob }: SubReportProps) {
+  const [data, setData] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [showWhatsAppAlert, setShowWhatsAppAlert] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPagination((p) => ({ ...p, page: 1 }));
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  useEffect(() => {
+    loadVehicles();
+  }, [debouncedSearch, pagination.page]);
+
+  async function loadVehicles() {
+    try {
+      setLoading(true);
+      const res = await api.get(`/reports/vehicles?page=${pagination.page}&limit=${pagination.limit}&search=${debouncedSearch}`);
+      setData(res.data.data.vehicles || []);
+      setPagination(res.data.data.pagination);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+  // Export Excel and Share via WhatsApp
+  function handleExportExcelAndWhatsApp() {
+    if (data.length === 0) return;
+    const title = 'تقرير المركبات وصيانة السيارات - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString('ar-EG');
+    const rowsHtml = data.map((v) => `
+      <tr>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${v.brand} ${v.model}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.plateNumber}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.mileage} كم</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px;">${v.owner?.fullName || ''}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.repairsCount}</td>
+      </tr>
+    `).join('');
+
+    const excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+        <style>
+          table { border-collapse: collapse; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><td colspan="5" class="title-row">${title}</td></tr>
+          <tr><td colspan="5">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr></tr>
+          <thead>
+            <tr>
+              <th>السيارة والموديل</th>
+              <th>رقم اللوحة</th>
+              <th>قراءة العداد</th>
+              <th>المالك (العميل)</th>
+              <th>إجمالي زيارات الإصلاح</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `reports-vehicles-${new Date().toISOString().slice(0, 10)}.xls`);
+    link.click();
+    
+    setShowWhatsAppAlert(true);
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Search Header */}
+      <div className="flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="relative w-72">
+            <input
+              type="text"
+              placeholder="البحث عن سيارة بالنوع أو الموديل أو اللوحة..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white focus:outline-none"
+            />
+            <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+          </div>
+          <button
+            onClick={handleExportExcelAndWhatsApp}
+            disabled={data.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm shrink-0"
+          >
+            📊 تصدير Excel ومشاركة واتساب
+          </button>
+        </div>
+        <div className="text-xs text-zinc-500">متابعة سجلات تشخيص وأعطال وعدد إصلاحات السيارات بالكامل.</div>
+      </div>
+
+      <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right text-xs">
+            <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
+              <tr>
+                <th className="p-3">السيارة والموديل</th>
+                <th className="p-3">رقم اللوحة</th>
+                <th className="p-3">قراءة العداد الحالية</th>
+                <th className="p-3">المالك (العميل)</th>
+                <th className="p-3">إجمالي زيارات الإصلاح</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-24"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-16"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-14"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-20"></div></td>
+                    <td className="p-3"><div className="h-4 bg-zinc-900 rounded w-10"></div></td>
+                  </tr>
+                ))
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-zinc-700 font-semibold">
+                    لا توجد سيارات مسجلة حالياً.
+                  </td>
+                </tr>
+              ) : (
+                data.map((v) => (
+                  <tr key={v.id} className="hover:bg-zinc-900/30 transition">
+                    <td className="p-3 font-bold text-white">{v.brand} {v.model}</td>
+                    <td className="p-3 font-mono text-zinc-400">{v.plateNumber}</td>
+                    <td className="p-3 font-semibold text-zinc-400 font-mono">{v.mileage} كم</td>
+                    <td className="p-3 text-zinc-400">{v.owner?.fullName}</td>
+                    <td className="p-3 font-bold text-zinc-300 font-mono">{v.repairsCount}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
+          <div className="text-zinc-500 text-[11px] font-semibold">
+            عرض {data.length} من أصل {pagination.total} سيارة
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
+              disabled={pagination.page <= 1}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <span className="text-xs text-zinc-400 font-bold font-mono">
+              صفحة {pagination.page} من {pagination.pages}
+            </span>
+            <button
+              onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
+              disabled={pagination.page >= pagination.pages}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Alert Modal for WhatsApp Excel Sharing */}
+      {showWhatsAppAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir="rtl">
+          <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
+            <div className="space-y-2">
+              <span className="text-3xl">📊</span>
+              <h3 className="text-lg font-black text-white">تم تحميل تقرير المركبات بنجاح!</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                الخطوة التالية: سنقوم بفتح محادثة الواتساب الآن. يرجى سحب وإرفاق ملف الإكسيل الذي تم تحميله في المحادثة المفتوحة لإرساله فورًا.
+              </p>
+            </div>
+
+            <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 text-xs text-right space-y-2 text-zinc-300">
+              <p>• اسم الملف المحمل: <span className="font-mono text-emerald-400 font-bold">{`reports-vehicles-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
+              <p>• كيفية الإرسال: اضغط على زر الإرفاق 📎 في واتساب واختر التقرير من قائمة التنزيلات (Downloads).</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer"
+              >
+                إلغاء
+              </button>
+              <a
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent('السلام عليكم، مرفق لكم تقرير حركة المركبات بالكامل الصادر من نظام Au2Ka CRM 🚗')}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                📲 فتح المحادثة على واتساب
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

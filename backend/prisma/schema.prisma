@@ -1,0 +1,123 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  RECEPTION
+  TECHNICIAN
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum JobStatus {
+  RECEIVED
+  INSPECTION
+  WAITING_APPROVAL
+  IN_PROGRESS
+  COMPLETED
+  DELIVERED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  mobileNumber String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role      @default(RECEPTION)
+  status       String    @default("ACTIVE")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  activities   JobCardActivity[]
+}
+
+model Customer {
+  id           String    @id @default(uuid())
+  fullName     String
+  mobileNumber String
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  vehicles     Vehicle[]
+  jobCards     JobCard[]
+
+  @@index([fullName])
+  @@index([mobileNumber])
+}
+
+model Vehicle {
+  id          String    @id @default(uuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  brand       String
+  model       String
+  plateNumber String
+  mileage     Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  jobCards    JobCard[]
+
+  @@index([plateNumber])
+}
+
+model JobCard {
+  id                    String         @id @default(uuid())
+  jobNumber             String         @unique
+  customerId            String
+  customer              Customer       @relation(fields: [customerId], references: [id])
+  vehicleId             String
+  vehicle               Vehicle        @relation(fields: [vehicleId], references: [id])
+  customerComplaint     String         @db.Text
+  initialInspection     String?        @db.Text
+  requiredRepairs       String?        @db.Text
+  estimatedCost         Decimal?       @db.Decimal(10, 2)
+  approvalStatus        ApprovalStatus @default(PENDING)
+  technicianName        String?
+  entryDate             DateTime       @default(now())
+  notes                 String?        @db.Text
+  isVehiclePhotographed Boolean        @default(false)
+  status                JobStatus      @default(RECEIVED)
+  additionalServices    String?        @db.Text
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  deletedAt             DateTime?
+
+  photos                JobCardPhotos[]
+  activities            JobCardActivity[]
+
+  @@index([jobNumber])
+}
+
+model JobCardPhotos {
+  id         String   @id @default(uuid())
+  jobCardId  String
+  jobCard    JobCard  @relation(fields: [jobCardId], references: [id])
+  filePath   String
+  uploadedAt DateTime @default(now())
+}
+
+model JobCardActivity {
+  id        String   @id @default(uuid())
+  jobCardId String
+  jobCard   JobCard  @relation(fields: [jobCardId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  createdAt DateTime @default(now())
+}

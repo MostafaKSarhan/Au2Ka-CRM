@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: #080d1a;
+  /* Premium deep navy */
+  --color-card: #0f172a;
+  /* Slate 900 card */
+  --color-primary: #dc2626;
+  /* Crimson Red from logo */
+  --color-primary-hover: #b91c1c;
+  --color-accent: #0f2c59;
+  /* Navy Blue from logo border */
+  --color-accent-hover: #0a1e3f;
+  --color-border: #1e293b;
+  /* Slate 800 */
+  --color-muted: #64748b;
+  /* Slate 500 */
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    background-image: radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(15, 44, 89, 0.15) 0px, transparent 50%);
+    color: #f8fafc;
+    /* slate-50 */
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    text-align: right;
+  }
+}
+
+/* Glass Card Helper Classes */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080d1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
