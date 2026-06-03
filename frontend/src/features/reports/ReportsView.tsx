@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { FileText, Users, Car, Search, Download, Printer, Filter, ChevronLeft, ChevronRight, Eye, RefreshCw, AlertCircle } from 'lucide-react';
 import { JobCardDetailView } from '../jobCards/JobCardDetailView';
+import { useTranslation } from '../../store/LanguageContext';
 
 export function ReportsView() {
+  const { lang, t } = useTranslation();
   const [activeSubTab, setActiveSubTab] = useState<'jobCards' | 'customers' | 'vehicles'>('jobCards');
   
   // Modals / Details state
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
+  const isRtl = lang === 'ar';
+
   return (
-    <div className="space-y-6 text-right" dir="rtl">
+    <div className={`space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-white">مركز التقارير والإحصائيات</h1>
-        <p className="text-sm text-zinc-400">تحليل كروت الاستقبال، بيانات العملاء، سجلات صيانة المركبات وعمليات التوثيق بالورشة.</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('reportsTitle')}</h1>
+        <p className="text-sm text-zinc-400">{t('reportsSubtitle')}</p>
       </div>
 
       {/* Sub tabs Navigation */}
@@ -27,7 +31,7 @@ export function ReportsView() {
               : 'border-transparent text-zinc-500 hover:text-white'
           }`}
         >
-          <FileText size={14} /> كروت الاستقبال وصيانة السيارات
+          <FileText size={14} /> {t('jobCardsReport')}
         </button>
         <button
           onClick={() => setActiveSubTab('customers')}
@@ -37,7 +41,7 @@ export function ReportsView() {
               : 'border-transparent text-zinc-500 hover:text-white'
           }`}
         >
-          <Users size={14} /> تقارير حركة العملاء
+          <Users size={14} /> {t('customersReport')}
         </button>
         <button
           onClick={() => setActiveSubTab('vehicles')}
@@ -47,7 +51,7 @@ export function ReportsView() {
               : 'border-transparent text-zinc-500 hover:text-white'
           }`}
         >
-          <Car size={14} /> تقارير المركبات المسجلة
+          <Car size={14} /> {t('vehiclesReport')}
         </button>
       </div>
 
@@ -75,6 +79,7 @@ interface SubReportProps {
 }
 
 function JobCardsReportTab({ onViewJob }: SubReportProps) {
+  const { lang, t } = useTranslation();
   const [data, setData] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -92,6 +97,21 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
   // Sorting
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const statusLabels: Record<string, string> = {
+    RECEIVED: t('status_RECEIVED'),
+    INSPECTION: t('status_INSPECTION'),
+    WAITING_APPROVAL: t('status_WAITING_APPROVAL'),
+    IN_PROGRESS: t('status_IN_PROGRESS'),
+    COMPLETED: t('status_COMPLETED'),
+    DELIVERED: t('status_DELIVERED')
+  };
+
+  const approvalStatusLabels: Record<string, string> = {
+    PENDING: t('approval_PENDING'),
+    APPROVED: t('approval_APPROVED'),
+    REJECTED: t('approval_REJECTED')
+  };
 
   // Debouncing search
   useEffect(() => {
@@ -136,8 +156,8 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
     
-    const title = 'تقرير كروت استقبال وصيانة السيارات - Au2Ka CRM';
-    const dateStr = new Date().toLocaleDateString('ar-EG');
+    const title = lang === 'ar' ? 'تقرير كروت استقبال وصيانة السيارات - Au2Ka CRM' : 'Job Cards Intake & Maintenance Report - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     
     const rowsHtml = data.map((job) => `
       <tr>
@@ -149,7 +169,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${job.estimatedCost || '0'}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px;">${approvalStatusLabels[job.approvalStatus] || job.approvalStatus}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px;">${statusLabels[job.status] || job.status}</td>
-        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${new Date(job.entryDate).toLocaleDateString('ar-EG')}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${new Date(job.entryDate).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</td>
       </tr>
     `).join('');
 
@@ -159,26 +179,26 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
         <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
         <style>
           table { border-collapse: collapse; }
-          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: ${lang === 'ar' ? 'right' : 'left'}; }
           .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
         </style>
       </head>
       <body>
         <table>
           <tr><td colspan="9" class="title-row">${title}</td></tr>
-          <tr><td colspan="9">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr><td colspan="9">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>رقم الكرت</th>
-              <th>اسم العميل</th>
-              <th>رقم الهاتف</th>
-              <th>السيارة</th>
-              <th>رقم اللوحة</th>
-              <th>التكلفة (ريال)</th>
-              <th>حالة الاعتماد</th>
-              <th>حالة العمل</th>
-              <th>تاريخ الدخول</th>
+              <th>${lang === 'ar' ? 'رقم الكرت' : 'Card Number'}</th>
+              <th>${lang === 'ar' ? 'اسم العميل' : 'Customer Name'}</th>
+              <th>${lang === 'ar' ? 'رقم الهاتف' : 'Phone Number'}</th>
+              <th>${lang === 'ar' ? 'السيارة' : 'Vehicle'}</th>
+              <th>${lang === 'ar' ? 'رقم اللوحة' : 'Plate Number'}</th>
+              <th>${lang === 'ar' ? 'التكلفة (ريال)' : 'Cost (SAR)'}</th>
+              <th>${lang === 'ar' ? 'حالة الاعتماد' : 'Approval Status'}</th>
+              <th>${lang === 'ar' ? 'حالة العمل' : 'Work Status'}</th>
+              <th>${lang === 'ar' ? 'تاريخ الدخول' : 'Entry Date'}</th>
             </tr>
           </thead>
           <tbody>
@@ -199,54 +219,41 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
     setShowWhatsAppAlert(true);
   }
 
-  const statusLabels: Record<string, string> = {
-    RECEIVED: 'تم الاستلام',
-    INSPECTION: 'قيد الفحص',
-    WAITING_APPROVAL: 'انتظار الموافقة',
-    IN_PROGRESS: 'تحت الإصلاح',
-    COMPLETED: 'تم الإصلاح',
-    DELIVERED: 'تم التسليم'
-  };
-
-  const approvalStatusLabels: Record<string, string> = {
-    PENDING: 'انتظار الاعتماد',
-    APPROVED: 'تمت الموافقة',
-    REJECTED: 'مرفوض'
-  };
+  const isRtl = lang === 'ar';
 
   return (
     <div className="space-y-4">
       {/* Filter panel */}
       <div className="glass-panel rounded-xl p-5 border border-zinc-900 space-y-4">
         <div className="flex items-center gap-2 text-sm font-bold text-white mb-2">
-          <Filter size={16} className="text-primary" /> تصفية وفلترة متقدمة
+          <Filter size={16} className="text-primary" /> {t('advancedFilter')}
         </div>
         
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-5 text-right">
+        <div className={`grid gap-4 grid-cols-2 md:grid-cols-5 ${isRtl ? 'text-right' : 'text-left'}`}>
           {/* Search */}
           <div className="col-span-2 md:col-span-1">
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">بحث شامل</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{lang === 'ar' ? 'بحث شامل' : 'Search'}</label>
             <div className="relative">
               <input
                 type="text"
-                placeholder="رقم الكرت، العميل، اللوحة..."
+                placeholder={t('searchJobCards')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white placeholder-zinc-600 focus:outline-none"
+                className={`w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white placeholder-zinc-600 focus:outline-none ${isRtl ? 'pr-8 pl-2' : 'pl-8 pr-2'}`}
               />
-              <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+              <Search className={`absolute top-2.5 text-zinc-600 ${isRtl ? 'right-2.5' : 'left-2.5'}`} size={14} />
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">حالة الكرت</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{lang === 'ar' ? 'حالة الكرت' : 'Card Status'}</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
             >
-              <option value="">كل الحالات</option>
+              <option value="">{t('allStatuses')}</option>
               {Object.entries(statusLabels).map(([val, label]) => (
                 <option key={val} value={val}>{label}</option>
               ))}
@@ -255,13 +262,13 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
 
           {/* Approval */}
           <div>
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">حالة اعتماد الإصلاح</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{t('jobApprovalSelect')}</label>
             <select
               value={approvalStatus}
               onChange={(e) => setApprovalStatus(e.target.value)}
               className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
             >
-              <option value="">كل الموافقات</option>
+              <option value="">{t('allApprovals')}</option>
               {Object.entries(approvalStatusLabels).map(([val, label]) => (
                 <option key={val} value={val}>{label}</option>
               ))}
@@ -270,7 +277,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
 
           {/* Date range */}
           <div>
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">من تاريخ</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{t('startDate')}</label>
             <input
               type="date"
               value={startDate}
@@ -280,7 +287,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
           </div>
 
           <div>
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">إلى تاريخ</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{t('endDate')}</label>
             <input
               type="date"
               value={endDate}
@@ -297,14 +304,14 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
               disabled={data.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm"
             >
-              📊 تصدير Excel ومشاركة واتساب
+              {t('exportExcel')}
             </button>
             <button
               onClick={() => window.print()}
               disabled={data.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white rounded text-xs font-semibold cursor-pointer transition"
             >
-              <Printer size={12} /> طباعة القائمة
+              <Printer size={12} /> {t('printList')}
             </button>
           </div>
           
@@ -317,9 +324,9 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
               setEndDate('');
               setTechnician('');
             }}
-            className="text-xs text-zinc-500 hover:text-zinc-300 font-bold"
+            className="text-xs text-zinc-500 hover:text-zinc-300 font-bold cursor-pointer"
           >
-            إعادة تعيين الفلاتر
+            {t('resetFilters')}
           </button>
         </div>
       </div>
@@ -327,18 +334,18 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
       {/* Data Table */}
       <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className={`w-full text-xs ${isRtl ? 'text-right' : 'text-left'}`}>
             <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
               <tr>
-                <th className="p-3">رقم الكرت</th>
-                <th className="p-3">العميل</th>
-                <th className="p-3">السيارة</th>
-                <th className="p-3">اللوحة</th>
-                <th className="p-3">التكلفة (ريال)</th>
-                <th className="p-3">حالة الاعتماد</th>
-                <th className="p-3">الحالة</th>
-                <th className="p-3">تاريخ الدخول</th>
-                <th className="p-3 text-center">إجراءات</th>
+                <th className="p-3">{t('zoomedCardNum')}</th>
+                <th className="p-3">{t('zoomedCust')}</th>
+                <th className="p-3">{t('vehicleInfo')}</th>
+                <th className="p-3">{t('plateNumber')}</th>
+                <th className="p-3">{t('cost')}</th>
+                <th className="p-3">{t('approvalDecision')}</th>
+                <th className="p-3">{lang === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="p-3">{t('entryDate')}</th>
+                <th className="p-3 text-center">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-900">
@@ -360,7 +367,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                 <tr>
                   <td colSpan={9} className="p-8 text-center text-zinc-600 font-bold">
                     <AlertCircle size={24} className="mx-auto mb-2 text-zinc-700" />
-                    لا توجد كروت عمل مطابقة لخيارات الفلترة والبحث الحالية.
+                    {t('noReportMatches')}
                   </td>
                 </tr>
               ) : (
@@ -386,18 +393,18 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         job.status === 'COMPLETED' ? 'bg-green-500/10 text-green-400' :
                         job.status === 'IN_PROGRESS' ? 'bg-blue-500/10 text-blue-400' :
-                        job.status === 'WAITING_APPROVAL' ? 'bg-yellow-500/10 text-yellow-400' :
+                        job.status === 'WAITING_APPROVAL' ? 'bg-yellow-500/10 text-yellow-450' :
                         'bg-zinc-800 text-zinc-400'
                       }`}>
                         {statusLabels[job.status] || job.status}
                       </span>
                     </td>
-                    <td className="p-3 text-zinc-400 font-mono">{new Date(job.entryDate).toLocaleDateString('ar-EG')}</td>
+                    <td className="p-3 text-zinc-400 font-mono">{new Date(job.entryDate).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</td>
                     <td className="p-3 text-center">
                       <button
                         onClick={() => onViewJob(job)}
                         className="p-1 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
-                        title="عرض كامل كرت العمل"
+                        title={lang === 'ar' ? 'عرض كامل كرت العمل' : 'View Full Job Card'}
                       >
                         <Eye size={14} />
                       </button>
@@ -412,7 +419,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
         {/* Pagination block */}
         <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
           <div className="text-zinc-500 text-[11px] font-semibold">
-            عرض {data.length} من أصل {pagination.total} كرت استقبال
+            {t('showingItems').replace('{count}', data.length.toString()).replace('{total}', pagination.total.toString())}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -420,17 +427,17 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
               disabled={pagination.page <= 1}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              صفحة {pagination.page} من {pagination.pages}
+              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
           </div>
         </div>
@@ -439,19 +446,19 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
 
       {/* Alert Modal for WhatsApp Excel Sharing */}
       {showWhatsAppAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
               <span className="text-3xl">📊</span>
-              <h3 className="text-lg font-black text-white">تم تحميل شيت Excel بنجاح!</h3>
+              <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
-                الخطوة التالية: سنقوم بفتح محادثة الواتساب الآن. يرجى سحب وإرفاق ملف الإكسيل الذي تم تحميله في المحادثة المفتوحة لإرساله فورًا.
+                {t('excelNextSteps')}
               </p>
             </div>
 
             <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 text-xs text-right space-y-2 text-zinc-300">
-              <p>• اسم الملف المحمل: <span className="font-mono text-emerald-400 font-bold">{`reports-job-cards-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
-              <p>• كيفية الإرسال: بعد النقر على الزر بالأسفل، اضغط على زر المشبك 📎 أو الإرفاق في واتساب واختر التقرير من قائمة التنزيلات (Downloads).</p>
+              <p>• {t('excelFileName')}: <span className="font-mono text-emerald-400 font-bold">{`reports-job-cards-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
+              <p>• {t('excelInstructions')}</p>
             </div>
 
             <div className="flex gap-2">
@@ -459,16 +466,16 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                 onClick={() => setShowWhatsAppAlert(false)}
                 className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer"
               >
-                إلغاء
+                {t('cancel')}
               </button>
               <a
-                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent('السلام عليكم، مرفق لكم تقرير كروت صيانة المركبات الصادر من نظام Au2Ka CRM 🚗')}`}
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير كروت صيانة المركبات الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the vehicle maintenance job cards report generated by Au2Ka CRM 🚗')}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowWhatsAppAlert(false)}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                📲 فتح المحادثة على واتساب
+                {t('openWhatsAppChat')}
               </a>
             </div>
           </div>
@@ -482,6 +489,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
    2. CUSTOMERS REPORT VIEW
    ========================================================================= */
 function CustomersReportTab({ onViewJob }: SubReportProps) {
+  const { lang, t } = useTranslation();
   const [data, setData] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -517,15 +525,15 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
   // Export Excel and Share via WhatsApp
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
-    const title = 'تقرير حركة العملاء بالكامل - Au2Ka CRM';
-    const dateStr = new Date().toLocaleDateString('ar-EG');
+    const title = lang === 'ar' ? 'تقرير حركة العملاء بالكامل - Au2Ka CRM' : 'Full Customer Analytics Report - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     const rowsHtml = data.map((c) => `
       <tr>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${c.fullName}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">+${c.mobileNumber}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.vehiclesCount}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.jobCardsCount}</td>
-        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString('ar-EG') : 'لا يوجد'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (lang === 'ar' ? 'لا يوجد' : 'None')}</td>
       </tr>
     `).join('');
 
@@ -535,22 +543,22 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
         <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
         <style>
           table { border-collapse: collapse; }
-          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: ${lang === 'ar' ? 'right' : 'left'}; }
           .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
         </style>
       </head>
       <body>
         <table>
           <tr><td colspan="5" class="title-row">${title}</td></tr>
-          <tr><td colspan="5">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr><td colspan="5">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>الاسم الكامل للعميل</th>
-              <th>رقم الجوال</th>
-              <th>عدد السيارات</th>
-              <th>إجمالي الكروت</th>
-              <th>تاريخ آخر زيارة</th>
+              <th>${lang === 'ar' ? 'الاسم الكامل للعميل' : 'Customer Full Name'}</th>
+              <th>${lang === 'ar' ? 'رقم الجوال' : 'Mobile Number'}</th>
+              <th>${lang === 'ar' ? 'عدد السيارات' : 'Vehicles Count'}</th>
+              <th>${lang === 'ar' ? 'إجمالي الكروت' : 'Total Job Cards'}</th>
+              <th>${lang === 'ar' ? 'تاريخ آخر زيارة' : 'Last Visit Date'}</th>
             </tr>
           </thead>
           <tbody>
@@ -571,42 +579,44 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
     setShowWhatsAppAlert(true);
   }
 
+  const isRtl = lang === 'ar';
+
   return (
     <div className="space-y-4">
       {/* Search Header */}
-      <div className="flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl">
+      <div className={`flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl ${isRtl ? 'text-right' : 'text-left'}`}>
         <div className="flex items-center gap-3">
           <div className="relative w-72">
             <input
               type="text"
-              placeholder="البحث عن عميل بالاسم أو الجوال..."
+              placeholder={t('searchCustomer')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white focus:outline-none"
+              className={`w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none ${isRtl ? 'pr-8 pl-2' : 'pl-8 pr-2'}`}
             />
-            <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+            <Search className={`absolute top-2.5 text-zinc-600 ${isRtl ? 'right-2.5' : 'left-2.5'}`} size={14} />
           </div>
           <button
             onClick={handleExportExcelAndWhatsApp}
             disabled={data.length === 0}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm shrink-0"
           >
-            📊 تصدير Excel ومشاركة واتساب
+            {t('exportExcel')}
           </button>
         </div>
-        <div className="text-xs text-zinc-500">تحليل فترات الزيارة وسجل حركة الكروت لكل عميل بالورشة.</div>
+        <div className="text-xs text-zinc-500">{lang === 'ar' ? 'تحليل فترات الزيارة وسجل حركة الكروت لكل عميل بالورشة.' : 'Analysis of visit periods and lifecycle history for each customer.'}</div>
       </div>
 
       <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className={`w-full text-xs ${isRtl ? 'text-right' : 'text-left'}`}>
             <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
               <tr>
-                <th className="p-3">الاسم الكامل للعميل</th>
-                <th className="p-3">رقم الجوال</th>
-                <th className="p-3">عدد السيارات</th>
-                <th className="p-3">إجمالي الكروت</th>
-                <th className="p-3">تاريخ آخر زيارة</th>
+                <th className="p-3">{t('fullName')}</th>
+                <th className="p-3">{t('mobileNumber')}</th>
+                <th className="p-3">{t('vehiclesCountLabel')}</th>
+                <th className="p-3">{t('visitsCountLabel')}</th>
+                <th className="p-3">{t('lastVisit')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-900">
@@ -623,7 +633,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
               ) : data.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-zinc-600 font-semibold">
-                    لا يوجد عملاء مسجلين حالياً.
+                    {t('noCustomers')}
                   </td>
                 </tr>
               ) : (
@@ -634,7 +644,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
                     <td className="p-3 font-semibold text-zinc-400 font-mono">{c.vehiclesCount}</td>
                     <td className="p-3 font-semibold text-zinc-400 font-mono">{c.jobCardsCount}</td>
                     <td className="p-3 text-zinc-400 font-mono">
-                      {c.lastVisit ? new Date(c.lastVisit).toLocaleDateString('ar-EG') : 'لا يوجد'}
+                      {c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (lang === 'ar' ? 'لا يوجد' : 'None')}
                     </td>
                   </tr>
                 ))
@@ -646,7 +656,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
         {/* Pagination */}
         <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
           <div className="text-zinc-500 text-[11px] font-semibold">
-            عرض {data.length} من أصل {pagination.total} عميل
+            {t('showingItems').replace('{count}', data.length.toString()).replace('{total}', pagination.total.toString())}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -654,21 +664,59 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
               disabled={pagination.page <= 1}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              صفحة {pagination.page} من {pagination.pages}
+              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
           </div>
         </div>
       </div>
+
+      {/* Alert Modal for WhatsApp Excel Sharing */}
+      {showWhatsAppAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
+            <div className="space-y-2">
+              <span className="text-3xl">📊</span>
+              <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                {t('excelNextSteps')}
+              </p>
+            </div>
+
+            <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 text-xs text-right space-y-2 text-zinc-300">
+              <p>• {t('excelFileName')}: <span className="font-mono text-emerald-400 font-bold">{`reports-customers-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
+              <p>• {t('excelInstructions')}</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer"
+              >
+                {t('cancel')}
+              </button>
+              <a
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير حركة العملاء بالكامل الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the complete customer analytics report generated by Au2Ka CRM 🚗')}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setShowWhatsAppAlert(false)}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {t('openWhatsAppChat')}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -677,6 +725,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
    3. VEHICLES REPORT VIEW
    ========================================================================= */
 function VehiclesReportTab({ onViewJob }: SubReportProps) {
+  const { lang, t } = useTranslation();
   const [data, setData] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -708,16 +757,17 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
       setLoading(false);
     }
   }
+
   // Export Excel and Share via WhatsApp
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
-    const title = 'تقرير المركبات وصيانة السيارات - Au2Ka CRM';
-    const dateStr = new Date().toLocaleDateString('ar-EG');
+    const title = lang === 'ar' ? 'تقرير المركبات وصيانة السيارات - Au2Ka CRM' : 'Vehicles Maintenance Report - Au2Ka CRM';
+    const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     const rowsHtml = data.map((v) => `
       <tr>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${v.brand} ${v.model}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.plateNumber}</td>
-        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.mileage} كم</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.mileage} ${lang === 'ar' ? 'كم' : 'km'}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px;">${v.owner?.fullName || ''}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.repairsCount}</td>
       </tr>
@@ -729,22 +779,22 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
         <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
         <style>
           table { border-collapse: collapse; }
-          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: right; }
+          th { background-color: #e11d48; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: ${lang === 'ar' ? 'right' : 'left'}; }
           .title-row { font-size: 16px; font-weight: bold; color: #0b192c; }
         </style>
       </head>
       <body>
         <table>
           <tr><td colspan="5" class="title-row">${title}</td></tr>
-          <tr><td colspan="5">تاريخ استخراج التقرير: ${dateStr}</td></tr>
+          <tr><td colspan="5">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>السيارة والموديل</th>
-              <th>رقم اللوحة</th>
-              <th>قراءة العداد</th>
-              <th>المالك (العميل)</th>
-              <th>إجمالي زيارات الإصلاح</th>
+              <th>${lang === 'ar' ? 'السيارة والموديل' : 'Vehicle & Model'}</th>
+              <th>${lang === 'ar' ? 'رقم اللوحة' : 'Plate Number'}</th>
+              <th>${lang === 'ar' ? 'قراءة العداد' : 'Mileage'}</th>
+              <th>${lang === 'ar' ? 'المالك (العميل)' : 'Owner (Customer)'}</th>
+              <th>${lang === 'ar' ? 'إجمالي زيارات الإصلاح' : 'Total Repairs'}</th>
             </tr>
           </thead>
           <tbody>
@@ -765,42 +815,44 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
     setShowWhatsAppAlert(true);
   }
 
+  const isRtl = lang === 'ar';
+
   return (
     <div className="space-y-4">
       {/* Search Header */}
-      <div className="flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl">
+      <div className={`flex justify-between items-center glass-panel p-4 border border-zinc-900 rounded-xl ${isRtl ? 'text-right' : 'text-left'}`}>
         <div className="flex items-center gap-3">
           <div className="relative w-72">
             <input
               type="text"
-              placeholder="البحث عن سيارة بالنوع أو الموديل أو اللوحة..."
+              placeholder={t('searchVehicle')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 pr-8 text-xs text-white focus:outline-none"
+              className={`w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none ${isRtl ? 'pr-8 pl-2' : 'pl-8 pr-2'}`}
             />
-            <Search className="absolute right-2.5 top-2.5 text-zinc-600" size={14} />
+            <Search className={`absolute top-2.5 text-zinc-600 ${isRtl ? 'right-2.5' : 'left-2.5'}`} size={14} />
           </div>
           <button
             onClick={handleExportExcelAndWhatsApp}
             disabled={data.length === 0}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-700 hover:text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 transition shadow-sm shrink-0"
           >
-            📊 تصدير Excel ومشاركة واتساب
+            {t('exportExcel')}
           </button>
         </div>
-        <div className="text-xs text-zinc-500">متابعة سجلات تشخيص وأعطال وعدد إصلاحات السيارات بالكامل.</div>
+        <div className="text-xs text-zinc-500">{lang === 'ar' ? 'متابعة سجلات تشخيص وأعطال وعدد إصلاحات السيارات بالكامل.' : 'Follow up complete logs of diagnostics, faults, and total repairs for all vehicles.'}</div>
       </div>
 
       <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className={`w-full text-xs ${isRtl ? 'text-right' : 'text-left'}`}>
             <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
               <tr>
-                <th className="p-3">السيارة والموديل</th>
-                <th className="p-3">رقم اللوحة</th>
-                <th className="p-3">قراءة العداد الحالية</th>
-                <th className="p-3">المالك (العميل)</th>
-                <th className="p-3">إجمالي زيارات الإصلاح</th>
+                <th className="p-3">{lang === 'ar' ? 'السيارة والموديل' : 'Vehicle & Model'}</th>
+                <th className="p-3">{t('plateNumber')}</th>
+                <th className="p-3">{t('mileage')}</th>
+                <th className="p-3">{lang === 'ar' ? 'المالك (العميل)' : 'Owner (Customer)'}</th>
+                <th className="p-3">{t('visitsCountLabel')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-900">
@@ -817,7 +869,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
               ) : data.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-zinc-700 font-semibold">
-                    لا توجد سيارات مسجلة حالياً.
+                    {t('noVehicles')}
                   </td>
                 </tr>
               ) : (
@@ -825,7 +877,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
                   <tr key={v.id} className="hover:bg-zinc-900/30 transition">
                     <td className="p-3 font-bold text-white">{v.brand} {v.model}</td>
                     <td className="p-3 font-mono text-zinc-400">{v.plateNumber}</td>
-                    <td className="p-3 font-semibold text-zinc-400 font-mono">{v.mileage} كم</td>
+                    <td className="p-3 font-semibold text-zinc-400 font-mono">{v.mileage} {lang === 'ar' ? 'كم' : 'km'}</td>
                     <td className="p-3 text-zinc-400">{v.owner?.fullName}</td>
                     <td className="p-3 font-bold text-zinc-300 font-mono">{v.repairsCount}</td>
                   </tr>
@@ -838,7 +890,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
         {/* Pagination */}
         <div className="p-3.5 bg-zinc-950 border-t border-zinc-900 flex justify-between items-center">
           <div className="text-zinc-500 text-[11px] font-semibold">
-            عرض {data.length} من أصل {pagination.total} سيارة
+            {t('showingItems').replace('{count}', data.length.toString()).replace('{total}', pagination.total.toString())}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -846,17 +898,17 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
               disabled={pagination.page <= 1}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              صفحة {pagination.page} من {pagination.pages}
+              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
           </div>
         </div>
@@ -864,19 +916,19 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
 
       {/* Alert Modal for WhatsApp Excel Sharing */}
       {showWhatsAppAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
               <span className="text-3xl">📊</span>
-              <h3 className="text-lg font-black text-white">تم تحميل تقرير المركبات بنجاح!</h3>
+              <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
-                الخطوة التالية: سنقوم بفتح محادثة الواتساب الآن. يرجى سحب وإرفاق ملف الإكسيل الذي تم تحميله في المحادثة المفتوحة لإرساله فورًا.
+                {t('excelNextSteps')}
               </p>
             </div>
 
             <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 text-xs text-right space-y-2 text-zinc-300">
-              <p>• اسم الملف المحمل: <span className="font-mono text-emerald-400 font-bold">{`reports-vehicles-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
-              <p>• كيفية الإرسال: اضغط على زر الإرفاق 📎 في واتساب واختر التقرير من قائمة التنزيلات (Downloads).</p>
+              <p>• {t('excelFileName')}: <span className="font-mono text-emerald-400 font-bold">{`reports-vehicles-${new Date().toISOString().slice(0, 10)}.xls`}</span></p>
+              <p>• {t('excelInstructions')}</p>
             </div>
 
             <div className="flex gap-2">
@@ -884,16 +936,16 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
                 onClick={() => setShowWhatsAppAlert(false)}
                 className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer"
               >
-                إلغاء
+                {t('cancel')}
               </button>
               <a
-                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent('السلام عليكم، مرفق لكم تقرير حركة المركبات بالكامل الصادر من نظام Au2Ka CRM 🚗')}`}
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير حركة المركبات بالكامل الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the vehicle maintenance report generated by Au2Ka CRM 🚗')}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowWhatsAppAlert(false)}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                📲 فتح المحادثة على واتساب
+                {t('openWhatsAppChat')}
               </a>
             </div>
           </div>

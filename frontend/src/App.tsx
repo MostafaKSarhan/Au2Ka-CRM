@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from './store/authStore';
+import { useTranslation } from './store/LanguageContext';
 import { LoginView } from './features/auth/LoginView';
 import { DashboardView } from './features/dashboard/DashboardView';
 import { CustomersView } from './features/customers/CustomersView';
@@ -11,6 +12,7 @@ import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Me
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
+  const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
   const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports'>(
     isTechnician ? 'jobCards' : 'dashboard'
@@ -33,18 +35,21 @@ export default function App() {
   }
 
   const allMenuItems = [
-    { id: 'dashboard', label: 'لوحة التحكم', icon: LayoutDashboard, roles: ['ADMIN', 'RECEPTION'] },
-    { id: 'customers', label: 'معلومات العملاء', icon: Users, roles: ['ADMIN', 'RECEPTION'] },
-    { id: 'vehicles', label: 'معلومات السيارات', icon: Car, roles: ['ADMIN', 'RECEPTION'] },
-    { id: 'jobCards', label: 'كروت استقبال السيارات', icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
-    { id: 'reports', label: 'التقارير والإحصائيات', icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
-    { id: 'settings', label: 'الإعدادات والمستخدمين', icon: Settings, roles: ['ADMIN'] },
+    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'customers', label: t('customers'), icon: Users, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'vehicles', label: t('vehicles'), icon: Car, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'jobCards', label: t('jobCards'), icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
+    { id: 'reports', label: t('reports'), icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'settings', label: t('settings'), icon: Settings, roles: ['ADMIN'] },
   ];
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(user?.role || ''));
 
   return (
-    <div className="flex min-h-screen bg-background text-zinc-100 relative overflow-hidden" dir="rtl">
+    <div 
+      className="flex min-h-screen bg-background text-zinc-100 relative overflow-hidden" 
+      dir={lang === 'ar' ? 'rtl' : 'ltr'}
+    >
       {/* Mobile/Tablet Sidebar Backdrop */}
       {isSidebarOpen && (
         <div 
@@ -55,8 +60,10 @@ export default function App() {
 
       {/* Sidebar Layout */}
       <aside 
-        className={`fixed inset-y-0 z-50 w-64 border-l border-zinc-900 bg-zinc-950 flex flex-col justify-between transition-all duration-300 lg:static lg:right-auto ${
-          isSidebarOpen ? 'right-0' : '-right-64'
+        className={`fixed inset-y-0 z-50 w-64 bg-zinc-950 flex flex-col justify-between transition-all duration-300 lg:static ${
+          lang === 'ar' 
+            ? `border-l border-zinc-900 lg:right-auto ${isSidebarOpen ? 'right-0' : '-right-64'}`
+            : `border-r border-zinc-900 lg:left-auto ${isSidebarOpen ? 'left-0' : '-left-64'}`
         }`}
       >
         <div className="p-6">
@@ -78,9 +85,9 @@ export default function App() {
 
           {/* Technician notice badge */}
           {isTechnician && (
-            <div className="mt-4 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-center">
-              <p className="text-[11px] font-bold text-amber-400">🔧 وضع الفني</p>
-              <p className="text-[10px] text-amber-300/70 mt-0.5">صلاحية: كروت الاستقبال فقط</p>
+            <div className="mt-4 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-center text-right">
+              <p className="text-[11px] font-bold text-amber-400">{t('techMode')}</p>
+              <p className="text-[10px] text-amber-300/70 mt-0.5">{t('techScope')}</p>
             </div>
           )}
 
@@ -118,14 +125,14 @@ export default function App() {
               <div className="overflow-hidden text-right">
                 <p className="text-xs font-bold text-white truncate">{user.firstName} {user.lastName}</p>
                 <p className="text-[10px] text-zinc-500 truncate">
-                  {user.role === 'ADMIN' ? 'مدير النظام' : user.role === 'RECEPTION' ? 'موظف استقبال' : 'فني صيانة'}
+                  {user.role === 'ADMIN' ? t('adminRole') : user.role === 'RECEPTION' ? t('receptionRole') : t('technicianRole')}
                 </p>
               </div>
             </div>
             <button
               onClick={logout}
-              className="text-zinc-500 hover:text-red-400 transition rotate-180 cursor-pointer"
-              title="تسجيل الخروج"
+              className={`text-zinc-500 hover:text-red-400 transition cursor-pointer ${lang === 'ar' ? 'rotate-180' : ''}`}
+              title={t('logout')}
             >
               <LogOut size={16} />
             </button>
@@ -142,7 +149,7 @@ export default function App() {
             <button 
               onClick={() => setIsSidebarOpen(true)} 
               className="p-1.5 text-zinc-400 hover:text-white lg:hidden cursor-pointer"
-              aria-label="فتح القائمة"
+              aria-label="Menu"
             >
               <Menu size={22} />
             </button>
@@ -152,11 +159,19 @@ export default function App() {
             </div>
           </div>
 
-          {/* User Role Tag */}
-          <div className="mr-auto flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <button
+              onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white cursor-pointer transition"
+            >
+              🌐 {lang === 'ar' ? 'English' : 'العربية'}
+            </button>
+
+            {/* User Role Tag */}
             <span className="rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1 text-xs font-bold text-zinc-400">
-              دور المستخدم: <span className="text-primary">
-                {user?.role === 'ADMIN' ? 'مدير النظام' : user?.role === 'RECEPTION' ? 'استقبال' : 'فني'}
+              {t('userRole')}: <span className="text-primary">
+                {user?.role === 'ADMIN' ? t('adminRole') : user?.role === 'RECEPTION' ? t('receptionShort') : t('technicianShort')}
               </span>
             </span>
           </div>
@@ -175,3 +190,4 @@ export default function App() {
     </div>
   );
 }
+
