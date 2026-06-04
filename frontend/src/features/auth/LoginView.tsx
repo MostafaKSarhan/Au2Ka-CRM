@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
-import { Shield, Key, Phone, Lock } from 'lucide-react';
+import { Shield, Phone, Lock } from 'lucide-react';
 
 export function LoginView() {
   const login = useAuthStore((state) => state.login);
@@ -24,19 +24,6 @@ export function LoginView() {
       setErrorMsg(err.response?.data?.message === 'Invalid mobile or password' ? t('invalidLogin') : t('loginError'));
     } finally {
       setLoading(false);
-    }
-  }
-
-  function prefillCredentials(role: 'admin' | 'reception' | 'tech') {
-    if (role === 'admin') {
-      setMobileNumber('0500000001');
-      setPassword('admin123');
-    } else if (role === 'reception') {
-      setMobileNumber('0500000002');
-      setPassword('reception123');
-    } else if (role === 'tech') {
-      setMobileNumber('0500000003');
-      setPassword('tech123');
     }
   }
 
@@ -120,33 +107,6 @@ export function LoginView() {
             {loading ? t('loading') : t('loginBtn')}
           </button>
         </form>
-
-        {/* Quick Testing Credentials Panel */}
-        <div className="border-t border-zinc-800 pt-5 space-y-2">
-          <p className="text-center text-xs font-medium text-zinc-500 flex items-center justify-center gap-1">
-            <Key size={12} /> {lang === 'ar' ? 'اضغط لتعبئة حساب تجريبي سريع:' : 'Tap to fill test credentials:'}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => prefillCredentials('admin')}
-              className="rounded bg-zinc-900 border border-zinc-800/80 px-2 py-1.5 text-[10px] text-zinc-400 hover:text-white hover:border-zinc-700 transition cursor-pointer"
-            >
-              {t('role_ADMIN').split(' ')[0]}
-            </button>
-            <button
-              onClick={() => prefillCredentials('reception')}
-              className="rounded bg-zinc-900 border border-zinc-800/80 px-2 py-1.5 text-[10px] text-zinc-400 hover:text-white hover:border-zinc-700 transition cursor-pointer"
-            >
-              {t('receptionShort')}
-            </button>
-            <button
-              onClick={() => prefillCredentials('tech')}
-              className="rounded bg-zinc-900 border border-zinc-800/80 px-2 py-1.5 text-[10px] text-zinc-400 hover:text-white hover:border-zinc-700 transition cursor-pointer"
-            >
-              {t('technicianShort')}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
