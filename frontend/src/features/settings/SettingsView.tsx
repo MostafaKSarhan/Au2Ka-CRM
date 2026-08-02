@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../lib/api';
-import { User, Shield, Info, LogOut, Phone, Save, UserPlus, Trash2, Eye, EyeOff, RefreshCw, Users, Edit2 } from 'lucide-react';
+import { User, Shield, LogOut, Phone, Save, UserPlus, Trash2, Eye, EyeOff, RefreshCw, Users, Edit2 } from 'lucide-react';
 import { useTranslation } from '../../store/LanguageContext';
 
 export function SettingsView() {
@@ -440,34 +440,6 @@ export function SettingsView() {
           <div className="p-3 bg-zinc-900/40 rounded border border-zinc-800">
             <p className="font-semibold text-white text-xs">{lang === 'ar' ? 'صلاحية فني الصيانة (Technician)' : 'Maintenance Tech (Technician)'}</p>
             <p className="text-xs text-zinc-500 mt-1">{lang === 'ar' ? 'عرض كروت العمل النشطة، وتعبئة الفحص الفني الأولي للأعطال، وتحديد القطع المطلوبة للإصلاح وملاحظات الصيانة.' : 'Review active job cards, complete initial technical inspection, choose repairs required, and log remarks.'}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* System info */}
-      <div className="glass-panel rounded-xl p-6">
-        <h2 className="text-lg font-bold text-white border-b border-zinc-800 pb-2 mb-4 flex items-center gap-2">
-          <Info size={18} className="text-primary" /> {lang === 'ar' ? 'المعايير الفنية والتقنية للمنصة' : 'Technical & Infrastructure Standards'}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3 text-xs text-zinc-400">
-          <div>
-            <p className="font-semibold text-zinc-500">{lang === 'ar' ? 'خادم الباكيند (REST Server)' : 'Backend REST Server'}</p>
-            <p className="mt-1 font-mono text-white text-sm">http://localhost:5000</p>
-          </div>
-          <div>
-            <p className="font-semibold text-zinc-500">{lang === 'ar' ? 'مستندات المطور (API Docs)' : 'Developer API Documentation'}</p>
-            <a
-              href="http://localhost:5000/api/docs"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 inline-block font-mono text-primary hover:underline text-sm"
-            >
-              http://localhost:5000/api/docs
-            </a>
-          </div>
-          <div>
-            <p className="font-semibold text-zinc-500">{lang === 'ar' ? 'مجلد حفظ الصور المرفوعة' : 'Uploads Storage Directory'}</p>
-            <p className="mt-1 font-mono text-white text-sm">./backend/uploads</p>
           </div>
         </div>
       </div>
