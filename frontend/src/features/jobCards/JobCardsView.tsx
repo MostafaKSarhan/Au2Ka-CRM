@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Eye, Receipt, Printer, Share2, UserPlus, Car as CarIcon } from 'lucide-react';
+import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { useTranslation } from '../../store/LanguageContext';
 
 const STATUS_COLUMNS = [
@@ -82,6 +82,8 @@ export function JobCardsView() {
   const [newServicePrice, setNewServicePrice] = useState('');
   const [showZoomedQR, setShowZoomedQR] = useState(false);
   const [qrScanned, setQrScanned] = useState(false);
+  // In-screen media preview (lightbox)
+  const [previewMedia, setPreviewMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
 
   useEffect(() => {
     loadJobCards();
@@ -450,6 +452,56 @@ export function JobCardsView() {
       setErrorMsg(err.response?.data?.message || 'فشل تحميل الملفات');
     } finally {
       setUploadLoading(false);
+    }
+  }
+
+  // Download a media file (works cross-origin by fetching a blob first, since
+  // the <a download> attribute is ignored for cross-origin URLs).
+  async function downloadMedia(url: string) {
+    const fileName = url.split('/').pop() || 'au2ka-media';
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objUrl);
+    } catch {
+      // Fallback: open in a new tab if the blob download is blocked
+      window.open(url, '_blank');
+    }
+  }
+
+  // Share a media file using the native share sheet when available (mobile),
+  // falling back to WhatsApp web with the file link.
+  async function shareMedia(url: string) {
+    const fileName = url.split('/').pop() || 'au2ka-media';
+    const title = selectedJob?.jobNumber ? `Au2Ka - ${selectedJob.jobNumber}` : 'Au2Ka';
+    try {
+      if (navigator.share) {
+        // Try to share the actual file for a richer share on supported devices
+        try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const file = new File([blob], fileName, { type: blob.type });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title });
+            return;
+          }
+        } catch {
+          // ignore and fall through to sharing the link
+        }
+        await navigator.share({ title, url });
+        return;
+      }
+      // Desktop fallback: open WhatsApp with the media link
+      window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, '_blank');
+    } catch {
+      // user cancelled the share sheet — nothing to do
     }
   }
 
@@ -1161,7 +1213,12 @@ export function JobCardsView() {
                       {(selectedJob.photos || []).map((p: any) => {
                         const isVid = isVideoFile(p.filePath);
                         return (
-                          <div key={p.id} className="relative rounded overflow-hidden border border-zinc-800 h-16 group bg-black flex items-center justify-center">
+                          <button
+                            type="button"
+                            key={p.id}
+                            onClick={() => setPreviewMedia({ url: `${UPLOADS_BASE_URL}${p.filePath}`, isVideo: isVid })}
+                            className="relative rounded overflow-hidden border border-zinc-800 h-16 group bg-black flex items-center justify-center cursor-pointer hover:border-zinc-600"
+                          >
                             {isVid ? (
                               <video
                                 src={`${UPLOADS_BASE_URL}${p.filePath}`}
@@ -1181,15 +1238,10 @@ export function JobCardsView() {
                                 VIDEO
                               </div>
                             )}
-                            <a
-                              href={`${UPLOADS_BASE_URL}${p.filePath}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-semibold transition"
-                            >
-                              <Eye size={12} className="ml-1" /> {isRtl ? 'عرض' : 'View'}
-                            </a>
-                          </div>
+                            <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 text-[10px] text-white font-semibold transition">
+                              <ZoomIn size={12} /> {isRtl ? 'معاينة' : 'Preview'}
+                            </span>
+                          </button>
                         );
                       })}
                     </div>
@@ -1327,7 +1379,7 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('customerComplaint')}
                   </div>
-                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap"
+                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap break-words"
                        style={{ 
                          backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, #e2e8f0 95%)', 
                          backgroundSize: '100% 24px',
@@ -1342,7 +1394,7 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('initialInspection')}
                   </div>
-                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap"
+                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap break-words"
                        style={{ 
                          backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, #e2e8f0 95%)', 
                          backgroundSize: '100% 24px',
@@ -1357,7 +1409,7 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('requiredRepairs')}
                   </div>
-                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap"
+                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap break-words"
                        style={{ 
                          backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, #e2e8f0 95%)', 
                          backgroundSize: '100% 24px',
@@ -1384,7 +1436,7 @@ export function JobCardsView() {
                         {t('additionalServices')}
                       </div>
                       <div className="border border-zinc-200 rounded overflow-hidden">
-                        <table className={`w-full ${isRtl ? 'text-right' : 'text-left'} text-xs border-collapse`}>
+                        <table className={`w-full table-fixed ${isRtl ? 'text-right' : 'text-left'} text-xs border-collapse`}>
                           <thead>
                             <tr className="bg-zinc-50 border-b border-zinc-200 font-bold text-zinc-600">
                               <th className="p-2.5">{t('serviceName')}</th>
@@ -1394,7 +1446,7 @@ export function JobCardsView() {
                           <tbody>
                             {invoiceServices.map((srv, idx) => (
                               <tr key={idx} className="border-b border-zinc-150 hover:bg-zinc-50/55">
-                                <td className="p-2.5 text-zinc-700 font-medium">{srv.name}</td>
+                                <td className="p-2.5 text-zinc-700 font-medium break-words align-top">{srv.name}</td>
                                 <td className={`p-2.5 text-zinc-900 font-bold font-mono ${isRtl ? 'text-left' : 'text-right'}`}>{srv.price} {isRtl ? 'ريال' : 'SAR'}</td>
                               </tr>
                             ))}
@@ -1489,7 +1541,7 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('notes')}
                   </div>
-                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap"
+                  <div className="border border-zinc-200 rounded p-3 text-xs bg-zinc-50 min-h-[50px] leading-relaxed text-zinc-700 whitespace-pre-wrap break-words"
                        style={{ 
                          backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, #e2e8f0 95%)', 
                          backgroundSize: '100% 24px',
@@ -1624,6 +1676,64 @@ export function JobCardsView() {
               <p>• {t('zoomedCust')}: <span className="font-bold text-white">{selectedJob.customer?.fullName}</span></p>
               <p>• {t('zoomedPhone')}: <span className="font-bold text-emerald-400 font-mono">+{activeWhatsappNumber}</span></p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox: in-screen media preview with blurred backdrop + actions */}
+      {previewMedia && (
+        <div
+          className="fixed inset-0 z-[110] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl p-4 sm:p-8"
+          onClick={() => setPreviewMedia(null)}
+          dir={isRtl ? 'rtl' : 'ltr'}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setPreviewMedia(null)}
+            className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer backdrop-blur-md`}
+            title={isRtl ? 'إغلاق' : 'Close'}
+          >
+            <X size={20} />
+          </button>
+
+          {/* Media frame (stop click so it doesn't close when interacting) */}
+          <div
+            className="max-w-4xl w-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {previewMedia.isVideo ? (
+              <video
+                src={previewMedia.url}
+                controls
+                autoPlay
+                className="max-w-full max-h-[72vh] rounded-2xl shadow-2xl border border-white/10"
+              />
+            ) : (
+              <img
+                src={previewMedia.url}
+                alt={isRtl ? 'معاينة صورة الكرت' : 'Card media preview'}
+                className="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+              />
+            )}
+          </div>
+
+          {/* Action bar */}
+          <div
+            className="mt-6 flex items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => downloadMedia(previewMedia.url)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-sm font-bold text-white rounded-xl transition cursor-pointer backdrop-blur-md border border-white/10"
+            >
+              <Download size={16} /> {isRtl ? 'تحميل' : 'Download'}
+            </button>
+            <button
+              onClick={() => shareMedia(previewMedia.url)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-sm font-bold text-white rounded-xl transition cursor-pointer shadow-lg"
+            >
+              <Share2 size={16} /> {isRtl ? 'مشاركة' : 'Share'}
+            </button>
           </div>
         </div>
       )}
