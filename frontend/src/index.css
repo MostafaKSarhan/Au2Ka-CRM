@@ -84,42 +84,41 @@
   }
 }
 
-/* When the printable invoice is on screen, print ONLY the invoice (a single
-   clean copy) instead of the whole app + modal chrome. Scoped with :has() so
-   printing other pages (e.g. Reports) is unaffected. */
+/* When the printable invoice (portaled onto <body>) is open, print ONLY it:
+   hide the whole app (#root) and let the invoice flow as a normal document so
+   there are no clipped or blank pages. Scoped with :has() so printing other
+   pages (e.g. Reports) is unaffected. */
 @media print {
-  body:has(#printable-invoice-layout) * {
-    visibility: hidden;
+  body:has(#printable-invoice-layout) #root {
+    display: none !important;
   }
 
-  body:has(#printable-invoice-layout) #printable-invoice-layout,
-  body:has(#printable-invoice-layout) #printable-invoice-layout * {
-    visibility: visible;
+  /* The portaled modal is a sibling of #root; flatten its overlay + scroll
+     container into normal document flow. */
+  body:has(#printable-invoice-layout) .print-modal-overlay {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
   }
 
-  /* Neutralize the modal overlay + scroll container so no part of the
-     invoice is clipped by max-height / overflow. */
-  body:has(#printable-invoice-layout) .print-modal-overlay,
   body:has(#printable-invoice-layout) .print-modal-container {
     position: static !important;
     max-height: none !important;
     height: auto !important;
     overflow: visible !important;
+    width: 100% !important;
+    max-width: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    box-shadow: none !important;
     background: #fff !important;
-    display: block !important;
   }
 
   body:has(#printable-invoice-layout) #printable-invoice-layout {
-    position: absolute;
-    top: 0;
-    inset-inline-start: 0;
-    width: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
     box-shadow: none !important;
+    border-radius: 0 !important;
   }
 
   /* Keep each section together instead of splitting mid-block. */

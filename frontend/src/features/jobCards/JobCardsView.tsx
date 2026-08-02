@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
 import html2canvas from 'html2canvas-pro';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useTranslation } from '../../store/LanguageContext';
 
 const STATUS_COLUMNS = [
@@ -540,9 +542,19 @@ export function JobCardsView() {
     return `https://api.whatsapp.com/send?phone=${savedPhone}&text=${encodeURIComponent(text)}`;
   }
 
-  function getQRCodeUrl() {
-    const link = getWhatsAppShareLink();
-    return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}`;
+  // Short WhatsApp link used ONLY for the QR code. The full share message (with
+  // every card detail) is far too long to encode in a scannable QR, so the QR
+  // carries a concise approval link; the full message stays on the button.
+  function getWhatsAppQRLink() {
+    if (!selectedJob) return 'https://api.whatsapp.com/send';
+    const savedPhone = localStorage.getItem('whatsappNumber') || '201015657091';
+    const name = selectedJob.customer?.fullName || '';
+    let approvalMessage = 'موافق على الإصلاح ومكتمل 👍';
+    if (selectedJob.status === 'WAITING_APPROVAL') {
+      approvalMessage = `أنا العميل (${name})، أؤكد موافقتي على البدء في أعمال الصيانة والتكلفة الموضّحة بالفاتورة. ✅`;
+    }
+    const text = `موافقة كرت رقم ${selectedJob.jobNumber}\n${approvalMessage}`;
+    return `https://api.whatsapp.com/send?phone=${savedPhone}&text=${encodeURIComponent(text)}`;
   }
 
   const activeWhatsappNumber = localStorage.getItem('whatsappNumber') || '201015657091';
@@ -1283,8 +1295,10 @@ export function JobCardsView() {
         );
       })()}
 
-      {/* Modal: Printable Electronic Invoice & WhatsApp QR sharing */}
-      {showInvoiceModal && selectedJob && (
+      {/* Modal: Printable Electronic Invoice & WhatsApp QR sharing.
+          Rendered via a portal on <body> so printing can isolate it cleanly
+          without the app's overflow/relative wrappers clipping it. */}
+      {showInvoiceModal && selectedJob && createPortal(
         <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
           <div className="print-modal-container w-full max-w-2xl glass-panel rounded-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Header Toolbar */}
@@ -1580,9 +1594,11 @@ export function JobCardsView() {
                       className="cursor-zoom-in relative group bg-white p-3 rounded-lg border border-zinc-200/80 shadow-sm shrink-0 transition-transform hover:scale-105"
                       title={isRtl ? 'تكبير الباركود ملء الشاشة وتوثيق الموافقة' : 'Zoom barcode fullscreen and verify approval'}
                     >
-                      <img
-                        src={getQRCodeUrl()}
-                        alt="WhatsApp QR Code"
+                      <QRCodeCanvas
+                        value={getWhatsAppQRLink()}
+                        size={112}
+                        level="M"
+                        marginSize={2}
                         className="w-28 h-28"
                       />
                       <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-white font-bold transition rounded-lg">
@@ -1645,7 +1661,8 @@ export function JobCardsView() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal: Fullscreen Zoomed QR Code */}
@@ -1664,10 +1681,12 @@ export function JobCardsView() {
             </div>
             
             <div className="bg-white p-6 rounded-xl inline-block shadow-2xl mx-auto">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=380x380&data=${encodeURIComponent(getWhatsAppShareLink())}`}
-                alt="Zoomed WhatsApp QR Code"
-                className="w-80 h-80 mx-auto"
+              <QRCodeCanvas
+                value={getWhatsAppQRLink()}
+                size={320}
+                level="M"
+                marginSize={2}
+                className="mx-auto"
               />
             </div>
 
