@@ -507,11 +507,18 @@ export function JobCardsView() {
     }
   }
 
+  // The invoice / approval message is sent to the CUSTOMER's own WhatsApp
+  // number taken from their card (digits only, no + or spaces), not a fixed
+  // central number.
+  function getCustomerWhatsappNumber() {
+    return String(selectedJob?.customer?.mobileNumber || '').replace(/[^0-9]/g, '');
+  }
+
   // Generate WhatsApp Message Text & Link
   function getWhatsAppShareLink() {
     if (!selectedJob) return '';
-    const savedPhone = localStorage.getItem('whatsappNumber') || '201015657091';
-    
+    const savedPhone = getCustomerWhatsappNumber();
+
     // Parse additional services for the text message
     let servicesText = '';
     try {
@@ -547,7 +554,7 @@ export function JobCardsView() {
   // carries a concise approval link; the full message stays on the button.
   function getWhatsAppQRLink() {
     if (!selectedJob) return 'https://api.whatsapp.com/send';
-    const savedPhone = localStorage.getItem('whatsappNumber') || '201015657091';
+    const savedPhone = getCustomerWhatsappNumber();
     const name = selectedJob.customer?.fullName || '';
     let approvalMessage = 'موافق على الإصلاح ومكتمل 👍';
     if (selectedJob.status === 'WAITING_APPROVAL') {
@@ -557,7 +564,7 @@ export function JobCardsView() {
     return `https://api.whatsapp.com/send?phone=${savedPhone}&text=${encodeURIComponent(text)}`;
   }
 
-  const activeWhatsappNumber = localStorage.getItem('whatsappNumber') || '201015657091';
+  const activeWhatsappNumber = String(selectedJob?.customer?.mobileNumber || '').replace(/[^0-9]/g, '');
 
   const isRtl = lang === 'ar';
 
