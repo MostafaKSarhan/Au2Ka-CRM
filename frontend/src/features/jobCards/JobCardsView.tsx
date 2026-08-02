@@ -1233,8 +1233,8 @@ export function JobCardsView() {
 
       {/* Modal: Printable Electronic Invoice & WhatsApp QR sharing */}
       {showInvoiceModal && selectedJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-2xl glass-panel rounded-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
+          <div className="print-modal-container w-full max-w-2xl glass-panel rounded-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Header Toolbar */}
             <div className="flex justify-between items-center border-b border-zinc-800 pb-4 no-print">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">

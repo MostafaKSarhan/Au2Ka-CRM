@@ -64,3 +64,73 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
+
+/* ===================== Print Styles ===================== */
+/* Anything marked no-print is hidden when printing, and colors/backgrounds
+   are forced to render so white text on dark banners stays visible. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
+
+/* When the printable invoice is on screen, print ONLY the invoice (a single
+   clean copy) instead of the whole app + modal chrome. Scoped with :has() so
+   printing other pages (e.g. Reports) is unaffected. */
+@media print {
+  body:has(#printable-invoice-layout) * {
+    visibility: hidden;
+  }
+
+  body:has(#printable-invoice-layout) #printable-invoice-layout,
+  body:has(#printable-invoice-layout) #printable-invoice-layout * {
+    visibility: visible;
+  }
+
+  /* Neutralize the modal overlay + scroll container so no part of the
+     invoice is clipped by max-height / overflow. */
+  body:has(#printable-invoice-layout) .print-modal-overlay,
+  body:has(#printable-invoice-layout) .print-modal-container {
+    position: static !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    display: block !important;
+  }
+
+  body:has(#printable-invoice-layout) #printable-invoice-layout {
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep each section together instead of splitting mid-block. */
+  body:has(#printable-invoice-layout) #printable-invoice-layout > div > div {
+    break-inside: avoid;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+}
