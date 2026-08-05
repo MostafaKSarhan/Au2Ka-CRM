@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn } from 'lucide-react';
+import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
 import html2canvas from 'html2canvas-pro';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -1218,10 +1218,25 @@ export function JobCardsView() {
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-zinc-300 border-b border-zinc-800 pb-2">{t('jobPhotosTitle')}</h3>
                   <div className="flex items-center gap-3">
+                    {/* Camera: opens the device camera directly on mobile */}
+                    <label className="flex-1 flex flex-col items-center justify-center p-4 rounded-lg border border-dashed border-zinc-800 cursor-pointer hover:bg-zinc-900/30 transition">
+                      <Camera size={20} className="text-zinc-500 mb-1" />
+                      <span className="text-[11px] text-zinc-400">
+                        {uploadLoading ? t('jobUploadLoading') : (isRtl ? 'تصوير بالكاميرا' : 'Take Photo')}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    {/* Gallery: pick existing photos/videos (supports multiple) */}
                     <label className="flex-1 flex flex-col items-center justify-center p-4 rounded-lg border border-dashed border-zinc-800 cursor-pointer hover:bg-zinc-900/30 transition">
                       <UploadCloud size={20} className="text-zinc-500 mb-1" />
                       <span className="text-[11px] text-zinc-400">
-                        {uploadLoading ? t('jobUploadLoading') : t('jobPhotosUpload')}
+                        {uploadLoading ? t('jobUploadLoading') : (isRtl ? 'من المعرض' : 'From Gallery')}
                       </span>
                       <input
                         type="file"
