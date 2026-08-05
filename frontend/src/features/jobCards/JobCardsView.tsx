@@ -508,10 +508,18 @@ export function JobCardsView() {
   }
 
   // The invoice / approval message is sent to the CUSTOMER's own WhatsApp
-  // number taken from their card (digits only, no + or spaces), not a fixed
-  // central number.
+  // number taken from their card, normalized to international format (digits
+  // only, with country code) so WhatsApp can look it up. Local Saudi numbers
+  // like 05XXXXXXXX are converted to 9665XXXXXXXX.
   function getCustomerWhatsappNumber() {
-    return String(selectedJob?.customer?.mobileNumber || '').replace(/[^0-9]/g, '');
+    const DEFAULT_COUNTRY_CODE = '966'; // Saudi Arabia
+    let n = String(selectedJob?.customer?.mobileNumber || '').replace(/[^0-9]/g, '');
+    if (!n) return '';
+    if (n.startsWith('00')) n = n.slice(2);            // 0096650... -> 96650...
+    if (n.startsWith(DEFAULT_COUNTRY_CODE)) return n;  // already international
+    if (n.startsWith('0')) return DEFAULT_COUNTRY_CODE + n.slice(1); // 05... -> 9665...
+    if (n.length === 9 && n.startsWith('5')) return DEFAULT_COUNTRY_CODE + n; // 5XXXXXXXX
+    return n;
   }
 
   // Generate WhatsApp Message Text & Link
@@ -1306,10 +1314,10 @@ export function JobCardsView() {
           Rendered via a portal on <body> so printing can isolate it cleanly
           without the app's overflow/relative wrappers clipping it. */}
       {showInvoiceModal && selectedJob && createPortal(
-        <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
-          <div className="print-modal-container w-full max-w-2xl glass-panel rounded-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4">
+          <div className="print-modal-container w-full max-w-2xl glass-panel rounded-2xl p-3 sm:p-8 space-y-4 sm:space-y-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             {/* Header Toolbar */}
-            <div className="flex justify-between items-center border-b border-zinc-800 pb-4 no-print">
+            <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-800 pb-4 no-print">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <Receipt size={22} className="text-emerald-500" /> {t('invoiceTitle')}
               </h2>
@@ -1336,16 +1344,16 @@ export function JobCardsView() {
             </div>
 
             {/* Printable Invoice Page */}
-            <div className={`bg-white text-zinc-900 p-8 rounded-xl print:p-0 print:bg-white ${isRtl ? 'text-right' : 'text-left'}`} id="printable-invoice-layout" style={{ fontFamily: 'Cairo, sans-serif' }} dir={isRtl ? 'rtl' : 'ltr'}>
-              
+            <div className={`bg-white text-zinc-900 p-4 sm:p-8 rounded-xl print:p-0 print:bg-white ${isRtl ? 'text-right' : 'text-left'}`} id="printable-invoice-layout" style={{ fontFamily: 'Cairo, sans-serif' }} dir={isRtl ? 'rtl' : 'ltr'}>
+
               {/* Header block resembling the navy blue banner */}
-              <div className="bg-[#0b192c] text-white p-4 rounded-t-lg flex justify-between items-center relative" style={{ borderBottom: '6px solid #e11d48' }}>
+              <div className="bg-[#0b192c] text-white p-4 rounded-t-lg flex justify-between items-center gap-3 relative" style={{ borderBottom: '6px solid #e11d48' }}>
                 <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                  <h1 className="text-xl font-black tracking-wide text-white">{t('invoiceHeaderMain')}</h1>
+                  <h1 className="text-base sm:text-xl font-black text-white leading-tight">{t('invoiceHeaderMain')}</h1>
                   <p className="text-[10px] text-zinc-300 font-semibold mt-1">{t('invoiceHeaderSub')}</p>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-zinc-900 font-black tracking-wider text-xl font-mono">Au<span className="text-red-600">2</span>Ka</span>
+                <div className="bg-white p-2.5 rounded-lg flex items-center justify-center shadow-md shrink-0">
+                  <span className="text-zinc-900 font-black tracking-wider text-lg sm:text-xl font-mono">Au<span className="text-red-600">2</span>Ka</span>
                 </div>
               </div>
 
