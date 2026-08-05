@@ -1372,21 +1372,21 @@ export function JobCardsView() {
                 </div>
               </div>
 
-              <div className="p-6 border-x-2 border-b-2 border-zinc-100 rounded-b-lg space-y-6">
-                
+              <div className="p-3 sm:p-6 border-x-2 border-b-2 border-zinc-100 rounded-b-lg space-y-5 sm:space-y-6">
+
                 {/* 1. معلومات العميل */}
                 <div className="space-y-3">
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('customerInfo')}
                   </div>
-                  <div className="grid grid-cols-2 gap-6 text-xs px-2">
-                    <div className="flex items-baseline gap-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs px-1 sm:px-2">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('customerName')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold">{selectedJob.customer?.fullName}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold break-words">{selectedJob.customer?.fullName}</span>
                     </div>
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('mobileNumber')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold font-mono">{selectedJob.customer?.mobileNumber}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono break-all" dir="ltr">{selectedJob.customer?.mobileNumber}</span>
                     </div>
                   </div>
                 </div>
@@ -1396,24 +1396,22 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('vehicleInfo')}
                   </div>
-                  <div className="grid grid-cols-2 gap-6 text-xs px-2">
-                    <div className="flex items-baseline gap-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs px-1 sm:px-2">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('vehicleBrand')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold">{selectedJob.vehicle?.brand}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold break-words">{selectedJob.vehicle?.brand}</span>
                     </div>
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('vehicleModel')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold">{selectedJob.vehicle?.model}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold break-words">{selectedJob.vehicle?.model}</span>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6 text-xs px-2">
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('plateNumber')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold font-mono">{selectedJob.vehicle?.plateNumber}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono break-words">{selectedJob.vehicle?.plateNumber}</span>
                     </div>
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('mileage')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold font-mono">{selectedJob.vehicle?.mileage} {isRtl ? 'كم' : 'km'}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono break-words">{selectedJob.vehicle?.mileage} {isRtl ? 'كم' : 'km'}</span>
                     </div>
                   </div>
                 </div>
@@ -1483,15 +1481,15 @@ export function JobCardsView() {
                         <table className={`w-full table-fixed ${isRtl ? 'text-right' : 'text-left'} text-xs border-collapse`}>
                           <thead>
                             <tr className="bg-zinc-50 border-b border-zinc-200 font-bold text-zinc-600">
-                              <th className="p-2.5">{t('serviceName')}</th>
-                              <th className={`p-2.5 w-32 ${isRtl ? 'text-left' : 'text-right'}`}>{t('cost')}</th>
+                              <th className="p-2 sm:p-2.5">{t('serviceName')}</th>
+                              <th className={`p-2 sm:p-2.5 w-24 sm:w-32 ${isRtl ? 'text-left' : 'text-right'}`}>{t('cost')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {invoiceServices.map((srv, idx) => (
                               <tr key={idx} className="border-b border-zinc-150 hover:bg-zinc-50/55">
-                                <td className="p-2.5 text-zinc-700 font-medium break-words align-top">{srv.name}</td>
-                                <td className={`p-2.5 text-zinc-900 font-bold font-mono ${isRtl ? 'text-left' : 'text-right'}`}>{srv.price} {isRtl ? 'ريال' : 'SAR'}</td>
+                                <td className="p-2 sm:p-2.5 text-zinc-700 font-medium break-words align-top">{srv.name}</td>
+                                <td className={`p-2 sm:p-2.5 text-zinc-900 font-bold font-mono align-top whitespace-nowrap ${isRtl ? 'text-left' : 'text-right'}`}>{srv.price} {isRtl ? 'ريال' : 'SAR'}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1519,7 +1517,7 @@ export function JobCardsView() {
                       <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                         {t('costAndApproval')}
                       </div>
-                      <div className="grid grid-cols-2 gap-6 text-xs px-2 items-start">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-xs px-1 sm:px-2 items-start">
                         <div className="space-y-2">
                           <div className="flex justify-between items-baseline border-b border-dashed border-zinc-200 pb-1">
                             <span className="text-zinc-500 font-semibold">{t('baseCost')}:</span>
@@ -1536,8 +1534,8 @@ export function JobCardsView() {
                             <span className="text-emerald-600 font-black text-sm font-mono">{grandTotal} {isRtl ? 'ريال' : 'SAR'}</span>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2 justify-center text-zinc-700 font-semibold pt-1">
-                          <div className="flex items-center gap-4">
+                        <div className="flex flex-col gap-2 justify-center text-zinc-700 font-semibold pt-1 border-t sm:border-t-0 border-dashed border-zinc-200 sm:pt-1 pt-3">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                             <span className="text-zinc-500">{t('approvalDecision')}:</span>
                             <div className="flex items-center gap-1.5">
                               <span className={`w-4 h-4 border border-zinc-400 rounded flex items-center justify-center text-[10px] ${selectedJob.approvalStatus === 'APPROVED' ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]' : ''}`}>
@@ -1563,19 +1561,14 @@ export function JobCardsView() {
                   <div className={`flex items-center gap-2 bg-[#dbeafe] p-2 ${isRtl ? 'rounded-r-md border-r-4' : 'rounded-l-md border-l-4'} border-[#1e3a8a] text-[#1e3a8a] font-bold text-xs`}>
                     {t('jobTechSecTitle')}
                   </div>
-                  <div className="flex justify-between items-center text-xs px-2 gap-4">
-                    <div className="flex items-baseline gap-1 flex-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs px-1 sm:px-2 items-baseline">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('techNameLabel')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold">{selectedJob.technicianName || '.......................'}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold break-words">{selectedJob.technicianName || '.......................'}</span>
                     </div>
-                    <div className="flex items-baseline gap-1 flex-1">
+                    <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('jobEntryDate')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 pb-0.5 text-zinc-800 font-bold font-mono">{new Date(selectedJob.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</span>
-                    </div>
-                    <div className="flex gap-1.5">
-                      <span className="w-5 h-5 border border-zinc-300 rounded bg-white"></span>
-                      <span className="w-5 h-5 border border-zinc-300 rounded bg-white"></span>
-                      <span className="w-5 h-5 border border-zinc-300 rounded bg-white"></span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono whitespace-nowrap">{new Date(selectedJob.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</span>
                     </div>
                   </div>
                 </div>
@@ -1596,8 +1589,8 @@ export function JobCardsView() {
                 </div>
 
                 {/* 9. تأكيد الاستلام (Footer) */}
-                <div className="bg-[#0b192c] text-white p-3.5 rounded-lg flex justify-between items-center text-xs">
-                  <div className="flex gap-4">
+                <div className="bg-[#0b192c] text-white p-3.5 rounded-lg flex flex-wrap justify-between items-center gap-x-4 gap-y-2.5 text-xs">
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-4 h-4 border border-white/40 rounded flex items-center justify-center text-[10px] ${selectedJob.isVehiclePhotographed ? 'bg-primary text-white border-primary' : ''}`}>
                         {selectedJob.isVehiclePhotographed ? '✓' : ''}
@@ -1615,8 +1608,8 @@ export function JobCardsView() {
                 </div>
 
                 {/* WhatsApp QR sharing & barcode - Only displayed on screen / no-print */}
-                <div className="border-t border-zinc-100 pt-6 mt-6 no-print">
-                  <div className="bg-zinc-50/80 rounded-xl p-5 border border-zinc-100 flex flex-col md:flex-row items-center gap-6">
+                <div className="border-t border-zinc-100 pt-5 sm:pt-6 mt-5 sm:mt-6 no-print">
+                  <div className="bg-zinc-50/80 rounded-xl p-4 sm:p-5 border border-zinc-100 flex flex-col md:flex-row items-center gap-5 sm:gap-6">
                     
                     {/* QR Code Graphic Display */}
                     <div 
@@ -1672,10 +1665,10 @@ export function JobCardsView() {
               <div className={`text-xs text-zinc-400 ${isRtl ? 'text-right' : 'text-left'}`}>
                 <span>{t('whatsappTip')}</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={downloadInvoiceAsImage}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm"
+                  className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm"
                 >
                   📥 {isRtl ? 'تحميل الكارت كصورة' : 'Download Card as Image'}
                 </button>
@@ -1684,9 +1677,9 @@ export function JobCardsView() {
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => markQRAsScanned()}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm"
+                  className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm text-center"
                 >
-                  <Share2 size={14} /> {isRtl ? 'إرسال عبر واتساب' : 'Send via WhatsApp'} (+{activeWhatsappNumber})
+                  <Share2 size={14} className="shrink-0" /> <span className="break-all">{isRtl ? 'إرسال عبر واتساب' : 'Send via WhatsApp'} (+{activeWhatsappNumber})</span>
                 </a>
               </div>
             </div>
@@ -1697,26 +1690,28 @@ export function JobCardsView() {
 
       {/* Modal: Fullscreen Zoomed QR Code */}
       {showZoomedQR && selectedJob && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6">
-          <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 relative">
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6">
+          <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-6 text-center space-y-4 sm:space-y-6 relative max-h-[95vh] overflow-y-auto">
             <button
               onClick={() => setShowZoomedQR(false)}
-              className="absolute top-4 left-4 text-zinc-400 hover:text-white text-sm font-bold cursor-pointer"
+              className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 px-2 py-1 rounded-md bg-zinc-900/80 text-zinc-300 hover:text-white text-xs sm:text-sm font-bold cursor-pointer"
             >
               {t('zoomedClose')}
             </button>
-            <div className="space-y-1">
-              <h3 className="text-lg font-black text-white">{t('zoomedQrTitle')}</h3>
+            <div className="space-y-1 pt-7 sm:pt-2">
+              <h3 className="text-base sm:text-lg font-black text-white leading-snug">{t('zoomedQrTitle')}</h3>
               <p className="text-xs text-zinc-400">{t('zoomedQrSub')}</p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl inline-block shadow-2xl mx-auto">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-2xl mx-auto w-full max-w-[320px]">
+              {/* Canvas is rendered at 320px for scan quality but scaled down
+                  with CSS so it never overflows on small screens. */}
               <QRCodeCanvas
                 value={getWhatsAppQRLink()}
                 size={320}
                 level="M"
                 marginSize={2}
-                className="mx-auto"
+                className="mx-auto !w-full !h-auto max-w-full"
               />
             </div>
 
