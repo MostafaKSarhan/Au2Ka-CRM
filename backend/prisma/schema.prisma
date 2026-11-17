@@ -40,14 +40,15 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  activities    JobCardActivity[]
-  branch        Branch?           @relation(fields: [branchId], references: [id])
-  branchId      String?
-  sentMessages  OutboundMessage[]
-  notifications Notification[]
-  inspections   Inspection[]
-  appointments  Appointment[]
-  pointsEntries PointsEntry[]
+  activities     JobCardActivity[]
+  branch         Branch?           @relation(fields: [branchId], references: [id])
+  branchId       String?
+  sentMessages   OutboundMessage[]
+  notifications  Notification[]
+  inspections    Inspection[]
+  appointments   Appointment[]
+  pointsEntries  PointsEntry[]
+  stockMovements StockMovement[]
 
   @@index([branchId])
 }
@@ -147,16 +148,17 @@ model JobCard {
   subscriptionDiscount Decimal?      @db.Decimal(5, 2)
   isFreeVisit          Boolean       @default(false)
 
-  photos       JobCardPhotos[]
-  activities   JobCardActivity[]
-  usages       SubscriptionUsage[]
-  branch       Branch?                  @relation(fields: [branchId], references: [id])
-  branchId     String?
-  replacements VehiclePartReplacement[]
-  mileageLogs  VehicleMileageLog[]
-  messages     OutboundMessage[]
-  inspection   Inspection?
-  appointment  Appointment?
+  photos         JobCardPhotos[]
+  activities     JobCardActivity[]
+  usages         SubscriptionUsage[]
+  branch         Branch?                  @relation(fields: [branchId], references: [id])
+  branchId       String?
+  replacements   VehiclePartReplacement[]
+  mileageLogs    VehicleMileageLog[]
+  messages       OutboundMessage[]
+  inspection     Inspection?
+  appointment    Appointment?
+  stockMovements StockMovement[]
 
   @@index([jobNumber])
   @@index([branchId])
@@ -288,6 +290,7 @@ model Part {
   deletedAt     DateTime?
 
   replacements VehiclePartReplacement[]
+  movements    StockMovement[]
 
   @@index([nameAr])
   @@index([category])
@@ -868,5 +871,41 @@ model PointsEntry {
   createdAt    DateTime        @default(now())
 
   @@index([customerId])
+  @@index([createdAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M10: إدارة المخزون وقطع الغيار
+// مستودع واحد. أوامر الشراء وحسابات الموردين وتعدد المستودعات
+// غير مشمولة في هذا النطاق.
+// =====================================================================
+
+enum StockMovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id           String            @id @default(uuid())
+  partId       String
+  part         Part              @relation(fields: [partId], references: [id])
+  type         StockMovementType
+  /// Always the signed change: +10 for an intake, -2 for an issue.
+  quantity     Int
+  balanceAfter Int
+  unitPrice    Decimal?          @db.Decimal(10, 2)
+  /// The job card the part went out on, when it was issued to a repair.
+  jobCardId    String?
+  jobCard      JobCard?          @relation(fields: [jobCardId], references: [id])
+  reference    String?
+  reasonAr     String
+  reasonEn     String
+  createdById  String?
+  createdBy    User?             @relation(fields: [createdById], references: [id])
+  createdAt    DateTime          @default(now())
+
+  @@index([partId])
+  @@index([jobCardId])
   @@index([createdAt])
 }

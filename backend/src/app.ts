@@ -25,6 +25,7 @@ import { messagingRoutes } from './modules/messaging/messaging.routes';
 import { inspectionsRoutes, monthlyReportsRoutes } from './modules/inspections/inspections.routes';
 import { appointmentsRoutes } from './modules/appointments/appointments.routes';
 import { referralsRoutes } from './modules/referrals/referrals.routes';
+import { inventoryRoutes } from './modules/inventory/inventory.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -108,6 +109,9 @@ app.register(appointmentsRoutes, { prefix: '/api/v1/appointments' });
 
 // Phase 2 — M5: referrals, points and customer tiers
 app.register(referralsRoutes, { prefix: '/api/v1/referrals' });
+
+// Phase 2 — M10: inventory movements for the spare parts catalogue
+app.register(inventoryRoutes, { prefix: '/api/v1/inventory' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

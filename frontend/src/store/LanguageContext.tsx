@@ -789,7 +789,55 @@ const translations = {
     ref_statCompleted: 'إحالات مكتملة',
     ref_statPending: 'إحالات قيد الانتظار',
     ref_statVip: 'عملاء VIP',
-    ref_statPoints: 'النقاط القائمة'
+    ref_statPoints: 'النقاط القائمة',
+
+    // ===== M10 — إدارة المخزون وقطع الغيار =====
+    inventory: 'المخزون',
+    inv_subtitle: 'حركة قطع الغيار، أرصدتها، وحد إعادة الطلب',
+    inv_scopeNote:
+      'مستودع واحد حسب نطاق العرض. أوامر الشراء وحسابات الموردين وتعدد المستودعات والفروع غير مشمولة في هذه المرحلة.',
+
+    // العمليات
+    inv_intake: 'إدخال مخزون',
+    inv_issue: 'صرف على كرت',
+    inv_issueHint:
+      'الصرف ينقص الرصيد ويُسجَّل في نفس الوقت ضمن القطع المستبدلة في ملف السيارة.',
+    inv_count: 'جرد وتسوية',
+    inv_countHint:
+      'اكتب الكمية التي وجدتها فعليًا على الرف، وسيسجّل النظام الفرق كتسوية جرد موثّقة.',
+    inv_countedQuantity: 'الكمية المجرودة فعليًا',
+    inv_countReason: 'سبب الفرق',
+    inv_countReasonPlaceholder: 'مثال: تالف، أو خطأ في التسجيل السابق',
+    inv_bookBalance: 'الرصيد الدفتري',
+    inv_selectPart: 'اختر القطعة',
+    inv_selectJobCard: 'اختر كرت العمل',
+    inv_quantity: 'الكمية',
+    inv_reference: 'رقم المستند',
+    inv_referenceHint: 'رقم فاتورة المورد أو إذن الاستلام، إن وُجد',
+    inv_priceHint: 'تحديثه يحدّث سعر شراء القطعة',
+
+    // السجل
+    inv_movements: 'سجل حركة المخزون',
+    inv_noMovements: 'لا توجد حركات مسجلة',
+    inv_allParts: 'كل القطع',
+    inv_allTypes: 'كل الحركات',
+    inv_type: 'نوع الحركة',
+    inv_typeIn: 'إدخال',
+    inv_typeOut: 'صرف',
+    inv_typeAdjustment: 'تسوية',
+    inv_balanceAfter: 'الرصيد بعدها',
+    inv_reason: 'البيان',
+
+    // التقارير
+    inv_statUnits: 'إجمالي الوحدات',
+    inv_statValue: 'قيمة المخزون بسعر الشراء',
+    inv_statProfit: 'الربح المتوقع',
+    inv_statLow: 'أصناف تحت حد الطلب',
+    inv_reorderTitle: 'أصناف وصلت حد إعادة الطلب — اضغط لإدخال كمية',
+    inv_mostUsed: 'الأكثر استهلاكًا (آخر 30 يومًا)',
+    inv_noUsage: 'لم يُصرف أي صنف في هذه المدة',
+    inv_stagnant: 'أصناف راكدة',
+    inv_noStagnant: 'لا توجد أصناف راكدة'
   },
   en: {
     // Menu & Layout
@@ -1577,7 +1625,55 @@ const translations = {
     ref_statCompleted: 'Completed referrals',
     ref_statPending: 'Pending referrals',
     ref_statVip: 'VIP customers',
-    ref_statPoints: 'Outstanding points'
+    ref_statPoints: 'Outstanding points',
+
+    // ===== M10 — Inventory & spare parts =====
+    inventory: 'Inventory',
+    inv_subtitle: 'Spare part movements, balances and reorder levels',
+    inv_scopeNote:
+      'One warehouse, per the agreed scope. Purchase orders, supplier accounts, multiple warehouses and branches are not included in this phase.',
+
+    // Operations
+    inv_intake: 'Stock intake',
+    inv_issue: 'Issue to a card',
+    inv_issueHint:
+      'Issuing reduces the balance and is written into the vehicle file as a replaced part at the same time.',
+    inv_count: 'Stock count',
+    inv_countHint:
+      'Enter what you actually counted on the shelf; the system records the difference as a documented adjustment.',
+    inv_countedQuantity: 'Quantity counted',
+    inv_countReason: 'Reason for the difference',
+    inv_countReasonPlaceholder: 'e.g. damaged, or an earlier entry was wrong',
+    inv_bookBalance: 'Book balance',
+    inv_selectPart: 'Select a part',
+    inv_selectJobCard: 'Select a job card',
+    inv_quantity: 'Quantity',
+    inv_reference: 'Document number',
+    inv_referenceHint: 'Supplier invoice or goods receipt number, if any',
+    inv_priceHint: 'Updating it updates the part’s purchase price',
+
+    // Ledger
+    inv_movements: 'Stock movement log',
+    inv_noMovements: 'No movements recorded',
+    inv_allParts: 'All parts',
+    inv_allTypes: 'All movements',
+    inv_type: 'Movement',
+    inv_typeIn: 'Intake',
+    inv_typeOut: 'Issue',
+    inv_typeAdjustment: 'Adjustment',
+    inv_balanceAfter: 'Balance after',
+    inv_reason: 'Details',
+
+    // Reports
+    inv_statUnits: 'Total units',
+    inv_statValue: 'Stock value at cost',
+    inv_statProfit: 'Expected profit',
+    inv_statLow: 'Items below reorder level',
+    inv_reorderTitle: 'Items at their reorder level — click to receive stock',
+    inv_mostUsed: 'Most used (last 30 days)',
+    inv_noUsage: 'Nothing was issued in this period',
+    inv_stagnant: 'Stagnant items',
+    inv_noStagnant: 'No stagnant items'
   }
 };
 
