@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare, ClipboardCheck, Clock, MessageCircle } from 'lucide-react';
+import { Building2, MapPin, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare, ClipboardCheck, Clock, MessageCircle, Receipt } from 'lucide-react';
 import { useTranslation } from '../../store/LanguageContext';
 import { BranchesTab } from './BranchesTab';
 import { CitiesTab } from './CitiesTab';
@@ -10,9 +10,10 @@ import { TemplatesTab } from './TemplatesTab';
 import { InspectionItemsTab } from './InspectionItemsTab';
 import { WorkingHoursTab } from './WorkingHoursTab';
 import { WhatsAppTab } from './WhatsAppTab';
+import { ZatcaTab } from './ZatcaTab';
 import { BackupTab } from './BackupTab';
 
-type TabId = 'branches' | 'cities' | 'models' | 'parts' | 'plans' | 'templates' | 'checklist' | 'hours' | 'whatsapp' | 'backup';
+type TabId = 'branches' | 'cities' | 'models' | 'parts' | 'plans' | 'templates' | 'checklist' | 'hours' | 'whatsapp' | 'zatca' | 'backup';
 
 export function MasterDataView() {
   const { lang, t } = useTranslation();
@@ -28,6 +29,7 @@ export function MasterDataView() {
     { id: 'checklist', label: t('insp_checklist'), icon: ClipboardCheck },
     { id: 'hours', label: t('wh_workingHours'), icon: Clock },
     { id: 'whatsapp', label: t('wa_tab'), icon: MessageCircle },
+    { id: 'zatca', label: t('zt_tab'), icon: Receipt },
     { id: 'backup', label: t('md_backup'), icon: DatabaseBackup },
   ];
 
@@ -68,6 +70,7 @@ export function MasterDataView() {
       {tab === 'checklist' && <InspectionItemsTab />}
       {tab === 'hours' && <WorkingHoursTab />}
       {tab === 'whatsapp' && <WhatsAppTab />}
+      {tab === 'zatca' && <ZatcaTab />}
       {tab === 'backup' && <BackupTab />}
     </div>
   );

@@ -925,7 +925,90 @@ const translations = {
     wa_statusNotSubmitted: 'لم يُقدَّم',
     wa_statusPending: 'قيد المراجعة',
     wa_statusApproved: 'معتمد',
-    wa_statusRejected: 'مرفوض'
+    wa_statusRejected: 'مرفوض',
+
+    // ===== M9 — الفوترة الإلكترونية ZATCA =====
+    zt_tab: 'الفوترة الإلكترونية',
+    zt_title: 'الفوترة الإلكترونية — ZATCA المرحلة الثانية',
+    zt_subtitle: 'بيانات المنشأة، شهادة الختم، والربط مع هيئة الزكاة والضريبة والجمارك',
+    zt_scopeNote:
+      'يتطلب الرقم الضريبي وصلاحيات المنشأة على بوابة ZATCA من العميل. لا يشمل تدقيقًا محاسبيًا ولا إعداد إقرارات ضريبية. حتى اكتمال التسجيل تصدر الفواتير مرقّمة ومختومة ومسلسلة برمز QR، وتُرسل إلى الهيئة فور توفّر الشهادة.',
+    zt_missing: 'بيانات ناقصة',
+    zt_sellerNameAr: 'اسم المنشأة بالعربية',
+    zt_sellerNameEn: 'اسم المنشأة بالإنجليزية',
+    zt_vatNumber: 'الرقم الضريبي',
+    zt_vatNumberHint: '15 رقمًا يبدأ وينتهي بالرقم 3',
+    zt_crnNumber: 'السجل التجاري',
+    zt_street: 'الشارع',
+    zt_buildingNumber: 'رقم المبنى',
+    zt_district: 'الحي',
+    zt_postalCode: 'الرمز البريدي',
+    zt_vatRate: 'نسبة ضريبة القيمة المضافة %',
+    zt_environment: 'بيئة الربط',
+    zt_environmentHint: 'ابدأ بالتجريبية، ثم المحاكاة، ثم الإنتاج بعد نجاح الاختبارات',
+    zt_envSandbox: 'تجريبية (Sandbox)',
+    zt_envSimulation: 'محاكاة (Simulation)',
+    zt_envProduction: 'إنتاج (Production)',
+
+    // التسجيل وإصدار الشهادة
+    zt_onboarding: 'التسجيل وإصدار الشهادة',
+    zt_onboardingHint: 'مفتاح الختم التشفيري وبيانات طلب الشهادة، ثم إدخال الشهادة الصادرة من الهيئة',
+    zt_stampKey: 'مفتاح الختم',
+    zt_complianceCsid: 'شهادة التوافق',
+    zt_productionCsid: 'شهادة الإنتاج CSID',
+    zt_productionSecret: 'المفتاح السري للشهادة',
+    zt_ready: 'جاهز',
+    zt_notReady: 'غير جاهز',
+    zt_generateKey: 'توليد مفتاح الختم',
+    zt_saveCsid: 'حفظ الشهادة',
+    zt_csrSubject: 'بيانات طلب الشهادة (CSR Subject)',
+    zt_csrHint: 'استخدم هذه البيانات مع رمز OTP من بوابة فاتورة لإصدار الشهادة، ثم الصقها أعلاه.',
+    zt_csidHint: 'تصدرها الهيئة بعد اجتياز اختبارات التوافق',
+
+    // سلسلة الفواتير
+    zt_chainTitle: 'سلامة سلسلة الفواتير',
+    zt_chainHint: 'كل فاتورة تحمل تجزئة الفاتورة التي قبلها، والتسلسل لا يقبل انقطاعًا',
+    zt_verifyChain: 'فحص السلسلة',
+    zt_chainIntact: 'السلسلة سليمة',
+    zt_chainBroken: 'السلسلة مكسورة',
+    zt_invoices: 'فاتورة',
+
+    // الفواتير
+    invoices: 'الفواتير',
+    zt_invoicesSubtitle: 'إصدار الفواتير المبسطة والضريبية وأرشفتها وإرسالها للهيئة',
+    zt_issue: 'إصدار فاتورة',
+    zt_none: 'لا توجد فواتير صادرة',
+    zt_search: 'ابحث برقم الفاتورة أو اسم المشتري...',
+    zt_number: 'رقم الفاتورة',
+    zt_type: 'نوع الفاتورة',
+    zt_typeHint: 'المبسطة للأفراد، والضريبية للمنشآت ذات الرقم الضريبي',
+    zt_simplified: 'مبسطة',
+    zt_standard: 'ضريبية',
+    zt_jobCardHint: 'اختيار الكرت يملأ بنود الفاتورة من الأعمال والقطع تلقائيًا',
+    zt_buyerName: 'اسم المشتري',
+    zt_buyerVat: 'الرقم الضريبي للمشتري',
+    zt_item: 'البند',
+    zt_net: 'الإجمالي قبل الضريبة',
+    zt_vat: 'ضريبة القيمة المضافة',
+    zt_total: 'الإجمالي شامل الضريبة',
+    zt_submit: 'إرسال للهيئة',
+    zt_downloadXml: 'تنزيل XML',
+    zt_stamped: 'مختومة تشفيريًا',
+    zt_qrHint: 'امسح الرمز للتحقق من الفاتورة لدى هيئة الزكاة والضريبة والجمارك',
+
+    // حالات الفاتورة
+    zt_statusDraft: 'مسودة',
+    zt_statusSigned: 'مختومة',
+    zt_statusReported: 'مُبلَّغة',
+    zt_statusCleared: 'معتمدة',
+    zt_statusFailed: 'مرفوضة',
+    zt_statusCancelled: 'ملغاة',
+
+    // إحصائيات الفواتير
+    zt_statCount: 'عدد الفواتير',
+    zt_statNet: 'الإجمالي قبل الضريبة',
+    zt_statVat: 'إجمالي الضريبة',
+    zt_statTotal: 'الإجمالي شامل الضريبة'
   },
   en: {
     // Menu & Layout
@@ -1849,7 +1932,90 @@ const translations = {
     wa_statusNotSubmitted: 'Not submitted',
     wa_statusPending: 'Under review',
     wa_statusApproved: 'Approved',
-    wa_statusRejected: 'Rejected'
+    wa_statusRejected: 'Rejected',
+
+    // ===== M9 — ZATCA e-invoicing =====
+    zt_tab: 'E-invoicing',
+    zt_title: 'E-invoicing — ZATCA phase two',
+    zt_subtitle: 'Seller details, the stamp certificate, and the connection to ZATCA',
+    zt_scopeNote:
+      'Requires the VAT number and portal permissions from the client. Does not include accounting review or tax returns. Until onboarding is complete, invoices are still issued numbered, stamped, sequenced and carrying a QR code, and are sent to ZATCA as soon as the certificate is in place.',
+    zt_missing: 'Missing details',
+    zt_sellerNameAr: 'Seller name (Arabic)',
+    zt_sellerNameEn: 'Seller name (English)',
+    zt_vatNumber: 'VAT number',
+    zt_vatNumberHint: '15 digits beginning and ending with 3',
+    zt_crnNumber: 'Commercial registration',
+    zt_street: 'Street',
+    zt_buildingNumber: 'Building number',
+    zt_district: 'District',
+    zt_postalCode: 'Postal code',
+    zt_vatRate: 'VAT rate %',
+    zt_environment: 'Environment',
+    zt_environmentHint: 'Start with sandbox, then simulation, then production once tests pass',
+    zt_envSandbox: 'Sandbox',
+    zt_envSimulation: 'Simulation',
+    zt_envProduction: 'Production',
+
+    // Onboarding
+    zt_onboarding: 'Onboarding and certificate',
+    zt_onboardingHint: 'The cryptographic stamp key and CSR details, then the certificate ZATCA issues',
+    zt_stampKey: 'Stamp key',
+    zt_complianceCsid: 'Compliance CSID',
+    zt_productionCsid: 'Production CSID',
+    zt_productionSecret: 'Certificate secret',
+    zt_ready: 'Ready',
+    zt_notReady: 'Not ready',
+    zt_generateKey: 'Generate stamp key',
+    zt_saveCsid: 'Save certificate',
+    zt_csrSubject: 'CSR subject',
+    zt_csrHint: 'Use these details with the OTP from the Fatoora portal to obtain the certificate, then paste it above.',
+    zt_csidHint: 'Issued by ZATCA once compliance checks pass',
+
+    // Invoice chain
+    zt_chainTitle: 'Invoice chain integrity',
+    zt_chainHint: 'Each invoice carries the hash of the one before it, and the sequence may not break',
+    zt_verifyChain: 'Check the chain',
+    zt_chainIntact: 'The chain is intact',
+    zt_chainBroken: 'The chain is broken',
+    zt_invoices: 'invoices',
+
+    // Invoices
+    invoices: 'Invoices',
+    zt_invoicesSubtitle: 'Issue simplified and tax invoices, archive them and report them to ZATCA',
+    zt_issue: 'Issue an invoice',
+    zt_none: 'No invoices issued',
+    zt_search: 'Search by invoice number or buyer...',
+    zt_number: 'Invoice',
+    zt_type: 'Invoice type',
+    zt_typeHint: 'Simplified for individuals, tax invoice for VAT-registered businesses',
+    zt_simplified: 'Simplified',
+    zt_standard: 'Tax invoice',
+    zt_jobCardHint: 'Choosing a card fills the invoice lines from the work and parts automatically',
+    zt_buyerName: 'Buyer name',
+    zt_buyerVat: 'Buyer VAT number',
+    zt_item: 'Item',
+    zt_net: 'Net',
+    zt_vat: 'VAT',
+    zt_total: 'Total incl. VAT',
+    zt_submit: 'Send to ZATCA',
+    zt_downloadXml: 'Download XML',
+    zt_stamped: 'Cryptographically stamped',
+    zt_qrHint: 'Scan to verify this invoice with ZATCA',
+
+    // Invoice statuses
+    zt_statusDraft: 'Draft',
+    zt_statusSigned: 'Stamped',
+    zt_statusReported: 'Reported',
+    zt_statusCleared: 'Cleared',
+    zt_statusFailed: 'Rejected',
+    zt_statusCancelled: 'Cancelled',
+
+    // Invoice stats
+    zt_statCount: 'Invoices',
+    zt_statNet: 'Net total',
+    zt_statVat: 'VAT total',
+    zt_statTotal: 'Total incl. VAT'
   }
 };
 

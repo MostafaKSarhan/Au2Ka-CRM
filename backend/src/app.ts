@@ -28,6 +28,7 @@ import { referralsRoutes } from './modules/referrals/referrals.routes';
 import { inventoryRoutes } from './modules/inventory/inventory.routes';
 import { portalRoutes } from './modules/portal/portal.routes';
 import { whatsappRoutes, whatsappWebhookRoutes } from './modules/whatsapp/whatsapp.routes';
+import { zatcaRoutes } from './modules/zatca/zatca.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -121,6 +122,9 @@ app.register(portalRoutes, { prefix: '/api/v1/portal' });
 // Phase 2 — M8: official WhatsApp Business Cloud API
 app.register(whatsappRoutes, { prefix: '/api/v1/whatsapp' });
 app.register(whatsappWebhookRoutes, { prefix: '/api/v1/webhooks' });
+
+// Phase 2 — M9: ZATCA phase-two e-invoicing
+app.register(zatcaRoutes, { prefix: '/api/v1/zatca' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {
