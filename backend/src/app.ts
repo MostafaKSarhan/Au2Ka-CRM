@@ -22,6 +22,7 @@ import { plansRoutes } from './modules/plans/plans.routes';
 import { subscriptionsRoutes } from './modules/subscriptions/subscriptions.routes';
 import { vehicleFileRoutes, publicVehicleFileRoutes } from './modules/vehicleFile/vehicleFile.routes';
 import { messagingRoutes } from './modules/messaging/messaging.routes';
+import { inspectionsRoutes, monthlyReportsRoutes } from './modules/inspections/inspections.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -95,6 +96,10 @@ app.register(publicVehicleFileRoutes, { prefix: '/api/v1/public' });
 
 // Phase 2 — M6: messaging, templates and in-system alerts
 app.register(messagingRoutes, { prefix: '/api/v1/messaging' });
+
+// Phase 2 — M2: technical inspection checklist and monthly vehicle reports
+app.register(inspectionsRoutes, { prefix: '/api/v1/inspections' });
+app.register(monthlyReportsRoutes, { prefix: '/api/v1/monthly-reports' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

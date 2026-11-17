@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera } from 'lucide-react';
+import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera, ClipboardCheck } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
 import html2canvas from 'html2canvas-pro';
 import { QRCodeCanvas } from 'qrcode.react';
+import { InspectionModal } from '../inspections/InspectionModal';
 import { useTranslation } from '../../store/LanguageContext';
 
 const STATUS_COLUMNS = [
@@ -54,6 +55,7 @@ export function JobCardsView() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [inspectionJobId, setInspectionJobId] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   // Creation Form
@@ -958,6 +960,14 @@ export function JobCardsView() {
                 </h2>
               </div>
               <div className="flex items-center gap-2">
+                {/* M2 — structured technical inspection form */}
+                <button
+                  onClick={() => setInspectionJobId(selectedJob.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-bold text-zinc-200 rounded transition cursor-pointer"
+                >
+                  <ClipboardCheck size={14} /> {t('insp_title')}
+                </button>
+
                 {/* Invoice Button Trigger */}
                 {(selectedJob.status === 'WAITING_APPROVAL' || selectedJob.status === 'COMPLETED' || selectedJob.status === 'DELIVERED') && (
                   <button
@@ -1786,6 +1796,11 @@ export function JobCardsView() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* M2 — the technical inspection form for the open card */}
+      {inspectionJobId && (
+        <InspectionModal jobCardId={inspectionJobId} onClose={() => setInspectionJobId(null)} />
       )}
     </div>
   );

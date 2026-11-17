@@ -300,6 +300,35 @@ const TEMPLATES = [
   },
 ];
 
+/**
+ * M2 — a starting technical checklist, 20 of the 25 items the scope allows.
+ * This is a working default until the client approves their own list; every
+ * item can be reworded, reordered, switched off or replaced from the UI.
+ */
+const INSPECTION_ITEMS: Array<[string, string, string, string]> = [
+  // [code, nameAr, nameEn, category]
+  ['ENGINE_OIL', 'زيت المحرك ومستواه', 'Engine oil and level', 'المحرك'],
+  ['OIL_FILTER', 'فلتر الزيت', 'Oil filter', 'المحرك'],
+  ['AIR_FILTER', 'فلتر الهواء', 'Air filter', 'المحرك'],
+  ['COOLANT', 'سائل التبريد والرديتر', 'Coolant and radiator', 'المحرك'],
+  ['BELTS', 'السيور وحالتها', 'Belts condition', 'المحرك'],
+  ['ENGINE_LEAKS', 'تسريبات أسفل المحرك', 'Engine leaks', 'المحرك'],
+  ['BATTERY', 'البطارية وأطرافها', 'Battery and terminals', 'الكهرباء'],
+  ['ALTERNATOR', 'الدينامو والشحن', 'Alternator and charging', 'الكهرباء'],
+  ['LIGHTS', 'الإضاءة الأمامية والخلفية', 'Front and rear lights', 'الكهرباء'],
+  ['WIPERS', 'المساحات ورشاش الماء', 'Wipers and washer', 'الكهرباء'],
+  ['BRAKE_PADS', 'فحمات الفرامل', 'Brake pads', 'الفرامل'],
+  ['BRAKE_DISCS', 'أقراص الفرامل', 'Brake discs', 'الفرامل'],
+  ['BRAKE_FLUID', 'زيت الفرامل', 'Brake fluid', 'الفرامل'],
+  ['HANDBRAKE', 'فرامل اليد', 'Handbrake', 'الفرامل'],
+  ['TYRES', 'الإطارات وعمق النقشة', 'Tyres and tread depth', 'العجلات'],
+  ['TYRE_PRESSURE', 'ضغط الإطارات', 'Tyre pressure', 'العجلات'],
+  ['SUSPENSION', 'المساعدين والمقصات', 'Suspension and arms', 'العجلات'],
+  ['STEERING', 'المقود والتوجيه', 'Steering', 'العجلات'],
+  ['AC_SYSTEM', 'المكيف وكفاءة التبريد', 'Air conditioning', 'الراحة'],
+  ['GEARBOX', 'ناقل الحركة وزيته', 'Gearbox and its oil', 'نقل الحركة'],
+];
+
 async function main() {
   console.log('Seeding phase-2 reference data...');
 
@@ -407,6 +436,19 @@ async function main() {
     }
   }
   console.log(`  new message templates: ${templateCount}`);
+
+  // ---- Technical inspection checklist (M2) -------------------------------
+  let itemCount = 0;
+  for (const [code, nameAr, nameEn, category] of INSPECTION_ITEMS) {
+    const existing = await prisma.inspectionItem.findFirst({ where: { code, deletedAt: null } });
+    if (!existing) {
+      await prisma.inspectionItem.create({
+        data: { code, nameAr, nameEn, category, sortOrder: itemCount + 1 },
+      });
+      itemCount++;
+    }
+  }
+  console.log(`  new inspection items: ${itemCount}`);
 
   console.log('Reference data seeded.');
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare } from 'lucide-react';
+import { Building2, MapPin, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare, ClipboardCheck } from 'lucide-react';
 import { useTranslation } from '../../store/LanguageContext';
 import { BranchesTab } from './BranchesTab';
 import { CitiesTab } from './CitiesTab';
@@ -7,9 +7,10 @@ import { VehicleModelsTab } from './VehicleModelsTab';
 import { PartsTab } from './PartsTab';
 import { PlansTab } from './PlansTab';
 import { TemplatesTab } from './TemplatesTab';
+import { InspectionItemsTab } from './InspectionItemsTab';
 import { BackupTab } from './BackupTab';
 
-type TabId = 'branches' | 'cities' | 'models' | 'parts' | 'plans' | 'templates' | 'backup';
+type TabId = 'branches' | 'cities' | 'models' | 'parts' | 'plans' | 'templates' | 'checklist' | 'backup';
 
 export function MasterDataView() {
   const { lang, t } = useTranslation();
@@ -22,6 +23,7 @@ export function MasterDataView() {
     { id: 'parts', label: t('md_parts'), icon: Wrench },
     { id: 'plans', label: t('sub_plans'), icon: BadgeCheck },
     { id: 'templates', label: t('msg_templates'), icon: MessageSquare },
+    { id: 'checklist', label: t('insp_checklist'), icon: ClipboardCheck },
     { id: 'backup', label: t('md_backup'), icon: DatabaseBackup },
   ];
 
@@ -59,6 +61,7 @@ export function MasterDataView() {
       {tab === 'parts' && <PartsTab />}
       {tab === 'plans' && <PlansTab />}
       {tab === 'templates' && <TemplatesTab />}
+      {tab === 'checklist' && <InspectionItemsTab />}
       {tab === 'backup' && <BackupTab />}
     </div>
   );

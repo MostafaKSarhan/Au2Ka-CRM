@@ -45,6 +45,7 @@ model User {
   branchId      String?
   sentMessages  OutboundMessage[]
   notifications Notification[]
+  inspections   Inspection[]
 
   @@index([branchId])
 }
@@ -62,12 +63,13 @@ model Customer {
   messagingOptOut Boolean   @default(false)
   optedOutAt      DateTime?
 
-  vehicles      Vehicle[]
-  jobCards      JobCard[]
-  subscriptions Subscription[]
-  messages      OutboundMessage[]
-  branch        Branch?           @relation(fields: [branchId], references: [id])
-  branchId      String?
+  vehicles       Vehicle[]
+  jobCards       JobCard[]
+  subscriptions  Subscription[]
+  messages       OutboundMessage[]
+  branch         Branch?           @relation(fields: [branchId], references: [id])
+  branchId       String?
+  monthlyReports MonthlyReport[]
 
   @@index([fullName])
   @@index([branchId])
@@ -96,6 +98,8 @@ model Vehicle {
   documents      VehicleDocument[]
   replacements   VehiclePartReplacement[]
   mileageLogs    VehicleMileageLog[]
+  inspections    Inspection[]
+  monthlyReports MonthlyReport[]
 
   @@index([plateNumber])
   @@index([vehicleModelId])
@@ -137,6 +141,7 @@ model JobCard {
   replacements VehiclePartReplacement[]
   mileageLogs  VehicleMileageLog[]
   messages     OutboundMessage[]
+  inspection   Inspection?
 
   @@index([jobNumber])
   @@index([branchId])
@@ -551,4 +556,111 @@ model Notification {
   @@index([userId])
   @@index([role])
   @@index([readAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M2: التقرير الفني الشهري
+// قائمة بنود الفحص يعتمدها العميل (حتى 25 بندًا) وتبقى قابلة للتعديل.
+// =====================================================================
+
+enum InspectionRating {
+  NOT_CHECKED
+  OK
+  NEEDS_ATTENTION
+  CRITICAL
+}
+
+model InspectionItem {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  category  String?
+  // How the technician is told to judge this item, shown under its name.
+  hintAr    String?   @db.Text
+  hintEn    String?   @db.Text
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  results InspectionResult[]
+
+  @@index([sortOrder])
+}
+
+model Inspection {
+  id           String  @id @default(uuid())
+  // One inspection per job card — the form the technician fills on the card.
+  jobCardId    String  @unique
+  jobCard      JobCard @relation(fields: [jobCardId], references: [id])
+  vehicleId    String
+  vehicle      Vehicle @relation(fields: [vehicleId], references: [id])
+  technicianId String?
+  technician   User?   @relation(fields: [technicianId], references: [id])
+
+  mileage            Int?
+  // 0–100, derived from the ratings; stored so history keeps its own value
+  // even after the checklist itself changes.
+  healthScore        Int       @default(0)
+  summaryAr          String?   @db.Text
+  summaryEn          String?   @db.Text
+  nextServiceMileage Int?
+  nextServiceDate    DateTime?
+  completedAt        DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  results InspectionResult[]
+
+  @@index([vehicleId])
+  @@index([completedAt])
+}
+
+model InspectionResult {
+  id           String           @id @default(uuid())
+  inspectionId String
+  inspection   Inspection       @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         InspectionItem   @relation(fields: [itemId], references: [id])
+  rating       InspectionRating @default(NOT_CHECKED)
+  note         String?          @db.Text
+
+  @@unique([inspectionId, itemId])
+  @@index([itemId])
+}
+
+model MonthlyReport {
+  id         String   @id @default(uuid())
+  vehicleId  String
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  year       Int
+  month      Int
+
+  visits            Int     @default(0)
+  totalCost         Decimal @default(0) @db.Decimal(10, 2)
+  partsReplaced     Int     @default(0)
+  startMileage      Int?
+  endMileage        Int?
+  healthScore       Int?
+  // Written for the customer in plain language, not in technical terms.
+  recommendationsAr String? @db.Text
+  recommendationsEn String? @db.Text
+  // The inspection findings as they stood when the report was generated.
+  findings          String? @db.Text
+
+  generatedAt DateTime  @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([vehicleId, year, month])
+  @@index([customerId])
+  @@index([year, month])
 }

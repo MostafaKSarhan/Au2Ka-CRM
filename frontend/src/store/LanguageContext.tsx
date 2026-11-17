@@ -591,7 +591,65 @@ const translations = {
     // التنبيهات الداخلية
     notifications: 'التنبيهات',
     notif_markAll: 'تعليم الكل كمقروء',
-    notif_empty: 'لا توجد تنبيهات'
+    notif_empty: 'لا توجد تنبيهات',
+
+    // ===== M2 — الفحص الفني والتقرير الشهري =====
+    // قائمة البنود
+    insp_checklist: 'بنود الفحص الفني',
+    insp_checklistHint: 'القائمة التي يملؤها الفني على كرت العمل',
+    insp_pendingApproval:
+      'هذه قائمة مبدئية جاهزة للعمل بها، وتنتظر اعتماد العميل لقائمته النهائية. كل بند قابل للتعديل أو الإيقاف أو الاستبدال، والحد الأقصى 25 بندًا فعّالًا حسب نطاق العرض.',
+    insp_addItem: 'إضافة بند',
+    insp_editItem: 'تعديل البند',
+    insp_itemAdded: 'تم إضافة البند',
+    insp_itemUpdated: 'تم تحديث البند',
+    insp_itemDeleted: 'تم حذف البند',
+    insp_noItems: 'لا توجد بنود — أضف أول بند أو شغّل بيانات التهيئة',
+    insp_category: 'المجموعة',
+    insp_codeHint: 'كود ثابت لا يتكرر',
+    insp_uncategorised: 'بنود عامة',
+
+    // نموذج الفحص
+    insp_title: 'الفحص الفني',
+    insp_healthScore: 'مؤشر الصحة',
+    insp_checkedCount: 'تم فحصه',
+    insp_ok: 'سليم',
+    insp_attention: 'يحتاج متابعة',
+    insp_critical: 'حرج',
+    insp_notChecked: 'لم يُفحص',
+    insp_notePlaceholder: 'ملاحظة الفني على هذا البند...',
+    insp_mileageAtInspection: 'قراءة العداد وقت الفحص',
+    insp_summary: 'ملخص الفني',
+    insp_summaryAr: 'الملخص بالعربية',
+    insp_summaryEn: 'الملخص بالإنجليزية',
+    insp_summaryHint: 'اكتبه بلغة يفهمها العميل، لا بلغة فنية',
+    insp_saveDraft: 'حفظ كمسودة',
+    insp_complete: 'اعتماد الفحص',
+    insp_saved: 'تم حفظ الفحص',
+    insp_completed: 'تم اعتماد الفحص الفني',
+    insp_alreadyCompleted: 'فحص معتمد بتاريخ',
+    insp_noItemsYet: 'لم تُعرَّف بنود فحص بعد — عرّفها من البيانات الأساسية',
+
+    // التقرير الشهري
+    monthlyReports: 'التقارير الشهرية',
+    rep_subtitle: 'تقرير فني شهري لكل سيارة مشتركة، بالعربية والإنجليزية، جاهز للطباعة',
+    rep_generate: 'توليد تقارير الشهر',
+    rep_created: 'تقرير جديد',
+    rep_updated: 'تقرير محدَّث',
+    rep_none: 'لا توجد تقارير لهذا الشهر — اضغط «توليد تقارير الشهر»',
+    rep_search: 'ابحث باسم العميل أو رقم اللوحة...',
+    rep_mileage: 'المسافة المقطوعة',
+    rep_open: 'عرض',
+    rep_sent: 'أُرسل',
+    rep_notSent: 'لم يُرسل',
+    rep_markSent: 'تسجيل الإرسال',
+    rep_marked: 'تم تسجيل إرسال التقرير',
+    rep_docTitle: 'التقرير الفني الشهري للسيارة',
+    rep_findings: 'نتائج الفحص الفني',
+    rep_recommendations: 'توصياتنا لك',
+    rep_bandGood: 'الحالة العامة جيدة',
+    rep_bandFair: 'الحالة العامة مقبولة وتحتاج متابعة',
+    rep_bandPoor: 'الحالة العامة تحتاج تدخّلًا'
   },
   en: {
     // Menu & Layout
@@ -1181,7 +1239,65 @@ const translations = {
     // In-system alerts
     notifications: 'Alerts',
     notif_markAll: 'Mark all read',
-    notif_empty: 'No alerts'
+    notif_empty: 'No alerts',
+
+    // ===== M2 — Technical inspection & monthly report =====
+    // Checklist definition
+    insp_checklist: 'Inspection checklist',
+    insp_checklistHint: 'The list the technician fills on the job card',
+    insp_pendingApproval:
+      'This is a working starter list, pending the client’s approved checklist. Every item can be reworded, switched off or replaced, with a maximum of 25 active items per the scope.',
+    insp_addItem: 'Add item',
+    insp_editItem: 'Edit item',
+    insp_itemAdded: 'Item added',
+    insp_itemUpdated: 'Item updated',
+    insp_itemDeleted: 'Item deleted',
+    insp_noItems: 'No items yet — add one or run the reference seed',
+    insp_category: 'Group',
+    insp_codeHint: 'A fixed, unique code',
+    insp_uncategorised: 'General items',
+
+    // The form
+    insp_title: 'Technical inspection',
+    insp_healthScore: 'Health score',
+    insp_checkedCount: 'Checked',
+    insp_ok: 'Good',
+    insp_attention: 'Watch',
+    insp_critical: 'Critical',
+    insp_notChecked: 'Not checked',
+    insp_notePlaceholder: 'Technician note on this item...',
+    insp_mileageAtInspection: 'Odometer at inspection',
+    insp_summary: 'Technician summary',
+    insp_summaryAr: 'Summary (Arabic)',
+    insp_summaryEn: 'Summary (English)',
+    insp_summaryHint: 'Write it in language the customer understands, not in technical terms',
+    insp_saveDraft: 'Save draft',
+    insp_complete: 'Complete inspection',
+    insp_saved: 'Inspection saved',
+    insp_completed: 'Inspection completed',
+    insp_alreadyCompleted: 'Completed on',
+    insp_noItemsYet: 'No checklist items defined yet — set them up in Master Data',
+
+    // Monthly report
+    monthlyReports: 'Monthly reports',
+    rep_subtitle: 'A monthly technical report for every subscribed vehicle, in Arabic and English, ready to print',
+    rep_generate: 'Generate this month',
+    rep_created: 'new',
+    rep_updated: 'updated',
+    rep_none: 'No reports for this month — press "Generate this month"',
+    rep_search: 'Search by customer name or plate...',
+    rep_mileage: 'Distance driven',
+    rep_open: 'Open',
+    rep_sent: 'Sent',
+    rep_notSent: 'Not sent',
+    rep_markSent: 'Record as sent',
+    rep_marked: 'Report recorded as sent',
+    rep_docTitle: 'Monthly vehicle health report',
+    rep_findings: 'Inspection findings',
+    rep_recommendations: 'Our recommendations',
+    rep_bandGood: 'Overall condition is good',
+    rep_bandFair: 'Overall condition is fair and needs watching',
+    rep_bandPoor: 'Overall condition needs attention'
   }
 };
 
