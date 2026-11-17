@@ -27,6 +27,7 @@ import { appointmentsRoutes } from './modules/appointments/appointments.routes';
 import { referralsRoutes } from './modules/referrals/referrals.routes';
 import { inventoryRoutes } from './modules/inventory/inventory.routes';
 import { portalRoutes } from './modules/portal/portal.routes';
+import { whatsappRoutes, whatsappWebhookRoutes } from './modules/whatsapp/whatsapp.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -116,6 +117,10 @@ app.register(inventoryRoutes, { prefix: '/api/v1/inventory' });
 
 // Phase 2 — M7: the customer self-service portal (its own sign-in)
 app.register(portalRoutes, { prefix: '/api/v1/portal' });
+
+// Phase 2 — M8: official WhatsApp Business Cloud API
+app.register(whatsappRoutes, { prefix: '/api/v1/whatsapp' });
+app.register(whatsappWebhookRoutes, { prefix: '/api/v1/webhooks' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

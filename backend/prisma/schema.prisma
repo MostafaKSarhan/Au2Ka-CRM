@@ -510,8 +510,17 @@ model MessageTemplate {
   variables String?        @db.Text
   isSystem  Boolean        @default(false)
   isActive  Boolean        @default(true)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+
+  // M8 — the matching template registered with Meta. Free text may only be
+  // sent inside the 24-hour service window; outside it, Meta requires one of
+  // these approved templates, so a code with no Meta name cannot go out.
+  metaTemplateName String?
+  metaLanguage     String?            @default("ar")
+  metaStatus       MetaTemplateStatus @default(NOT_SUBMITTED)
+  metaStatusNote   String?            @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   messages OutboundMessage[]
@@ -541,6 +550,16 @@ model OutboundMessage {
   attempts    Int           @default(0)
   lastError   String?
 
+  // M8 — the values that filled this message, in the order Meta registered
+  // them, so an approved template can be sent for the same message later.
+  templateValues String? @db.Text
+
+  // M8 — what Meta tells us about the message after we hand it over.
+  providerMessageId String?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+
   createdById String?
   createdBy   User?    @relation(fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
@@ -550,6 +569,7 @@ model OutboundMessage {
   @@index([scheduledAt])
   @@index([customerId])
   @@index([jobCardId])
+  @@index([providerMessageId])
 }
 
 model Notification {
@@ -949,4 +969,37 @@ model CustomerSession {
 
   @@index([customerId])
   @@index([expiresAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M8: الربط الرسمي بواتساب للأعمال
+// اعتماد قوالب الرسائل يتم من Meta وهو خارج سيطرة المنفّذ.
+// =====================================================================
+
+enum MetaTemplateStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// One row holds the workshop's WhatsApp Business connection.
+model WhatsAppSettings {
+  id                 String  @id @default("default")
+  phoneNumberId      String?
+  businessAccountId  String?
+  /// Stored server-side only and never returned by the API. The environment
+  /// variable WHATSAPP_ACCESS_TOKEN takes precedence over this column.
+  accessToken        String? @db.Text
+  apiVersion         String  @default("v21.0")
+  /// Meta calls the webhook with this to prove the endpoint is ours.
+  webhookVerifyToken String?
+  displayNumber      String?
+
+  isEnabled      Boolean   @default(false)
+  lastVerifiedAt DateTime?
+  lastError      String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

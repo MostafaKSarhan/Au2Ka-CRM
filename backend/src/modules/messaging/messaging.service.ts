@@ -1,5 +1,6 @@
 import { MessageChannel, NotificationType, Role } from '@prisma/client';
 import { prisma } from '../../config/db';
+import * as whatsapp from '../whatsapp/whatsapp.service';
 
 /**
  * M6 — messaging and alerts.
@@ -99,6 +100,23 @@ export async function queueMessage(options: QueueOptions): Promise<QueueResult> 
     return { queued: false, reason: 'NO_RECIPIENT' };
   }
 
+  // M8 — the same values, in the order the template declares them, so an
+  // approved Meta template can be sent for this message later.
+  let templateValues: string | null = null;
+  if (template?.variables && options.values) {
+    try {
+      const names: string[] = JSON.parse(template.variables);
+      templateValues = JSON.stringify(
+        names.map(name => {
+          const value = options.values?.[name];
+          return value === undefined || value === null ? '' : String(value);
+        }),
+      );
+    } catch {
+      templateValues = null;
+    }
+  }
+
   const message = await prisma.outboundMessage.create({
     data: {
       templateId: template?.id || null,
@@ -109,6 +127,7 @@ export async function queueMessage(options: QueueOptions): Promise<QueueResult> 
       recipientNumber,
       lang,
       body,
+      templateValues,
       scheduledAt: options.scheduledAt || new Date(),
       createdById: options.createdById || null,
     },
@@ -163,7 +182,7 @@ export async function notify(options: NotifyOptions) {
  * for an employee to dispatch them, so they are only counted as due; M8
  * replaces this branch with a real API call.
  */
-export async function processQueue(): Promise<{ delivered: number; pendingWhatsApp: number }> {
+export async function processQueue(): Promise<{ delivered: number; pendingWhatsApp: number; sentViaApi: number }> {
   const now = new Date();
 
   const due = await prisma.outboundMessage.findMany({
@@ -174,8 +193,24 @@ export async function processQueue(): Promise<{ delivered: number; pendingWhatsA
 
   let delivered = 0;
   let pendingWhatsApp = 0;
+  let sentViaApi = 0;
+
+  // M8 — when the official connection is live the queue delivers by itself;
+  // otherwise WhatsApp messages wait for an employee to dispatch them.
+  const whatsappLive = await whatsapp.isEnabled();
 
   for (const message of due) {
+    if (message.channel === 'WHATSAPP') {
+      if (!whatsappLive) {
+        pendingWhatsApp++;
+        continue;
+      }
+
+      const result = await deliverViaWhatsApp(message);
+      if (result) sentViaApi++;
+      continue;
+    }
+
     if (message.channel !== 'INTERNAL') {
       pendingWhatsApp++;
       continue;
@@ -215,7 +250,104 @@ export async function processQueue(): Promise<{ delivered: number; pendingWhatsA
     }
   }
 
-  return { delivered, pendingWhatsApp };
+  return { delivered, pendingWhatsApp, sentViaApi };
+}
+
+/**
+ * M8 — hands one queued message to the official WhatsApp API.
+ *
+ * Outside the 24-hour service window Meta only accepts an approved template,
+ * so a message whose template was never approved is failed with a clear
+ * reason rather than retried forever.
+ */
+async function deliverViaWhatsApp(message: {
+  id: string;
+  recipientNumber: string | null;
+  body: string;
+  lang: string;
+  attempts: number;
+  customerId: string | null;
+  templateId: string | null;
+  templateValues: string | null;
+}): Promise<boolean> {
+  if (!message.recipientNumber) {
+    await prisma.outboundMessage.update({
+      where: { id: message.id },
+      data: { status: 'FAILED', lastError: 'لا يوجد رقم جوال صالح', failedAt: new Date() },
+    });
+    return false;
+  }
+
+  const insideWindow = await whatsapp.isWithinServiceWindow(message.customerId);
+
+  let result: whatsapp.SendResult;
+
+  if (insideWindow) {
+    result = await whatsapp.sendText(message.recipientNumber, message.body);
+  } else {
+    const template = message.templateId
+      ? await prisma.messageTemplate.findUnique({ where: { id: message.templateId } })
+      : null;
+
+    if (!template?.metaTemplateName || template.metaStatus !== 'APPROVED') {
+      await prisma.outboundMessage.update({
+        where: { id: message.id },
+        data: {
+          status: 'FAILED',
+          failedAt: new Date(),
+          attempts: { increment: 1 },
+          lastError:
+            'خارج نافذة الـ 24 ساعة ولا يوجد قالب معتمد من Meta لهذه الرسالة — اربط القالب واعتمده',
+        },
+      });
+      return false;
+    }
+
+    let values: string[] = [];
+    try {
+      values = message.templateValues ? JSON.parse(message.templateValues) : [];
+    } catch {
+      values = [];
+    }
+
+    result = await whatsapp.sendTemplate(
+      message.recipientNumber,
+      template.metaTemplateName,
+      template.metaLanguage || message.lang,
+      values,
+    );
+  }
+
+  if (result.ok) {
+    await prisma.outboundMessage.update({
+      where: { id: message.id },
+      data: {
+        status: 'SENT',
+        sentAt: new Date(),
+        attempts: { increment: 1 },
+        lastError: null,
+        providerMessageId: result.providerMessageId || null,
+      },
+    });
+    return true;
+  }
+
+  const attempts = message.attempts + 1;
+  // Three tries for anything transient; a rejected request is not retried.
+  const giveUp = !result.retryable || attempts >= 3;
+
+  await prisma.outboundMessage.update({
+    where: { id: message.id },
+    data: {
+      attempts,
+      lastError: (result.error || 'فشل الإرسال').slice(0, 250),
+      status: giveUp ? 'FAILED' : 'PENDING',
+      failedAt: giveUp ? new Date() : null,
+      scheduledAt: giveUp ? undefined : new Date(Date.now() + 5 * 60 * 1000),
+    },
+  });
+
+  return false;
 }
 
 const DAY_KEY = () => new Date().toISOString().slice(0, 10);

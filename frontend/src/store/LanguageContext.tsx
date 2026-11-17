@@ -881,7 +881,51 @@ const translations = {
     // ===== M11 — تطبيق الجوال =====
     pwa_installHint: 'ثبّت النظام كتطبيق على جوالك لفتحٍ أسرع وعملٍ دون اتصال',
     pwa_install: 'تثبيت',
-    pwa_offline: 'لا يوجد اتصال — تعرض الشاشات آخر بيانات محفوظة، ولا يمكن الحفظ حتى يعود الاتصال'
+    pwa_offline: 'لا يوجد اتصال — تعرض الشاشات آخر بيانات محفوظة، ولا يمكن الحفظ حتى يعود الاتصال',
+
+    // ===== M8 — الربط الرسمي بواتساب للأعمال =====
+    wa_tab: 'واتساب الرسمي',
+    wa_title: 'الربط الرسمي بواتساب للأعمال',
+    wa_subtitle: 'إرسال التقارير والتذكيرات آلياً دون تدخل الموظف',
+    wa_scopeNote:
+      'اعتماد قوالب الرسائل يتم من Meta وقد يستغرق حتى أسبوعين، وهو خارج سيطرة المنفّذ ولا يُحتسب ضمن مدة التنفيذ. تكلفة الرسائل تُدفع لـ Meta مباشرة وليست ضمن قيمة العرض. حتى اكتمال الربط يظل النظام يجهّز كل رسالة ويفتحها للموظف جاهزة ويسجّلها.',
+    wa_enabled: 'مفعّل',
+    wa_disabled: 'غير مفعّل',
+    wa_enable: 'تفعيل الربط',
+    wa_disable: 'إيقاف الربط',
+    wa_verify: 'تحقق من الاتصال',
+    wa_verifyFailed: 'تعذّر التحقق من الاتصال',
+    wa_lastVerified: 'آخر تحقق ناجح',
+    wa_phoneNumberId: 'معرّف رقم الجوال',
+    wa_phoneNumberIdHint: 'Phone Number ID من لوحة Meta، وليس رقم الجوال نفسه',
+    wa_businessAccountId: 'معرّف حساب الأعمال',
+    wa_accessToken: 'رمز الوصول',
+    wa_tokenHint: 'رمز دائم من Meta — يُحفظ على الخادم ولا يُعرض بعد حفظه',
+    wa_tokenStored: 'محفوظ — اتركه فارغاً للإبقاء عليه',
+    wa_tokenFromEnv: 'مضبوط من متغيّرات البيئة على الخادم، ولا يُعدَّل من هنا',
+    wa_apiVersion: 'إصدار واجهة Meta',
+    wa_verifyToken: 'رمز التحقق للـ Webhook',
+    wa_verifyTokenHint: 'أي نص تختاره، وتضعه نفسه في لوحة Meta',
+    wa_webhookUrl: 'عنوان الـ Webhook',
+    wa_webhookHint:
+      'ضع هذا العنوان في لوحة Meta مع رمز التحقق أعلاه لاستقبال تأكيدات التسليم والقراءة والرسائل الواردة. يجب أن يكون العنوان عاماً على الإنترنت بشهادة SSL.',
+
+    // ربط القوالب
+    wa_templateLinks: 'ربط القوالب بـ Meta',
+    wa_templateLinksHint: 'كل قالب يحتاج قالباً مقابلاً معتمداً من Meta ليخرج خارج نافذة الـ 24 ساعة',
+    wa_link: 'ربط',
+    wa_linkHint:
+      'اكتب اسم القالب كما سجّلته في Meta بالضبط. الرسالة لا تخرج خارج نافذة الـ 24 ساعة إلا إذا كانت حالته «معتمد».',
+    wa_templateLinked: 'تم حفظ ربط القالب',
+    wa_metaName: 'اسم القالب في Meta',
+    wa_metaNameHint: 'أحرف صغيرة وشرطة سفلية، مثل job_completed_ar',
+    wa_metaLanguage: 'لغة القالب',
+    wa_metaStatus: 'حالة الاعتماد',
+    wa_variableOrder: 'ترتيب المتغيّرات كما سترسل إلى Meta',
+    wa_statusNotSubmitted: 'لم يُقدَّم',
+    wa_statusPending: 'قيد المراجعة',
+    wa_statusApproved: 'معتمد',
+    wa_statusRejected: 'مرفوض'
   },
   en: {
     // Menu & Layout
@@ -1761,7 +1805,51 @@ const translations = {
     // ===== M11 — Mobile app =====
     pwa_installHint: 'Install the system as an app for faster opening and offline use',
     pwa_install: 'Install',
-    pwa_offline: 'No connection — screens show the last saved data and nothing can be saved until it returns'
+    pwa_offline: 'No connection — screens show the last saved data and nothing can be saved until it returns',
+
+    // ===== M8 — Official WhatsApp Business API =====
+    wa_tab: 'Official WhatsApp',
+    wa_title: 'Official WhatsApp Business connection',
+    wa_subtitle: 'Reports and reminders sent automatically, with no staff action',
+    wa_scopeNote:
+      'Template approval is done by Meta and can take up to two weeks; it is outside the implementer’s control and does not count toward delivery time. Message costs are paid to Meta directly and are not part of the quoted price. Until the connection is live the system still prepares every message, opens it ready to send, and logs it.',
+    wa_enabled: 'Enabled',
+    wa_disabled: 'Not enabled',
+    wa_enable: 'Enable connection',
+    wa_disable: 'Disable connection',
+    wa_verify: 'Verify connection',
+    wa_verifyFailed: 'Could not verify the connection',
+    wa_lastVerified: 'Last successful check',
+    wa_phoneNumberId: 'Phone number ID',
+    wa_phoneNumberIdHint: 'The Phone Number ID from the Meta console, not the number itself',
+    wa_businessAccountId: 'Business account ID',
+    wa_accessToken: 'Access token',
+    wa_tokenHint: 'A permanent token from Meta — stored server-side and never shown again',
+    wa_tokenStored: 'Stored — leave empty to keep it',
+    wa_tokenFromEnv: 'Set from a server environment variable and not editable here',
+    wa_apiVersion: 'Meta API version',
+    wa_verifyToken: 'Webhook verify token',
+    wa_verifyTokenHint: 'Any text you choose, entered identically in the Meta console',
+    wa_webhookUrl: 'Webhook URL',
+    wa_webhookHint:
+      'Enter this URL in the Meta console with the verify token above to receive delivery and read receipts and inbound messages. It must be publicly reachable over HTTPS.',
+
+    // Template links
+    wa_templateLinks: 'Link templates to Meta',
+    wa_templateLinksHint: 'Each template needs an approved counterpart at Meta to go out beyond the 24-hour window',
+    wa_link: 'Link',
+    wa_linkHint:
+      'Enter the template name exactly as registered with Meta. Outside the 24-hour window a message only goes out when its status is Approved.',
+    wa_templateLinked: 'Template link saved',
+    wa_metaName: 'Template name at Meta',
+    wa_metaNameHint: 'Lowercase with underscores, e.g. job_completed_ar',
+    wa_metaLanguage: 'Template language',
+    wa_metaStatus: 'Approval status',
+    wa_variableOrder: 'Variable order as sent to Meta',
+    wa_statusNotSubmitted: 'Not submitted',
+    wa_statusPending: 'Under review',
+    wa_statusApproved: 'Approved',
+    wa_statusRejected: 'Rejected'
   }
 };
 
