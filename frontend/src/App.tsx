@@ -11,13 +11,15 @@ import { ReportsView } from './features/reports/ReportsView';
 import { MasterDataView } from './features/admin/MasterDataView';
 import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
 import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
-import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck } from 'lucide-react';
+import { MessagesView } from './features/messaging/MessagesView';
+import { NotificationBell } from './features/messaging/NotificationBell';
+import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
   const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions'>(
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages'>(
     isTechnician ? 'jobCards' : 'dashboard'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -51,6 +53,7 @@ export default function App() {
     { id: 'vehicles', label: t('vehicles'), icon: Car, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'jobCards', label: t('jobCards'), icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
     { id: 'subscriptions', label: t('subscriptions'), icon: BadgeCheck, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'messages', label: t('messages'), icon: MessageSquare, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'reports', label: t('reports'), icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'masterData', label: t('masterData'), icon: Database, roles: ['ADMIN'] },
     { id: 'settings', label: t('settings'), icon: Settings, roles: ['ADMIN'] },
@@ -156,7 +159,9 @@ export default function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
-        <header className="h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-md">
+        {/* backdrop-blur creates a stacking context, so the header needs its own
+            z-index for the notifications dropdown to sit above the page. */}
+        <header className="relative z-30 h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-md">
           {/* Mobile/Tablet hamburger & logo trigger */}
           <div className="flex items-center gap-3">
             <button 
@@ -173,6 +178,9 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* In-system alerts (M6) */}
+            <NotificationBell />
+
             {/* Language Switcher */}
             <button
               onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
@@ -197,6 +205,7 @@ export default function App() {
           {activeTab === 'vehicles' && !isTechnician && <VehiclesView />}
           {activeTab === 'jobCards' && <JobCardsView />}
           {activeTab === 'subscriptions' && !isTechnician && <SubscriptionsView />}
+          {activeTab === 'messages' && !isTechnician && <MessagesView />}
           {activeTab === 'reports' && !isTechnician && <ReportsView />}
           {activeTab === 'masterData' && user?.role === 'ADMIN' && <MasterDataView />}
           {activeTab === 'settings' && !isTechnician && <SettingsView />}

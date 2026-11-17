@@ -241,6 +241,65 @@ const PLANS = [
   },
 ];
 
+/** M6 — the wording the system sends by itself. The workshop edits the text. */
+const TEMPLATES = [
+  {
+    code: 'JOB_WAITING_APPROVAL',
+    nameAr: 'بانتظار موافقة العميل',
+    nameEn: 'Waiting for customer approval',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'مرحباً {{customerName}}،\nسيارتكم {{vehicle}} ({{plateNumber}}) انتهى فحصها الفني في ورشة Au2Ka.\nرقم الكرت: {{jobNumber}}\nالتكلفة التقديرية: {{cost}} ريال\nنرجو تأكيد الموافقة على البدء في الإصلاح.',
+    bodyEn:
+      'Hello {{customerName}},\nThe inspection of your {{vehicle}} ({{plateNumber}}) is complete at Au2Ka.\nJob card: {{jobNumber}}\nEstimated cost: {{cost}} SAR\nPlease confirm so we can start the repair.',
+    variables: '["customerName","vehicle","plateNumber","jobNumber","cost","status"]',
+  },
+  {
+    code: 'JOB_COMPLETED',
+    nameAr: 'اكتمل الإصلاح',
+    nameEn: 'Repair completed',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'مرحباً {{customerName}}،\nيسرّنا إبلاغكم بانتهاء العمل على سيارتكم {{vehicle}} ({{plateNumber}}).\nرقم الكرت: {{jobNumber}}\nالسيارة جاهزة للاستلام في أي وقت خلال ساعات العمل.',
+    bodyEn:
+      'Hello {{customerName}},\nWork on your {{vehicle}} ({{plateNumber}}) is now complete.\nJob card: {{jobNumber}}\nThe vehicle is ready for collection during working hours.',
+    variables: '["customerName","vehicle","plateNumber","jobNumber","cost","status"]',
+  },
+  {
+    code: 'JOB_DELIVERED',
+    nameAr: 'تم تسليم السيارة',
+    nameEn: 'Vehicle delivered',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'شكراً لثقتكم بنا {{customerName}}.\nتم تسليم سيارتكم {{vehicle}} ({{plateNumber}}) بموجب الكرت {{jobNumber}}.\nنتمنى لكم قيادة آمنة، ونسعد بخدمتكم دائماً.',
+    bodyEn:
+      'Thank you for your trust, {{customerName}}.\nYour {{vehicle}} ({{plateNumber}}) has been delivered under job card {{jobNumber}}.\nDrive safely — we are always glad to serve you.',
+    variables: '["customerName","vehicle","plateNumber","jobNumber","status"]',
+  },
+  {
+    code: 'SUBSCRIPTION_EXPIRING',
+    nameAr: 'قرب انتهاء الاشتراك',
+    nameEn: 'Subscription expiring',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'مرحباً {{customerName}}،\nاشتراككم في {{planName}} ينتهي بتاريخ {{endDate}}.\nيسعدنا تجديده لكم للاستمرار في الاستفادة من الزيارات المجانية وخصومات الصيانة.',
+    bodyEn:
+      'Hello {{customerName}},\nYour {{planName}} subscription ends on {{endDate}}.\nWe would be glad to renew it so you keep your free visits and service discounts.',
+    variables: '["customerName","planName","endDate","subscriptionNumber"]',
+  },
+  {
+    code: 'DOCUMENT_EXPIRING',
+    nameAr: 'قرب انتهاء مستند السيارة',
+    nameEn: 'Vehicle document expiring',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'تنبيه ودّي {{customerName}}،\n{{documentTitle}} الخاص بسيارتكم ({{plateNumber}}) ينتهي بتاريخ {{expiryDate}}.\nننصح بتجديده في وقته تفادياً للمخالفات.',
+    bodyEn:
+      'A friendly reminder, {{customerName}}.\nThe {{documentTitle}} for your vehicle ({{plateNumber}}) expires on {{expiryDate}}.\nWe recommend renewing it in good time.',
+    variables: '["customerName","documentTitle","plateNumber","expiryDate"]',
+  },
+];
+
 async function main() {
   console.log('Seeding phase-2 reference data...');
 
@@ -333,6 +392,21 @@ async function main() {
     }
   }
   console.log(`  new plans: ${planCount}`);
+
+  // ---- Message templates (M6) -------------------------------------------
+  let templateCount = 0;
+  for (const tpl of TEMPLATES) {
+    const existing = await prisma.messageTemplate.findFirst({
+      where: { code: tpl.code, deletedAt: null },
+    });
+    if (!existing) {
+      // isSystem marks the templates the automatic triggers look up by code,
+      // so the workshop can reword them but not delete or rename them.
+      await prisma.messageTemplate.create({ data: { ...tpl, isSystem: true } });
+      templateCount++;
+    }
+  }
+  console.log(`  new message templates: ${templateCount}`);
 
   console.log('Reference data seeded.');
 }

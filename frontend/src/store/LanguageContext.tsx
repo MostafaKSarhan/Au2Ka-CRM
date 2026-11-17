@@ -235,7 +235,7 @@ const translations = {
 
     // ===== المرحلة الثانية — البيانات الأساسية =====
     masterData: 'البيانات الأساسية',
-    md_subtitle: 'إدارة الفروع والمدن وموديلات السيارات وقطع الغيار والنسخ الاحتياطي',
+    md_subtitle: 'الفروع والمدن، موديلات السيارات، قطع الغيار، باقات الاشتراك، قوالب الرسائل، والنسخ الاحتياطي',
     md_loadFailed: 'تعذّر تحميل البيانات',
     md_saveFailed: 'تعذّر الحفظ',
     md_deleteFailed: 'تعذّر الحذف',
@@ -529,7 +529,69 @@ const translations = {
     vf_linkInvalid: 'الرابط غير صالح أو تم إلغاؤه',
     vf_linkInvalidHint: 'تواصل مع الورشة للحصول على رابط جديد.',
     vf_publicFooter: 'هذا الملف صادر من نظام Au2Ka لإدارة ورش السيارات.',
-    vf_print: 'طباعة'
+    vf_print: 'طباعة',
+
+    // ===== M6 — الرسائل والتنبيهات =====
+    messages: 'الرسائل والتنبيهات',
+    msg_subtitle: 'طابور الرسائل وسجلها الكامل وقوالبها، وتنبيهات فريق الورشة',
+    msg_scopeNote:
+      'القنوات المشمولة في هذه المرحلة هي واتساب والتنبيهات الداخلية. الإرسال التلقائي عبر واتساب الرسمي للأعمال يأتي في الوحدة M8، وحتى ذلك الحين يجهّز النظام الرسالة ويفتحها لك جاهزة بضغطة واحدة ويسجّلها. رسائل SMS غير مشمولة.',
+
+    // القوالب
+    msg_templates: 'قوالب الرسائل',
+    msg_templatesHint: 'نصوص الرسائل بالعربية والإنجليزية، قابلة للتعديل في أي وقت',
+    msg_addTemplate: 'إضافة قالب',
+    msg_editTemplate: 'تعديل القالب',
+    msg_templateAdded: 'تم إضافة القالب بنجاح',
+    msg_templateUpdated: 'تم تحديث القالب بنجاح',
+    msg_templateDeleted: 'تم حذف القالب',
+    msg_noTemplates: 'لا توجد قوالب — شغّل بيانات التهيئة أو أضف قالبًا جديدًا',
+    msg_code: 'كود القالب',
+    msg_codeHint: 'يستخدمه النظام لاستدعاء القالب تلقائيًا',
+    msg_channel: 'القناة',
+    msg_channelWhatsApp: 'واتساب',
+    msg_channelInternal: 'تنبيه داخلي',
+    msg_bodyAr: 'نص الرسالة بالعربية',
+    msg_bodyEn: 'نص الرسالة بالإنجليزية',
+    msg_bodyHint: 'استخدم المتغيرات بالشكل {{اسم_المتغير}} وسيملؤها النظام تلقائيًا',
+    msg_variables: 'المتغيرات المتاحة في هذا القالب',
+    msg_preview: 'معاينة',
+    msg_previewHint: 'هذه معاينة ببيانات تجريبية — الأرقام والأسماء الحقيقية تُملأ عند الإرسال.',
+    msg_systemTemplate: 'قالب أساسي يعتمد عليه النظام',
+    msg_systemTemplateHint:
+      'هذا قالب أساسي يستدعيه النظام تلقائيًا. يمكنك تعديل نصه ولغته بحرية، لكن لا يمكن تغيير كوده أو حذفه.',
+    msg_sentCount: 'رسالة',
+
+    // الطابور والسجل
+    msg_none: 'لا توجد رسائل في السجل',
+    msg_search: 'ابحث باسم العميل أو رقمه أو نص الرسالة...',
+    msg_recipient: 'المستلم',
+    msg_template: 'القالب',
+    msg_body: 'نص الرسالة',
+    msg_when: 'التوقيت',
+    msg_freeText: 'رسالة مباشرة',
+    msg_attempts: 'المحاولات',
+    msg_statusPending: 'بانتظار الإرسال',
+    msg_statusSent: 'تم الإرسال',
+    msg_statusFailed: 'فشل الإرسال',
+    msg_statusCancelled: 'ملغاة',
+    msg_optedOut: 'عملاء أوقفوا الرسائل',
+    msg_send: 'إرسال',
+    msg_sendHint: 'يفتح واتساب بالرسالة جاهزة ويسجّلها كمُرسَلة',
+    msg_marked: 'تم تسجيل الرسالة كمُرسَلة',
+    msg_retry: 'إعادة المحاولة',
+    msg_requeued: 'تمت إعادة الرسالة إلى الطابور',
+    msg_cancel: 'إلغاء الرسالة',
+    msg_cancelled: 'تم إلغاء الرسالة',
+    msg_runQueue: 'تشغيل الطابور الآن',
+    msg_queueRan: 'تم تشغيل الطابور',
+    msg_delivered: 'تنبيه داخلي',
+    msg_alertsRaised: 'تنبيه مجدول',
+
+    // التنبيهات الداخلية
+    notifications: 'التنبيهات',
+    notif_markAll: 'تعليم الكل كمقروء',
+    notif_empty: 'لا توجد تنبيهات'
   },
   en: {
     // Menu & Layout
@@ -763,7 +825,7 @@ const translations = {
 
     // ===== Phase 2 — Master data =====
     masterData: 'Master Data',
-    md_subtitle: 'Branches, cities, vehicle models, spare parts and backups',
+    md_subtitle: 'Branches and cities, vehicle models, spare parts, subscription plans, message templates and backups',
     md_loadFailed: 'Could not load the data',
     md_saveFailed: 'Could not save',
     md_deleteFailed: 'Could not delete',
@@ -1057,7 +1119,69 @@ const translations = {
     vf_linkInvalid: 'This link is invalid or has been revoked',
     vf_linkInvalidHint: 'Contact the workshop for a new link.',
     vf_publicFooter: 'This file was issued by the Au2Ka workshop management system.',
-    vf_print: 'Print'
+    vf_print: 'Print',
+
+    // ===== M6 — Messaging & alerts =====
+    messages: 'Messages & alerts',
+    msg_subtitle: 'The message queue, the full log, the templates, and alerts for the workshop team',
+    msg_scopeNote:
+      'The channels in scope for this phase are WhatsApp and in-system alerts. Automatic sending over the official WhatsApp Business API arrives with module M8; until then the system prepares each message, opens it ready to send in one click, and logs it. SMS is not included.',
+
+    // Templates
+    msg_templates: 'Message templates',
+    msg_templatesHint: 'Message wording in Arabic and English, editable at any time',
+    msg_addTemplate: 'Add template',
+    msg_editTemplate: 'Edit template',
+    msg_templateAdded: 'Template added successfully',
+    msg_templateUpdated: 'Template updated successfully',
+    msg_templateDeleted: 'Template deleted',
+    msg_noTemplates: 'No templates yet — run the reference seed or add one',
+    msg_code: 'Template code',
+    msg_codeHint: 'The system uses this to call the template automatically',
+    msg_channel: 'Channel',
+    msg_channelWhatsApp: 'WhatsApp',
+    msg_channelInternal: 'In-system alert',
+    msg_bodyAr: 'Message body (Arabic)',
+    msg_bodyEn: 'Message body (English)',
+    msg_bodyHint: 'Use variables in the form {{variableName}} and the system fills them in',
+    msg_variables: 'Variables available in this template',
+    msg_preview: 'Preview',
+    msg_previewHint: 'This preview uses sample data — real names and numbers are filled in on sending.',
+    msg_systemTemplate: 'Core template used by the system',
+    msg_systemTemplateHint:
+      'This is a core template the system calls automatically. You may reword it freely, but its code cannot be changed and it cannot be deleted.',
+    msg_sentCount: 'messages',
+
+    // Queue & log
+    msg_none: 'No messages in the log',
+    msg_search: 'Search by customer name, number or message text...',
+    msg_recipient: 'Recipient',
+    msg_template: 'Template',
+    msg_body: 'Message',
+    msg_when: 'When',
+    msg_freeText: 'Direct message',
+    msg_attempts: 'Attempts',
+    msg_statusPending: 'Waiting to send',
+    msg_statusSent: 'Sent',
+    msg_statusFailed: 'Failed',
+    msg_statusCancelled: 'Cancelled',
+    msg_optedOut: 'Customers opted out',
+    msg_send: 'Send',
+    msg_sendHint: 'Opens WhatsApp with the message ready and logs it as sent',
+    msg_marked: 'Message recorded as sent',
+    msg_retry: 'Retry',
+    msg_requeued: 'Message put back on the queue',
+    msg_cancel: 'Cancel message',
+    msg_cancelled: 'Message cancelled',
+    msg_runQueue: 'Run the queue now',
+    msg_queueRan: 'Queue processed',
+    msg_delivered: 'internal alerts',
+    msg_alertsRaised: 'scheduled alerts',
+
+    // In-system alerts
+    notifications: 'Alerts',
+    notif_markAll: 'Mark all read',
+    notif_empty: 'No alerts'
   }
 };
 

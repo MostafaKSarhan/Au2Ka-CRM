@@ -40,9 +40,11 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  activities JobCardActivity[]
-  branch     Branch?           @relation(fields: [branchId], references: [id])
-  branchId   String?
+  activities    JobCardActivity[]
+  branch        Branch?           @relation(fields: [branchId], references: [id])
+  branchId      String?
+  sentMessages  OutboundMessage[]
+  notifications Notification[]
 
   @@index([branchId])
 }
@@ -56,10 +58,15 @@ model Customer {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
+  // M6 — the customer asked not to be messaged again.
+  messagingOptOut Boolean   @default(false)
+  optedOutAt      DateTime?
+
   vehicles      Vehicle[]
   jobCards      JobCard[]
   subscriptions Subscription[]
-  branch        Branch?        @relation(fields: [branchId], references: [id])
+  messages      OutboundMessage[]
+  branch        Branch?           @relation(fields: [branchId], references: [id])
   branchId      String?
 
   @@index([fullName])
@@ -129,6 +136,7 @@ model JobCard {
   branchId     String?
   replacements VehiclePartReplacement[]
   mileageLogs  VehicleMileageLog[]
+  messages     OutboundMessage[]
 
   @@index([jobNumber])
   @@index([branchId])
@@ -435,4 +443,112 @@ model VehicleMileageLog {
 
   @@index([vehicleId])
   @@index([recordedAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M6: الرسائل والتنبيهات
+// القنوات المشمولة: واتساب والتنبيهات الداخلية. الـ SMS غير مشمول.
+// الإرسال التلقائي عبر واتساب الرسمي يأتي في M8؛ هنا يُجهَّز الطابور
+// ويُسلَّم للموظف رابط إرسال، ويُسجَّل كل شيء.
+// =====================================================================
+
+enum MessageChannel {
+  WHATSAPP
+  INTERNAL
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum NotificationType {
+  JOB_CARD
+  SUBSCRIPTION
+  DOCUMENT
+  SYSTEM
+}
+
+model MessageTemplate {
+  id        String         @id @default(uuid())
+  code      String         @unique
+  nameAr    String
+  nameEn    String
+  channel   MessageChannel @default(WHATSAPP)
+  bodyAr    String         @db.Text
+  bodyEn    String         @db.Text
+  // Placeholder names this template understands, as a JSON array — shown to
+  // whoever edits the text so they do not invent a variable that never fills.
+  variables String?        @db.Text
+  isSystem  Boolean        @default(false)
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?
+
+  messages OutboundMessage[]
+}
+
+model OutboundMessage {
+  id         String           @id @default(uuid())
+  templateId String?
+  template   MessageTemplate? @relation(fields: [templateId], references: [id])
+  channel    MessageChannel   @default(WHATSAPP)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  jobCardId  String?
+  jobCard    JobCard?  @relation(fields: [jobCardId], references: [id])
+
+  recipientName   String?
+  recipientNumber String?
+  lang            String  @default("ar")
+  // The rendered text is stored as it was sent, so the log stays truthful
+  // even after the template is edited.
+  body            String  @db.Text
+
+  status      MessageStatus @default(PENDING)
+  scheduledAt DateTime      @default(now())
+  sentAt      DateTime?
+  attempts    Int           @default(0)
+  lastError   String?
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([customerId])
+  @@index([jobCardId])
+}
+
+model Notification {
+  id     String  @id @default(uuid())
+  // A notification is either for one user, or for everyone in a role.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+  role   Role?
+
+  type    NotificationType @default(SYSTEM)
+  titleAr String
+  titleEn String
+  bodyAr  String?          @db.Text
+  bodyEn  String?          @db.Text
+
+  // What the notification points at, so the UI can open it.
+  linkType  String?
+  linkId    String?
+  // Stops the scheduler raising the same alert twice for the same thing.
+  dedupeKey String? @unique
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([role])
+  @@index([readAt])
 }

@@ -11,6 +11,14 @@ import {
   expireOverdueSubscriptions,
   findActiveSubscription,
 } from '../subscriptions/subscriptions.service';
+import { notify, queueMessage } from '../messaging/messaging.service';
+
+/** M6 — which status change tells the customer something, and with what wording. */
+const STATUS_TEMPLATES: Record<string, string> = {
+  WAITING_APPROVAL: 'JOB_WAITING_APPROVAL',
+  COMPLETED: 'JOB_COMPLETED',
+  DELIVERED: 'JOB_DELIVERED',
+};
 
 const pump = promisify(pipeline);
 
@@ -349,6 +357,44 @@ export class JobCardsController {
         }
       },
     });
+
+    // M6 — a status change the customer cares about queues a message to them
+    // and alerts the floor. Never let this fail the status change itself.
+    if (updates.status && updates.status !== jobCardExists.status) {
+      const templateCode = STATUS_TEMPLATES[updates.status];
+
+      try {
+        if (templateCode) {
+          await queueMessage({
+            templateCode,
+            customerId: jobCard.customerId,
+            jobCardId: jobCard.id,
+            createdById: request.user?.id || null,
+            values: {
+              customerName: jobCard.customer?.fullName,
+              jobNumber: jobCard.jobNumber,
+              plateNumber: jobCard.vehicle?.plateNumber,
+              vehicle: `${jobCard.vehicle?.brand ?? ''} ${jobCard.vehicle?.model ?? ''}`.trim(),
+              status: statusLabels[updates.status] || updates.status,
+              cost: jobCard.estimatedCost ? String(jobCard.estimatedCost) : '',
+            },
+          });
+        }
+
+        await notify({
+          role: 'RECEPTION',
+          type: 'JOB_CARD',
+          titleAr: `الكرت ${jobCard.jobNumber}: ${statusLabels[updates.status] || updates.status}`,
+          titleEn: `Card ${jobCard.jobNumber} moved to ${updates.status}`,
+          bodyAr: `${jobCard.customer?.fullName || ''} — ${jobCard.vehicle?.plateNumber || ''}`,
+          bodyEn: `${jobCard.customer?.fullName || ''} — ${jobCard.vehicle?.plateNumber || ''}`,
+          linkType: 'JOB_CARD',
+          linkId: jobCard.id,
+        });
+      } catch (err) {
+        request.log.error({ err }, 'failed to queue job card notifications');
+      }
+    }
 
     return reply.send({
       message: 'Job card updated successfully',
