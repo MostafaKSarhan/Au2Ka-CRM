@@ -13,6 +13,13 @@ import { vehicleRoutes } from './modules/vehicles/vehicles.routes';
 import { jobCardRoutes } from './modules/jobCards/jobCards.routes';
 import { reportsRoutes } from './modules/reports/reports.routes';
 import { usersRoutes } from './modules/users/users.routes';
+import { locationsRoutes } from './modules/locations/locations.routes';
+import { branchesRoutes } from './modules/branches/branches.routes';
+import { vehicleCatalogRoutes } from './modules/vehicleCatalog/vehicleCatalog.routes';
+import { partsRoutes } from './modules/parts/parts.routes';
+import { backupRoutes } from './modules/backup/backup.routes';
+import { plansRoutes } from './modules/plans/plans.routes';
+import { subscriptionsRoutes } from './modules/subscriptions/subscriptions.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -68,6 +75,17 @@ app.register(vehicleRoutes, { prefix: '/api/v1/vehicles' });
 app.register(jobCardRoutes, { prefix: '/api/v1/job-cards' });
 app.register(reportsRoutes, { prefix: '/api/v1' });
 app.register(usersRoutes, { prefix: '/api/v1/users' });
+
+// Phase 2 — R0: reference data & control panel
+app.register(locationsRoutes, { prefix: '/api/v1/locations' });
+app.register(branchesRoutes, { prefix: '/api/v1/branches' });
+app.register(vehicleCatalogRoutes, { prefix: '/api/v1/vehicle-catalog' });
+app.register(partsRoutes, { prefix: '/api/v1/parts' });
+app.register(backupRoutes, { prefix: '/api/v1/backup' });
+
+// Phase 2 — M1: subscriptions & annual plans
+app.register(plansRoutes, { prefix: '/api/v1/plans' });
+app.register(subscriptionsRoutes, { prefix: '/api/v1/subscriptions' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

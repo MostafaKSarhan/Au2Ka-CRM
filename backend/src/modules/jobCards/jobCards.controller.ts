@@ -6,6 +6,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import {
+  applyCoverageToJobCard,
+  expireOverdueSubscriptions,
+  findActiveSubscription,
+} from '../subscriptions/subscriptions.service';
 
 const pump = promisify(pipeline);
 
@@ -93,6 +98,13 @@ export class JobCardsController {
           customer: true,
           vehicle: true,
           photos: true,
+          subscription: {
+            select: {
+              id: true,
+              subscriptionNumber: true,
+              plan: { select: { nameAr: true, nameEn: true } },
+            },
+          },
         },
         skip,
         take: limit,
@@ -120,6 +132,9 @@ export class JobCardsController {
         customer: true,
         vehicle: true,
         photos: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
         activities: {
           include: {
             user: {
@@ -174,27 +189,53 @@ export class JobCardsController {
     const sequenceNum = String(countToday + 1).padStart(4, '0');
     const jobNumber = `WRK-${todayStr}-${sequenceNum}`;
 
-    const jobCard = await prisma.jobCard.create({
+    const created = await prisma.jobCard.create({
       data: {
         jobNumber,
+        branchId: customer.branchId,
         ...parseResult.data,
       },
-      include: {
-        customer: true,
-        vehicle: true,
-      },
     });
+
+    // M1 — subscription coverage: a free visit is consumed if the customer
+    // still has one, otherwise the plan discount is recorded on the card.
+    await expireOverdueSubscriptions();
+    const subscription = await findActiveSubscription(customerId, vehicleId);
+
+    let coverageNote = '';
+    if (subscription) {
+      const coverage = await prisma.$transaction(tx =>
+        applyCoverageToJobCard(tx, subscription, created.id),
+      );
+
+      coverageNote = coverage.isFreeVisit
+        ? ` — تم خصم زيارة مجانية من اشتراك ${subscription.subscriptionNumber}`
+        : coverage.discountPercent > 0
+          ? ` — تم تطبيق خصم اشتراك ${coverage.discountPercent}%`
+          : ` — العميل مشترك (${subscription.subscriptionNumber}) بدون رصيد زيارات متبقٍ`;
+    }
 
     // Log Activity in Arabic
     if (request.user) {
       await prisma.jobCardActivity.create({
         data: {
-          jobCardId: jobCard.id,
+          jobCardId: created.id,
           userId: request.user.id,
-          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)`,
+          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)${coverageNote}`,
         }
       });
     }
+
+    const jobCard = await prisma.jobCard.findUnique({
+      where: { id: created.id },
+      include: {
+        customer: true,
+        vehicle: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
+      },
+    });
 
     return reply.status(201).send({
       message: 'Job card created successfully',
@@ -265,6 +306,9 @@ export class JobCardsController {
         customer: true,
         vehicle: true,
         photos: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
         activities: {
           include: {
             user: {

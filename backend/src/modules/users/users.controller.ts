@@ -10,6 +10,7 @@ const createUserSchema = z.object({
   firstName: z.string().trim().min(2, 'الاسم الأول يجب أن يكون حرفين على الأقل'),
   lastName: z.string().trim().min(2, 'الاسم الأخير يجب أن يكون حرفين على الأقل'),
   role: z.enum(['ADMIN', 'RECEPTION', 'TECHNICIAN']),
+  branchId: z.string().uuid('الفرع غير صحيح').optional().nullable(),
 });
 
 const updateUserSchema = z.object({
@@ -19,21 +20,40 @@ const updateUserSchema = z.object({
   role: z.enum(['ADMIN', 'RECEPTION', 'TECHNICIAN']).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
   password: z.string().min(6).optional(),
+  branchId: z.string().uuid('الفرع غير صحيح').optional().nullable(),
 });
+
+// Shape returned to the client for every user record.
+const userSelect = {
+  id: true,
+  mobileNumber: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+  status: true,
+  createdAt: true,
+  branchId: true,
+  branch: { select: { id: true, code: true, nameAr: true, nameEn: true } },
+} as const;
+
+/** Rejects a branchId that does not point at a live branch. */
+async function assertBranchExists(branchId?: string | null) {
+  if (!branchId) return;
+  const branch = await prisma.branch.findFirst({ where: { id: branchId, deletedAt: null } });
+  if (!branch) throw new AppError('الفرع غير موجود', 404);
+}
 
 export class UsersController {
   static async list(request: FastifyRequest, reply: FastifyReply) {
+    const { branchId, role } = request.query as { branchId?: string; role?: string };
+
     const users = await prisma.user.findMany({
-      where: { deletedAt: null },
-      select: {
-        id: true,
-        mobileNumber: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        createdAt: true,
+      where: {
+        deletedAt: null,
+        ...(branchId ? { branchId } : {}),
+        ...(role ? { role: role as any } : {}),
       },
+      select: userSelect,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -47,7 +67,7 @@ export class UsersController {
       throw new AppError(errorMsg, 400);
     }
 
-    const { mobileNumber, password, firstName, lastName, role } = parseResult.data;
+    const { mobileNumber, password, firstName, lastName, role, branchId } = parseResult.data;
 
     // Check mobile number uniqueness
     const existing = await prisma.user.findFirst({ where: { mobileNumber, deletedAt: null } });
@@ -55,19 +75,13 @@ export class UsersController {
       throw new AppError('رقم الجوال مستخدم بالفعل', 409);
     }
 
+    await assertBranchExists(branchId);
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
-      data: { mobileNumber, passwordHash, firstName, lastName, role },
-      select: {
-        id: true,
-        mobileNumber: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        createdAt: true,
-      },
+      data: { mobileNumber, passwordHash, firstName, lastName, role, branchId: branchId ?? null },
+      select: userSelect,
     });
 
     return reply.status(201).send({ message: 'تم إنشاء المستخدم بنجاح', user });
@@ -90,18 +104,14 @@ export class UsersController {
       delete data.password;
     }
 
+    if (data.branchId !== undefined) {
+      await assertBranchExists(data.branchId);
+    }
+
     const user = await prisma.user.update({
       where: { id },
       data,
-      select: {
-        id: true,
-        mobileNumber: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        createdAt: true,
-      },
+      select: userSelect,
     });
 
     return reply.send({ message: 'تم تحديث المستخدم بنجاح', user });
@@ -123,9 +133,21 @@ export class UsersController {
   }
 
   static async listTechnicians(request: FastifyRequest, reply: FastifyReply) {
+    const { branchId } = request.query as { branchId?: string };
+
     const technicians = await prisma.user.findMany({
-      where: { role: 'TECHNICIAN', status: 'ACTIVE', deletedAt: null },
-      select: { id: true, firstName: true, lastName: true },
+      where: {
+        role: 'TECHNICIAN',
+        status: 'ACTIVE',
+        deletedAt: null,
+        ...(branchId ? { branchId } : {}),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        branch: { select: { id: true, nameAr: true, nameEn: true } },
+      },
       orderBy: { firstName: 'asc' },
     });
     return reply.send({ technicians });

@@ -636,7 +636,10 @@ export function JobCardsView() {
                         className={`glass-card hover:border-zinc-700/60 p-4 rounded-lg cursor-pointer space-y-3 border border-zinc-800/50 hover:bg-zinc-800/10 transition ${isRtl ? 'text-right' : 'text-left'}`}
                       >
                         <div>
-                          <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                            <CoverageBadge job={job} t={t} />
+                          </div>
                           <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{job.customerComplaint}</p>
                         </div>
 
@@ -949,7 +952,10 @@ export function JobCardsView() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs font-bold text-zinc-500 font-mono">{t('jobDetailsTitle')}</span>
-                <h2 className="text-2xl font-bold text-white mt-0.5 font-mono">{selectedJob.jobNumber}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-white mt-0.5 font-mono">
+                  {selectedJob.jobNumber}
+                  <CoverageBadge job={selectedJob} t={t} />
+                </h2>
               </div>
               <div className="flex items-center gap-2">
                 {/* Invoice Button Trigger */}
@@ -1782,5 +1788,37 @@ export function JobCardsView() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Shows how a subscription covered this job card (M1): either the free visit
+ * that was deducted when the card was opened, or the plan discount applied.
+ */
+function CoverageBadge({ job, t }: { job: any; t: (key: string) => string }) {
+  if (!job?.subscriptionId) return null;
+
+  const discount = Number(job.subscriptionDiscount || 0);
+
+  if (job.isFreeVisit) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+        ✓ {t('sub_badgeFreeVisit')}
+      </span>
+    );
+  }
+
+  if (discount > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-400">
+        {t('sub_badgeDiscount')} {discount}%
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-[10px] font-bold text-zinc-400">
+      {t('sub_badge')}
+    </span>
   );
 }

@@ -30,7 +30,7 @@ enum JobStatus {
 
 model User {
   id           String    @id @default(uuid())
-  mobileNumber String   @unique
+  mobileNumber String    @unique
   passwordHash String
   firstName    String
   lastName     String
@@ -40,7 +40,11 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  activities   JobCardActivity[]
+  activities JobCardActivity[]
+  branch     Branch?           @relation(fields: [branchId], references: [id])
+  branchId   String?
+
+  @@index([branchId])
 }
 
 model Customer {
@@ -52,10 +56,14 @@ model Customer {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  vehicles     Vehicle[]
-  jobCards     JobCard[]
+  vehicles      Vehicle[]
+  jobCards      JobCard[]
+  subscriptions Subscription[]
+  branch        Branch?        @relation(fields: [branchId], references: [id])
+  branchId      String?
 
   @@index([fullName])
+  @@index([branchId])
   @@index([mobileNumber])
 }
 
@@ -71,9 +79,13 @@ model Vehicle {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  jobCards    JobCard[]
+  jobCards       JobCard[]
+  subscriptions  Subscription[]
+  vehicleModel   VehicleModel?  @relation(fields: [vehicleModelId], references: [id])
+  vehicleModelId String?
 
   @@index([plateNumber])
+  @@index([vehicleModelId])
 }
 
 model JobCard {
@@ -98,10 +110,21 @@ model JobCard {
   updatedAt             DateTime       @updatedAt
   deletedAt             DateTime?
 
-  photos                JobCardPhotos[]
-  activities            JobCardActivity[]
+  // Subscription coverage applied when the card was opened (M1)
+  subscriptionId       String?
+  subscription         Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionDiscount Decimal?      @db.Decimal(5, 2)
+  isFreeVisit          Boolean       @default(false)
+
+  photos     JobCardPhotos[]
+  activities JobCardActivity[]
+  usages     SubscriptionUsage[]
+  branch     Branch?             @relation(fields: [branchId], references: [id])
+  branchId   String?
 
   @@index([jobNumber])
+  @@index([branchId])
+  @@index([subscriptionId])
 }
 
 model JobCardPhotos {
@@ -120,4 +143,204 @@ model JobCardActivity {
   user      User     @relation(fields: [userId], references: [id])
   action    String
   createdAt DateTime @default(now())
+}
+
+// =====================================================================
+// المرحلة الثانية — R0: البيانات المرجعية ولوحة التحكم
+// كل الحقول الجديدة على الجداول القائمة اختيارية حتى لا تتأثر بيانات v1.0
+// =====================================================================
+
+model Country {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  cities City[]
+}
+
+model City {
+  id        String    @id @default(uuid())
+  countryId String
+  country   Country   @relation(fields: [countryId], references: [id])
+  nameAr    String
+  nameEn    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  branches Branch[]
+
+  @@index([countryId])
+}
+
+model Branch {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  cityId    String
+  city      City      @relation(fields: [cityId], references: [id])
+  address   String?   @db.Text
+  phone     String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users         User[]
+  customers     Customer[]
+  jobCards      JobCard[]
+  subscriptions Subscription[]
+
+  @@index([cityId])
+}
+
+model VehicleBrand {
+  id        String    @id @default(uuid())
+  nameAr    String
+  nameEn    String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  models VehicleModel[]
+}
+
+model VehicleModel {
+  id        String       @id @default(uuid())
+  brandId   String
+  brand     VehicleBrand @relation(fields: [brandId], references: [id])
+  nameAr    String
+  nameEn    String
+  yearFrom  Int?
+  yearTo    Int?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  vehicles Vehicle[]
+
+  @@unique([brandId, nameEn])
+  @@index([brandId])
+}
+
+model Part {
+  id            String    @id @default(uuid())
+  partNumber    String    @unique
+  nameAr        String
+  nameEn        String
+  category      String?
+  unit          String    @default("PCS")
+  purchasePrice Decimal   @default(0) @db.Decimal(10, 2)
+  sellPrice     Decimal   @default(0) @db.Decimal(10, 2)
+  quantity      Int       @default(0)
+  reorderLevel  Int       @default(0)
+  location      String?
+  notes         String?   @db.Text
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  @@index([nameAr])
+  @@index([category])
+}
+
+// =====================================================================
+// المرحلة الثانية — M1: الاشتراكات والباقات السنوية
+// =====================================================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionUsageType {
+  FREE_VISIT
+  DISCOUNT
+}
+
+model Plan {
+  id              String    @id @default(uuid())
+  nameAr          String
+  nameEn          String
+  descriptionAr   String?   @db.Text
+  descriptionEn   String?   @db.Text
+  price           Decimal   @default(0) @db.Decimal(10, 2)
+  durationMonths  Int       @default(12)
+  freeVisits      Int       @default(0)
+  discountPercent Decimal   @default(0) @db.Decimal(5, 2)
+  benefitsAr      String?   @db.Text
+  benefitsEn      String?   @db.Text
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                 String   @id @default(uuid())
+  subscriptionNumber String   @unique
+  customerId         String
+  customer           Customer @relation(fields: [customerId], references: [id])
+  vehicleId          String?
+  vehicle            Vehicle? @relation(fields: [vehicleId], references: [id])
+  planId             String
+  plan               Plan     @relation(fields: [planId], references: [id])
+  branchId           String?
+  branch             Branch?  @relation(fields: [branchId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+
+  // Snapshot of the plan at purchase time, so later plan edits never
+  // change what a customer already paid for.
+  freeVisitsTotal Int     @default(0)
+  freeVisitsUsed  Int     @default(0)
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+
+  // Collection is recorded by hand — no payment gateway in this scope.
+  paidAmount    Decimal @default(0) @db.Decimal(10, 2)
+  paymentMethod String?
+  paymentNote   String?
+  notes         String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  usages   SubscriptionUsage[]
+  jobCards JobCard[]
+
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([endDate])
+}
+
+model SubscriptionUsage {
+  id              String                @id @default(uuid())
+  subscriptionId  String
+  subscription    Subscription          @relation(fields: [subscriptionId], references: [id])
+  jobCardId       String
+  jobCard         JobCard               @relation(fields: [jobCardId], references: [id])
+  type            SubscriptionUsageType
+  discountPercent Decimal?              @db.Decimal(5, 2)
+  note            String?
+  createdAt       DateTime              @default(now())
+
+  @@index([subscriptionId])
+  @@index([jobCardId])
 }

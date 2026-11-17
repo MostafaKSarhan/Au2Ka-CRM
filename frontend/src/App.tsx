@@ -8,13 +8,15 @@ import { VehiclesView } from './features/vehicles/VehiclesView';
 import { JobCardsView } from './features/jobCards/JobCardsView';
 import { SettingsView } from './features/settings/SettingsView';
 import { ReportsView } from './features/reports/ReportsView';
-import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4 } from 'lucide-react';
+import { MasterDataView } from './features/admin/MasterDataView';
+import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
+import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
   const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports'>(
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions'>(
     isTechnician ? 'jobCards' : 'dashboard'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,7 +41,9 @@ export default function App() {
     { id: 'customers', label: t('customers'), icon: Users, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'vehicles', label: t('vehicles'), icon: Car, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'jobCards', label: t('jobCards'), icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
+    { id: 'subscriptions', label: t('subscriptions'), icon: BadgeCheck, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'reports', label: t('reports'), icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'masterData', label: t('masterData'), icon: Database, roles: ['ADMIN'] },
     { id: 'settings', label: t('settings'), icon: Settings, roles: ['ADMIN'] },
   ];
 
@@ -183,7 +187,9 @@ export default function App() {
           {activeTab === 'customers' && !isTechnician && <CustomersView />}
           {activeTab === 'vehicles' && !isTechnician && <VehiclesView />}
           {activeTab === 'jobCards' && <JobCardsView />}
+          {activeTab === 'subscriptions' && !isTechnician && <SubscriptionsView />}
           {activeTab === 'reports' && !isTechnician && <ReportsView />}
+          {activeTab === 'masterData' && user?.role === 'ADMIN' && <MasterDataView />}
           {activeTab === 'settings' && !isTechnician && <SettingsView />}
         </main>
       </div>

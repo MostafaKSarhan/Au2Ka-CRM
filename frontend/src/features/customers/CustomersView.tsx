@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
-import { Search, UserPlus, Phone, BookOpen, PlusCircle, Car } from 'lucide-react';
+import { Search, UserPlus, Phone, BookOpen, PlusCircle, Car, BadgeCheck } from 'lucide-react';
 
 const POPULAR_BRANDS = [
   'تويوتا', 'هيونداي', 'كيا', 'نيسان', 'فورد',
@@ -217,7 +217,12 @@ export function CustomersView() {
               <tbody className="divide-y divide-zinc-800 bg-transparent">
                 {customers.map((c) => (
                   <tr key={c.id} className="hover:bg-zinc-900/30 transition">
-                    <td className={`px-6 py-4 font-medium text-white ${isRtl ? 'text-right' : 'text-left'}`}>{c.fullName}</td>
+                    <td className={`px-6 py-4 font-medium text-white ${isRtl ? 'text-right' : 'text-left'}`}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {c.fullName}
+                        <SubscriberBadge subscription={c.subscriptions?.[0]} isRtl={isRtl} t={t} />
+                      </div>
+                    </td>
                     <td className={`px-6 py-4 font-mono ${isRtl ? 'text-right' : 'text-left'}`}>{c.mobileNumber}</td>
                     <td className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>
                       {c.vehicles?.length || 0} {isRtl ? 'سيارات مسجلة' : 'Vehicles'}
@@ -411,7 +416,14 @@ export function CustomersView() {
           <div className="w-full max-w-2xl glass-panel rounded-xl p-6 space-y-6 max-h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-start">
               <div className={isRtl ? 'text-right' : 'text-left'}>
-                <h2 className="text-2xl font-bold text-white">{selectedCustomer.fullName}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-white">
+                  {selectedCustomer.fullName}
+                  <SubscriberBadge
+                    subscription={selectedCustomer.subscriptions?.find((s: any) => s.status === 'ACTIVE')}
+                    isRtl={isRtl}
+                    t={t}
+                  />
+                </h2>
                 <p className="text-sm text-zinc-400 flex items-center gap-1.5 mt-1 font-mono">
                   <Phone size={14} /> {selectedCustomer.mobileNumber}
                 </p>
@@ -579,5 +591,45 @@ export function CustomersView() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * "Subscriber" badge (M1) — shows the plan and what is left on it, so the
+ * receptionist can see the customer's entitlement before opening a job card.
+ */
+function SubscriberBadge({
+  subscription,
+  isRtl,
+  t,
+}: {
+  subscription: any;
+  isRtl: boolean;
+  t: (key: string) => string;
+}) {
+  if (!subscription) return null;
+
+  const remaining = Math.max(0, subscription.freeVisitsTotal - subscription.freeVisitsUsed);
+  const discount = Number(subscription.discountPercent);
+  const planName = isRtl ? subscription.plan?.nameAr : subscription.plan?.nameEn;
+
+  // Show what the customer is entitled to next: a remaining free visit if any,
+  // otherwise the discount that will be applied instead.
+  const detail =
+    remaining > 0
+      ? `${remaining} ${t('sub_visitsLeftShort')}`
+      : discount > 0
+        ? `${t('sub_badgeDiscount')} ${discount}%`
+        : '';
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400"
+      title={`${planName || ''}${detail ? ' — ' + detail : ''}`}
+    >
+      <BadgeCheck size={12} />
+      {t('sub_badge')}
+      {detail && <span className="font-normal text-emerald-300/80">· {detail}</span>}
+    </span>
   );
 }

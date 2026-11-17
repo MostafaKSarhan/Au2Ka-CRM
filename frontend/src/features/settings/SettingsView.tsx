@@ -38,7 +38,9 @@ export function SettingsView() {
     mobileNumber: '',
     password: '',
     role: 'TECHNICIAN',
+    branchId: '',
   });
+  const [branches, setBranches] = useState<any[]>([]);
 
   useEffect(() => {
     const savedNum = localStorage.getItem('whatsappNumber');
@@ -46,8 +48,20 @@ export function SettingsView() {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) loadUsers();
+    if (isAdmin) {
+      loadUsers();
+      loadBranches();
+    }
   }, [isAdmin]);
+
+  async function loadBranches() {
+    try {
+      const res = await api.get('/branches');
+      setBranches(res.data.branches || []);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   async function loadUsers() {
     setUsersLoading(true);
@@ -72,9 +86,9 @@ export function SettingsView() {
     e.preventDefault();
     setUserMsg('');
     try {
-      await api.post('/users', userForm);
+      await api.post('/users', { ...userForm, branchId: userForm.branchId || null });
       setUserMsg(lang === 'ar' ? '✅ تم إضافة المستخدم بنجاح' : '✅ User added successfully');
-      setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN' });
+      setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN', branchId: '' });
       setShowAddUser(false);
       loadUsers();
     } catch (err: any) {
@@ -91,6 +105,7 @@ export function SettingsView() {
       mobileNumber: u.mobileNumber || '',
       password: '',
       role: u.role,
+      branchId: u.branchId || '',
     });
     setUserMsg('');
   }
@@ -100,12 +115,12 @@ export function SettingsView() {
     if (!editingUserId) return;
     setUserMsg('');
     try {
-      const payload: any = { ...userForm };
+      const payload: any = { ...userForm, branchId: userForm.branchId || null };
       if (!payload.password) delete payload.password;
       await api.put(`/users/${editingUserId}`, payload);
       setUserMsg(lang === 'ar' ? '✅ تم تحديث المستخدم بنجاح' : '✅ User updated successfully');
       setEditingUserId(null);
-      setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN' });
+      setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN', branchId: '' });
       loadUsers();
     } catch (err: any) {
       setUserMsg('❌ ' + (err.response?.data?.message || (lang === 'ar' ? 'فشل تحديث المستخدم' : 'Failed to update user')));
@@ -230,7 +245,7 @@ export function SettingsView() {
                 <RefreshCw size={15} />
               </button>
               <button
-                onClick={() => { setShowAddUser(!showAddUser); setEditingUserId(null); setUserMsg(''); setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN' }); }}
+                onClick={() => { setShowAddUser(!showAddUser); setEditingUserId(null); setUserMsg(''); setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN', branchId: '' }); }}
                 className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded transition cursor-pointer ${
                   showAddUser ? 'bg-zinc-700 text-zinc-300' : 'bg-primary hover:bg-primary-hover text-white'
                 }`}
@@ -325,6 +340,22 @@ export function SettingsView() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1">{t('md_branch')}</label>
+                <select
+                  value={userForm.branchId}
+                  onChange={(e) => setUserForm({ ...userForm, branchId: e.target.value })}
+                  className="w-full rounded bg-zinc-800 border border-zinc-700 p-2.5 text-sm text-white focus:outline-none focus:border-primary"
+                >
+                  <option value="">{t('md_noBranch')}</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {(lang === 'ar' ? b.nameAr : b.nameEn) + ' — ' + (lang === 'ar' ? b.city?.nameAr : b.city?.nameEn)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="flex gap-2">
                 <button
                   type="submit"
@@ -334,7 +365,7 @@ export function SettingsView() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setEditingUserId(null); setShowAddUser(false); setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN' }); }}
+                  onClick={() => { setEditingUserId(null); setShowAddUser(false); setUserForm({ firstName: '', lastName: '', mobileNumber: '', password: '', role: 'TECHNICIAN', branchId: '' }); }}
                   className="rounded-lg bg-zinc-700 hover:bg-zinc-600 px-4 py-2 text-sm font-bold text-zinc-300 transition cursor-pointer"
                 >
                   {t('cancel')}
@@ -358,6 +389,7 @@ export function SettingsView() {
                     <th className="py-2 pr-2 font-semibold">{t('userName')}</th>
                     <th className="py-2 font-semibold">{t('mobileNumber')}</th>
                     <th className="py-2 font-semibold">{t('userRoleLabel')}</th>
+                    <th className="py-2 font-semibold">{t('md_branch')}</th>
                     <th className="py-2 font-semibold">{t('userStatus')}</th>
                     <th className="py-2 font-semibold text-center">{t('actions')}</th>
                   </tr>
@@ -381,6 +413,9 @@ export function SettingsView() {
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${ROLE_COLORS[u.role] || ''}`}>
                           {ROLE_LABELS[u.role] || u.role}
                         </span>
+                      </td>
+                      <td className="py-3 text-xs text-zinc-400">
+                        {u.branch ? (lang === 'ar' ? u.branch.nameAr : u.branch.nameEn) : <span className="text-zinc-600">—</span>}
                       </td>
                       <td className="py-3">
                         <button
