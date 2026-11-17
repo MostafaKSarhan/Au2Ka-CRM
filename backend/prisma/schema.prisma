@@ -46,6 +46,7 @@ model User {
   sentMessages  OutboundMessage[]
   notifications Notification[]
   inspections   Inspection[]
+  appointments  Appointment[]
 
   @@index([branchId])
 }
@@ -70,6 +71,7 @@ model Customer {
   branch         Branch?           @relation(fields: [branchId], references: [id])
   branchId       String?
   monthlyReports MonthlyReport[]
+  appointments   Appointment[]
 
   @@index([fullName])
   @@index([branchId])
@@ -100,6 +102,7 @@ model Vehicle {
   mileageLogs    VehicleMileageLog[]
   inspections    Inspection[]
   monthlyReports MonthlyReport[]
+  appointments   Appointment[]
 
   @@index([plateNumber])
   @@index([vehicleModelId])
@@ -142,6 +145,7 @@ model JobCard {
   mileageLogs  VehicleMileageLog[]
   messages     OutboundMessage[]
   inspection   Inspection?
+  appointment  Appointment?
 
   @@index([jobNumber])
   @@index([branchId])
@@ -218,6 +222,7 @@ model Branch {
   customers     Customer[]
   jobCards      JobCard[]
   subscriptions Subscription[]
+  appointments  Appointment[]
 
   @@index([cityId])
 }
@@ -663,4 +668,85 @@ model MonthlyReport {
   @@unique([vehicleId, year, month])
   @@index([customerId])
   @@index([year, month])
+}
+
+// =====================================================================
+// المرحلة الثانية — M4: حجز المواعيد وأولوية المشتركين
+// طاقة يومية واحدة قابلة للضبط، دون جدولة موارد مركّبة.
+// =====================================================================
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  ARRIVED
+  CONVERTED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  RECEPTION
+  CUSTOMER_PORTAL
+}
+
+/// Working hours and daily capacity, one row per weekday (0 = Sunday).
+model WorkingDay {
+  id                     String   @id @default(uuid())
+  weekday                Int      @unique
+  isOpen                 Boolean  @default(true)
+  openTime               String   @default("08:00")
+  closeTime              String   @default("18:00")
+  slotMinutes            Int      @default(60)
+  dailyCapacity          Int      @default(8)
+  // Slots held back for subscribers until the day itself.
+  reservedForSubscribers Int      @default(2)
+  updatedAt              DateTime @updatedAt
+}
+
+/// A day the workshop is closed, or runs at a different capacity.
+model Holiday {
+  id        String    @id @default(uuid())
+  date      DateTime  @unique @db.Date
+  nameAr    String
+  nameEn    String
+  isClosed  Boolean   @default(true)
+  capacity  Int?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model Appointment {
+  id         String   @id @default(uuid())
+  reference  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  vehicleId  String?
+  vehicle    Vehicle? @relation(fields: [vehicleId], references: [id])
+  branchId   String?
+  branch     Branch?  @relation(fields: [branchId], references: [id])
+
+  scheduledAt  DateTime
+  durationMin  Int               @default(60)
+  status       AppointmentStatus @default(BOOKED)
+  source       AppointmentSource @default(RECEPTION)
+  // Recorded at booking: a subscriber keeps their priority even if the
+  // subscription lapses before the appointment comes round.
+  isSubscriber Boolean           @default(false)
+  complaint    String?           @db.Text
+  notes        String?           @db.Text
+
+  reminderSentAt DateTime?
+  // The card this appointment turned into, once the customer arrives.
+  jobCardId      String?   @unique
+  jobCard        JobCard?  @relation(fields: [jobCardId], references: [id])
+
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([customerId])
 }

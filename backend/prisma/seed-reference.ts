@@ -298,6 +298,28 @@ const TEMPLATES = [
       'A friendly reminder, {{customerName}}.\nThe {{documentTitle}} for your vehicle ({{plateNumber}}) expires on {{expiryDate}}.\nWe recommend renewing it in good time.',
     variables: '["customerName","documentTitle","plateNumber","expiryDate"]',
   },
+  {
+    code: 'APPOINTMENT_CONFIRMED',
+    nameAr: 'تأكيد حجز موعد',
+    nameEn: 'Appointment confirmed',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'تم تأكيد موعدكم في ورشة Au2Ka ✅\nالتاريخ: {{date}}\nالوقت: {{time}}\nرقم الحجز: {{reference}}\nفي انتظاركم، ونرجو إبلاغنا مسبقاً في حال رغبتم بالتأجيل.',
+    bodyEn:
+      'Your appointment at Au2Ka is confirmed ✅\nDate: {{date}}\nTime: {{time}}\nBooking reference: {{reference}}\nWe look forward to seeing you — please let us know in advance if you need to reschedule.',
+    variables: '["customerName","date","time","reference"]',
+  },
+  {
+    code: 'APPOINTMENT_REMINDER',
+    nameAr: 'تذكير بالموعد',
+    nameEn: 'Appointment reminder',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      'تذكير ودّي {{customerName}} 🔔\nموعدكم في ورشة Au2Ka غداً {{date}} الساعة {{time}}.\nرقم الحجز: {{reference}}\nفي انتظاركم.',
+    bodyEn:
+      'A friendly reminder, {{customerName}} 🔔\nYour appointment at Au2Ka is tomorrow, {{date}} at {{time}}.\nBooking reference: {{reference}}\nSee you then.',
+    variables: '["customerName","date","time","reference"]',
+  },
 ];
 
 /**

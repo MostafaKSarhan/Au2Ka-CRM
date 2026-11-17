@@ -14,13 +14,14 @@ import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
 import { MessagesView } from './features/messaging/MessagesView';
 import { NotificationBell } from './features/messaging/NotificationBell';
 import { MonthlyReportsView } from './features/inspections/MonthlyReportsView';
-import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart } from 'lucide-react';
+import { AppointmentsView } from './features/appointments/AppointmentsView';
+import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
   const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages' | 'monthlyReports'>(
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages' | 'monthlyReports' | 'appointments'>(
     isTechnician ? 'jobCards' : 'dashboard'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -53,6 +54,7 @@ export default function App() {
     { id: 'customers', label: t('customers'), icon: Users, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'vehicles', label: t('vehicles'), icon: Car, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'jobCards', label: t('jobCards'), icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
+    { id: 'appointments', label: t('appointments'), icon: CalendarDays, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'subscriptions', label: t('subscriptions'), icon: BadgeCheck, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'messages', label: t('messages'), icon: MessageSquare, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'monthlyReports', label: t('monthlyReports'), icon: FileBarChart, roles: ['ADMIN', 'RECEPTION'] },
@@ -206,6 +208,7 @@ export default function App() {
           {activeTab === 'customers' && !isTechnician && <CustomersView />}
           {activeTab === 'vehicles' && !isTechnician && <VehiclesView />}
           {activeTab === 'jobCards' && <JobCardsView />}
+          {activeTab === 'appointments' && !isTechnician && <AppointmentsView />}
           {activeTab === 'subscriptions' && !isTechnician && <SubscriptionsView />}
           {activeTab === 'messages' && !isTechnician && <MessagesView />}
           {activeTab === 'monthlyReports' && !isTechnician && <MonthlyReportsView />}

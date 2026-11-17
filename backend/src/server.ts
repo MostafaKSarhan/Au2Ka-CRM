@@ -3,6 +3,7 @@ dotenv.config();
 
 import app from './app';
 import { processQueue, raiseScheduledAlerts } from './modules/messaging/messaging.service';
+import { sendDueReminders } from './modules/appointments/appointments.service';
 
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -15,10 +16,11 @@ async function tick() {
   try {
     const queue = await processQueue();
     const alerts = await raiseScheduledAlerts();
+    const reminders = await sendDueReminders();
 
-    if (queue.delivered > 0 || alerts.subscriptions > 0 || alerts.documents > 0) {
+    if (queue.delivered > 0 || alerts.subscriptions > 0 || alerts.documents > 0 || reminders > 0) {
       app.log.info(
-        { queue, alerts },
+        { queue, alerts, reminders },
         'messaging worker: delivered internal messages and raised alerts',
       );
     }
