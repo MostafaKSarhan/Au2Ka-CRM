@@ -876,7 +876,12 @@ const translations = {
     pt_confirmCancel: 'هل تريد إلغاء هذا الموعد؟',
 
     // التقارير
-    pt_noReports: 'لا توجد تقارير شهرية بعد'
+    pt_noReports: 'لا توجد تقارير شهرية بعد',
+
+    // ===== M11 — تطبيق الجوال =====
+    pwa_installHint: 'ثبّت النظام كتطبيق على جوالك لفتحٍ أسرع وعملٍ دون اتصال',
+    pwa_install: 'تثبيت',
+    pwa_offline: 'لا يوجد اتصال — تعرض الشاشات آخر بيانات محفوظة، ولا يمكن الحفظ حتى يعود الاتصال'
   },
   en: {
     // Menu & Layout
@@ -1751,7 +1756,12 @@ const translations = {
     pt_confirmCancel: 'Cancel this appointment?',
 
     // Reports
-    pt_noReports: 'No monthly reports yet'
+    pt_noReports: 'No monthly reports yet',
+
+    // ===== M11 — Mobile app =====
+    pwa_installHint: 'Install the system as an app for faster opening and offline use',
+    pwa_install: 'Install',
+    pwa_offline: 'No connection — screens show the last saved data and nothing can be saved until it returns'
   }
 };
 

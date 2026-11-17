@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { portalApi, getPortalToken, setPortalToken } from './portalApi';
 import { useTranslation } from '../../store/LanguageContext';
+import { PwaBanner } from '../pwa/PwaBanner';
 
 type Tab = 'home' | 'cards' | 'booking' | 'reports';
 
@@ -79,6 +80,8 @@ export function CustomerPortal() {
           </div>
         </div>
       </header>
+
+      <PwaBanner />
 
       <main className="mx-auto max-w-3xl p-4 pb-24">
         {tab === 'home' && <PortalHome />}

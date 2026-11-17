@@ -12,6 +12,7 @@ import { MasterDataView } from './features/admin/MasterDataView';
 import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
 import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
 import { CustomerPortal } from './features/portal/CustomerPortal';
+import { PwaBanner } from './features/pwa/PwaBanner';
 import { MessagesView } from './features/messaging/MessagesView';
 import { NotificationBell } from './features/messaging/NotificationBell';
 import { MonthlyReportsView } from './features/inspections/MonthlyReportsView';
@@ -178,6 +179,8 @@ export default function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
+        <PwaBanner />
+
         {/* backdrop-blur creates a stacking context, so the header needs its own
             z-index for the notifications dropdown to sit above the page. */}
         <header className="relative z-30 h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-md">
