@@ -24,6 +24,7 @@ import { vehicleFileRoutes, publicVehicleFileRoutes } from './modules/vehicleFil
 import { messagingRoutes } from './modules/messaging/messaging.routes';
 import { inspectionsRoutes, monthlyReportsRoutes } from './modules/inspections/inspections.routes';
 import { appointmentsRoutes } from './modules/appointments/appointments.routes';
+import { referralsRoutes } from './modules/referrals/referrals.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -104,6 +105,9 @@ app.register(monthlyReportsRoutes, { prefix: '/api/v1/monthly-reports' });
 
 // Phase 2 — M4: appointments, working hours and subscriber priority
 app.register(appointmentsRoutes, { prefix: '/api/v1/appointments' });
+
+// Phase 2 — M5: referrals, points and customer tiers
+app.register(referralsRoutes, { prefix: '/api/v1/referrals' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

@@ -12,6 +12,26 @@ import {
   findActiveSubscription,
 } from '../subscriptions/subscriptions.service';
 import { notify, queueMessage } from '../messaging/messaging.service';
+import { completeReferralOnFirstVisit, recordSpend } from '../referrals/referrals.service';
+
+/** What a job card is worth: estimated cost plus any priced extra services. */
+function jobCardTotal(jobCard: { estimatedCost: any; additionalServices: string | null }): number {
+  const base = jobCard.estimatedCost ? Number(jobCard.estimatedCost) : 0;
+
+  let extras = 0;
+  if (jobCard.additionalServices) {
+    try {
+      const parsed = JSON.parse(jobCard.additionalServices);
+      if (Array.isArray(parsed)) {
+        extras = parsed.reduce((sum: number, s: any) => sum + (Number(s?.price) || 0), 0);
+      }
+    } catch {
+      // Free-text services carry no price.
+    }
+  }
+
+  return base + extras;
+}
 
 /** M6 — which status change tells the customer something, and with what wording. */
 const STATUS_TEMPLATES: Record<string, string> = {
@@ -249,13 +269,25 @@ export class JobCardsController {
           : ` — العميل مشترك (${subscription.subscriptionNumber}) بدون رصيد زيارات متبقٍ`;
     }
 
+    // M5 — a referred customer's first visit is what earns both sides their
+    // reward. A failure here must never block opening the card.
+    let referralNote = '';
+    try {
+      const referral = await completeReferralOnFirstVisit(customerId, created.id);
+      if (referral) {
+        referralNote = ` — تم احتساب مكافأة الإحالة (${referral.referrerPoints} نقطة للمُحيل)`;
+      }
+    } catch (err) {
+      request.log.error({ err }, 'failed to complete referral on first visit');
+    }
+
     // Log Activity in Arabic
     if (request.user) {
       await prisma.jobCardActivity.create({
         data: {
           jobCardId: created.id,
           userId: request.user.id,
-          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)${coverageNote}`,
+          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)${coverageNote}${referralNote}`,
         }
       });
     }
@@ -393,6 +425,17 @@ export class JobCardsController {
         });
       } catch (err) {
         request.log.error({ err }, 'failed to queue job card notifications');
+      }
+
+      // M5 — a delivered card is money actually spent: it feeds the
+      // customer's lifetime total, their points and their tier.
+      if (updates.status === 'DELIVERED') {
+        try {
+          const total = jobCardTotal(jobCard);
+          await recordSpend(jobCard.customerId, total, jobCard.id);
+        } catch (err) {
+          request.log.error({ err }, 'failed to record customer spend');
+        }
       }
     }
 

@@ -47,6 +47,7 @@ model User {
   notifications Notification[]
   inspections   Inspection[]
   appointments  Appointment[]
+  pointsEntries PointsEntry[]
 
   @@index([branchId])
 }
@@ -64,18 +65,28 @@ model Customer {
   messagingOptOut Boolean   @default(false)
   optedOutAt      DateTime?
 
-  vehicles       Vehicle[]
-  jobCards       JobCard[]
-  subscriptions  Subscription[]
-  messages       OutboundMessage[]
-  branch         Branch?           @relation(fields: [branchId], references: [id])
-  branchId       String?
-  monthlyReports MonthlyReport[]
-  appointments   Appointment[]
+  // M5 — referrals, points and tiers
+  referralCode  String?      @unique
+  tier          CustomerTier @default(REGULAR)
+  pointsBalance Int          @default(0)
+  lifetimeSpend Decimal      @default(0) @db.Decimal(12, 2)
+
+  vehicles         Vehicle[]
+  jobCards         JobCard[]
+  subscriptions    Subscription[]
+  messages         OutboundMessage[]
+  branch           Branch?           @relation(fields: [branchId], references: [id])
+  branchId         String?
+  monthlyReports   MonthlyReport[]
+  appointments     Appointment[]
+  referralsMade    Referral[]        @relation("ReferralsMade")
+  referralReceived Referral?         @relation("ReferralReceived")
+  pointsEntries    PointsEntry[]
 
   @@index([fullName])
   @@index([branchId])
   @@index([mobileNumber])
+  @@index([tier])
 }
 
 model Vehicle {
@@ -749,4 +760,113 @@ model Appointment {
   @@index([scheduledAt])
   @@index([status])
   @@index([customerId])
+}
+
+// =====================================================================
+// المرحلة الثانية — M5: الإحالات والعملاء المميزون
+// قاعدة مكافأة واحدة قابلة للضبط. الحملات المتزامنة والقواعد المركّبة
+// غير مشمولة في هذا النطاق.
+// =====================================================================
+
+enum CustomerTier {
+  REGULAR
+  SILVER
+  VIP
+}
+
+enum ReferralStatus {
+  PENDING
+  REGISTERED
+  COMPLETED
+  EXPIRED
+}
+
+enum RewardType {
+  POINTS
+  DISCOUNT
+  FREE_SERVICE
+}
+
+enum PointsEntryType {
+  EARNED_REFERRAL
+  EARNED_SPEND
+  REDEEMED
+  ADJUSTMENT
+}
+
+enum TierBasis {
+  SPEND
+  SUBSCRIPTION
+}
+
+/// One row holds the workshop's single adjustable reward rule.
+model ReferralSettings {
+  id         String     @id @default("default")
+  rewardType RewardType @default(POINTS)
+
+  referrerPoints          Int     @default(100)
+  referredPoints          Int     @default(50)
+  referrerDiscountPercent Decimal @default(0) @db.Decimal(5, 2)
+  referredDiscountPercent Decimal @default(0) @db.Decimal(5, 2)
+  freeServiceAr           String?
+  freeServiceEn           String?
+
+  /// What one point is worth on an invoice, in riyals.
+  pointValue     Decimal @default(1) @db.Decimal(10, 2)
+  /// Points granted per riyal spent; 0 turns spend-earning off.
+  pointsPerRiyal Decimal @default(0) @db.Decimal(10, 4)
+
+  tierBasis       TierBasis @default(SPEND)
+  silverThreshold Decimal   @default(5000) @db.Decimal(10, 2)
+  vipThreshold    Decimal   @default(15000) @db.Decimal(10, 2)
+
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model Referral {
+  id         String    @id @default(uuid())
+  code       String
+  referrerId String
+  referrer   Customer  @relation("ReferralsMade", fields: [referrerId], references: [id])
+  /// The referred customer, once they register. One referral per customer.
+  referredId String?   @unique
+  referred   Customer? @relation("ReferralReceived", fields: [referredId], references: [id])
+
+  status         ReferralStatus @default(PENDING)
+  registeredAt   DateTime?
+  /// Set on the referred customer's first job card — this is what earns the reward.
+  firstVisitAt   DateTime?
+  jobCardId      String?
+  rewardedAt     DateTime?
+  referrerReward Int            @default(0)
+  referredReward Int            @default(0)
+  notes          String?        @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+/// Every movement on a customer's points balance, so the balance is auditable.
+model PointsEntry {
+  id           String          @id @default(uuid())
+  customerId   String
+  customer     Customer        @relation(fields: [customerId], references: [id])
+  type         PointsEntryType
+  points       Int
+  balanceAfter Int
+  reasonAr     String
+  reasonEn     String
+  referralId   String?
+  jobCardId    String?
+  createdById  String?
+  createdBy    User?           @relation(fields: [createdById], references: [id])
+  createdAt    DateTime        @default(now())
+
+  @@index([customerId])
+  @@index([createdAt])
 }

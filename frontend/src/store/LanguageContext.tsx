@@ -718,7 +718,78 @@ const translations = {
     wh_holidayAdded: 'تم إضافة الإجازة',
     wh_holidayDeleted: 'تم حذف الإجازة',
     wh_noHolidays: 'لا توجد إجازات مسجلة',
-    wh_date: 'التاريخ'
+    wh_date: 'التاريخ',
+
+    // ===== M5 — الإحالات والعملاء المميزون =====
+    referrals: 'الإحالات والنقاط',
+    ref_subtitle: 'أكواد الإحالة، رصيد النقاط، ومستويات العملاء',
+    ref_scopeNote:
+      'قاعدة مكافأة واحدة قابلة للضبط حسب نطاق العرض. الحملات الترويجية المتعددة المتزامنة والقواعد المركّبة غير مشمولة في هذه المرحلة.',
+
+    // الإحالات
+    ref_link: 'ربط إحالة',
+    ref_linked: 'تم ربط الإحالة بنجاح',
+    ref_linkHint:
+      'اكتب كود الإحالة الذي جاء به العميل الجديد، واختره من القائمة. يُحتسب للمُحيل عند أول زيارة فعلية للعميل الجديد.',
+    ref_code: 'كود الإحالة',
+    ref_newCustomer: 'العميل الجديد',
+    ref_showCode: 'كود ورابط الإحالة',
+    ref_referrer: 'المُحيل',
+    ref_referred: 'العميل المُحال',
+    ref_firstVisit: 'أول زيارة',
+    ref_reward: 'المكافأة',
+    ref_none: 'لا توجد إحالات مسجلة',
+    ref_search: 'ابحث بالكود أو اسم العميل...',
+    ref_broughtIn: 'عميل',
+    ref_topReferrers: 'الأكثر جلبًا للعملاء',
+
+    // حالات الإحالة
+    ref_statusPending: 'بانتظار التسجيل',
+    ref_statusRegistered: 'مسجّل — بانتظار أول زيارة',
+    ref_statusCompleted: 'مكتملة',
+    ref_statusExpired: 'منتهية',
+
+    // النقاط والمحفظة
+    ref_customerWallets: 'العملاء ورصيد نقاطهم',
+    ref_noCustomers: 'لا يوجد عملاء مسجلون بعد',
+    ref_wallet: 'محفظة النقاط',
+    ref_balance: 'الرصيد',
+    ref_value: 'قيمته بالريال',
+    ref_tier: 'المستوى',
+    ref_adjust: 'تعديل يدوي للرصيد',
+    ref_adjustReason: 'سبب التعديل',
+    ref_adjusted: 'تم تعديل رصيد النقاط',
+    ref_noEntries: 'لا توجد حركات على الرصيد',
+
+    // المستويات
+    ref_tierRegular: 'عادي',
+    ref_tierSilver: 'مميز',
+    ref_tierVip: 'VIP',
+
+    // قاعدة المكافأة
+    ref_settings: 'قاعدة المكافأة',
+    ref_settingsSaved: 'تم حفظ قاعدة المكافأة',
+    ref_rewardType: 'نوع المكافأة',
+    ref_rewardPoints: 'نقاط',
+    ref_rewardDiscount: 'خصم',
+    ref_rewardFreeService: 'خدمة مجانية',
+    ref_referrerPoints: 'نقاط المُحيل',
+    ref_referredPoints: 'نقاط العميل الجديد',
+    ref_pointValue: 'قيمة النقطة',
+    ref_pointValueHint: 'كم ريالاً تساوي النقطة الواحدة على الفاتورة',
+    ref_pointsPerRiyal: 'نقاط لكل ريال إنفاق',
+    ref_pointsPerRiyalHint: 'اتركها صفرًا لإيقاف كسب النقاط بالإنفاق',
+    ref_tierBasis: 'أساس تحديد المستوى',
+    ref_basisSpend: 'إجمالي الإنفاق',
+    ref_basisSubscription: 'قيمة الباقة المشترك فيها',
+    ref_silverThreshold: 'حد المستوى المميز',
+    ref_vipThreshold: 'حد مستوى VIP',
+
+    // إحصائيات
+    ref_statCompleted: 'إحالات مكتملة',
+    ref_statPending: 'إحالات قيد الانتظار',
+    ref_statVip: 'عملاء VIP',
+    ref_statPoints: 'النقاط القائمة'
   },
   en: {
     // Menu & Layout
@@ -1435,7 +1506,78 @@ const translations = {
     wh_holidayAdded: 'Holiday added',
     wh_holidayDeleted: 'Holiday deleted',
     wh_noHolidays: 'No holidays recorded',
-    wh_date: 'Date'
+    wh_date: 'Date',
+
+    // ===== M5 — Referrals & VIP customers =====
+    referrals: 'Referrals & points',
+    ref_subtitle: 'Referral codes, points balances and customer tiers',
+    ref_scopeNote:
+      'One adjustable reward rule, per the agreed scope. Multiple simultaneous campaigns and compound rules are not included in this phase.',
+
+    // Referrals
+    ref_link: 'Link a referral',
+    ref_linked: 'Referral linked successfully',
+    ref_linkHint:
+      'Enter the referral code the new customer arrived with and pick them from the list. The referrer is rewarded on the new customer’s first actual visit.',
+    ref_code: 'Referral code',
+    ref_newCustomer: 'New customer',
+    ref_showCode: 'Referral code & link',
+    ref_referrer: 'Referrer',
+    ref_referred: 'Referred customer',
+    ref_firstVisit: 'First visit',
+    ref_reward: 'Reward',
+    ref_none: 'No referrals recorded',
+    ref_search: 'Search by code or customer name...',
+    ref_broughtIn: 'customers',
+    ref_topReferrers: 'Top referrers',
+
+    // Referral statuses
+    ref_statusPending: 'Awaiting registration',
+    ref_statusRegistered: 'Registered — awaiting first visit',
+    ref_statusCompleted: 'Completed',
+    ref_statusExpired: 'Expired',
+
+    // Points wallet
+    ref_customerWallets: 'Customers and their points',
+    ref_noCustomers: 'No customers registered yet',
+    ref_wallet: 'Points wallet',
+    ref_balance: 'Balance',
+    ref_value: 'Value in SAR',
+    ref_tier: 'Tier',
+    ref_adjust: 'Manual balance adjustment',
+    ref_adjustReason: 'Reason for the adjustment',
+    ref_adjusted: 'Points balance adjusted',
+    ref_noEntries: 'No movements on this balance',
+
+    // Tiers
+    ref_tierRegular: 'Regular',
+    ref_tierSilver: 'Preferred',
+    ref_tierVip: 'VIP',
+
+    // Reward rule
+    ref_settings: 'Reward rule',
+    ref_settingsSaved: 'Reward rule saved',
+    ref_rewardType: 'Reward type',
+    ref_rewardPoints: 'Points',
+    ref_rewardDiscount: 'Discount',
+    ref_rewardFreeService: 'Free service',
+    ref_referrerPoints: 'Referrer points',
+    ref_referredPoints: 'New customer points',
+    ref_pointValue: 'Point value',
+    ref_pointValueHint: 'How many riyals one point is worth on an invoice',
+    ref_pointsPerRiyal: 'Points per riyal spent',
+    ref_pointsPerRiyalHint: 'Leave at zero to turn off earning points by spending',
+    ref_tierBasis: 'Tier is based on',
+    ref_basisSpend: 'Lifetime spend',
+    ref_basisSubscription: 'Subscribed plan value',
+    ref_silverThreshold: 'Preferred tier threshold',
+    ref_vipThreshold: 'VIP tier threshold',
+
+    // Stats
+    ref_statCompleted: 'Completed referrals',
+    ref_statPending: 'Pending referrals',
+    ref_statVip: 'VIP customers',
+    ref_statPoints: 'Outstanding points'
   }
 };
 
