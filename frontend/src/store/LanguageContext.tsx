@@ -837,7 +837,46 @@ const translations = {
     inv_mostUsed: 'الأكثر استهلاكًا (آخر 30 يومًا)',
     inv_noUsage: 'لم يُصرف أي صنف في هذه المدة',
     inv_stagnant: 'أصناف راكدة',
-    inv_noStagnant: 'لا توجد أصناف راكدة'
+    inv_noStagnant: 'لا توجد أصناف راكدة',
+
+    // ===== M7 — بوابة العميل =====
+    pt_title: 'بوابة العملاء',
+    pt_loginSubtitle: 'ادخل برقم جوالك المسجّل لدى الورشة — بدون كلمة مرور',
+    pt_mobile: 'رقم الجوال',
+    pt_sendCode: 'إرسال رمز التحقق',
+    pt_code: 'رمز التحقق',
+    pt_codeSent: 'تم إرسال الرمز إلى جوالك، صالح لعشر دقائق',
+    pt_codeFailed: 'تعذّر إتمام العملية — تحقق من الرقم أو تواصل مع الورشة',
+    pt_signIn: 'دخول',
+    pt_changeNumber: 'تغيير الرقم',
+    pt_sessionExpired: 'انتهت الجلسة — سجّل الدخول من جديد',
+
+    // التبويبات
+    pt_home: 'الرئيسية',
+    pt_myCards: 'سياراتي بالورشة',
+    pt_booking: 'حجز موعد',
+    pt_reports: 'تقاريري',
+
+    // الرئيسية
+    pt_welcome: 'أهلاً بك',
+    pt_openCards: 'كروت مفتوحة',
+    pt_nextAppointment: 'موعدك القادم',
+    pt_yourReferralCode: 'كود الإحالة الخاص بك',
+    pt_referralHint: 'شارك الكود مع أصدقائك واكسب نقاطًا عند أول زيارة لهم',
+    pt_myVehicles: 'سياراتي',
+    pt_noVehicles: 'لا توجد سيارات مسجلة باسمك',
+
+    // الكروت
+    pt_noCards: 'لا توجد كروت عمل مسجلة',
+
+    // الحجز
+    pt_pickSlot: 'اختر الوقت المناسب',
+    pt_subscriberPriority: 'لديك أولوية المشتركين — فتحات إضافية متاحة لك',
+    pt_myAppointments: 'مواعيدي',
+    pt_confirmCancel: 'هل تريد إلغاء هذا الموعد؟',
+
+    // التقارير
+    pt_noReports: 'لا توجد تقارير شهرية بعد'
   },
   en: {
     // Menu & Layout
@@ -1673,7 +1712,46 @@ const translations = {
     inv_mostUsed: 'Most used (last 30 days)',
     inv_noUsage: 'Nothing was issued in this period',
     inv_stagnant: 'Stagnant items',
-    inv_noStagnant: 'No stagnant items'
+    inv_noStagnant: 'No stagnant items',
+
+    // ===== M7 — Customer portal =====
+    pt_title: 'Customer portal',
+    pt_loginSubtitle: 'Sign in with the mobile number the workshop has on file — no password',
+    pt_mobile: 'Mobile number',
+    pt_sendCode: 'Send verification code',
+    pt_code: 'Verification code',
+    pt_codeSent: 'A code has been sent to your mobile, valid for ten minutes',
+    pt_codeFailed: 'We could not complete that — check the number or contact the workshop',
+    pt_signIn: 'Sign in',
+    pt_changeNumber: 'Change number',
+    pt_sessionExpired: 'Your session has ended — please sign in again',
+
+    // Tabs
+    pt_home: 'Home',
+    pt_myCards: 'In the workshop',
+    pt_booking: 'Book',
+    pt_reports: 'My reports',
+
+    // Home
+    pt_welcome: 'Welcome',
+    pt_openCards: 'Open job cards',
+    pt_nextAppointment: 'Your next appointment',
+    pt_yourReferralCode: 'Your referral code',
+    pt_referralHint: 'Share it with friends and earn points on their first visit',
+    pt_myVehicles: 'My vehicles',
+    pt_noVehicles: 'No vehicles registered in your name',
+
+    // Cards
+    pt_noCards: 'No job cards recorded',
+
+    // Booking
+    pt_pickSlot: 'Pick a time that suits you',
+    pt_subscriberPriority: 'You have subscriber priority — extra slots are open to you',
+    pt_myAppointments: 'My appointments',
+    pt_confirmCancel: 'Cancel this appointment?',
+
+    // Reports
+    pt_noReports: 'No monthly reports yet'
   }
 };
 

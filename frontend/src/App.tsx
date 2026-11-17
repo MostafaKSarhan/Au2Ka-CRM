@@ -11,6 +11,7 @@ import { ReportsView } from './features/reports/ReportsView';
 import { MasterDataView } from './features/admin/MasterDataView';
 import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
 import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
+import { CustomerPortal } from './features/portal/CustomerPortal';
 import { MessagesView } from './features/messaging/MessagesView';
 import { NotificationBell } from './features/messaging/NotificationBell';
 import { MonthlyReportsView } from './features/inspections/MonthlyReportsView';
@@ -28,13 +29,17 @@ export default function App() {
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // M3 — the customer's shared vehicle file opens without a login. It is
-  // matched before anything else so the share link never hits the login screen.
-  const shareToken = new URLSearchParams(window.location.search).get('file');
+  // M3 and M7 — the shared vehicle file and the customer portal both open
+  // without a staff login, so they are matched before anything else and the
+  // staff session is never initialised for them.
+  const params = new URLSearchParams(window.location.search);
+  const shareToken = params.get('file');
+  const isPortal = params.get('portal') === '1';
+  const referralCode = params.get('ref');
 
   useEffect(() => {
-    if (!shareToken) initialize();
-  }, [shareToken]);
+    if (!shareToken && !isPortal) initialize();
+  }, [shareToken, isPortal]);
 
   // When user role is resolved after initialization, redirect technician to jobCards
   useEffect(() => {
@@ -45,6 +50,12 @@ export default function App() {
 
   if (shareToken) {
     return <PublicVehicleFile token={shareToken} />;
+  }
+
+  // A referral link lands on the portal too — the code is shown to the
+  // customer so reception can record who referred them.
+  if (isPortal || referralCode) {
+    return <CustomerPortal />;
   }
 
   if (!isAuthenticated) {

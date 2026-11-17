@@ -83,6 +83,8 @@ model Customer {
   referralsMade    Referral[]        @relation("ReferralsMade")
   referralReceived Referral?         @relation("ReferralReceived")
   pointsEntries    PointsEntry[]
+  otps             CustomerOtp[]
+  portalSessions   CustomerSession[]
 
   @@index([fullName])
   @@index([branchId])
@@ -908,4 +910,43 @@ model StockMovement {
   @@index([partId])
   @@index([jobCardId])
   @@index([createdAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M7: بوابة العميل
+// بوابة عرض وحجز. لا تشمل دفعًا إلكترونيًا ولا محادثة مباشرة مع الورشة.
+// =====================================================================
+
+/// A one-time code sent to the customer's mobile to let them in without a password.
+model CustomerOtp {
+  id           String    @id @default(uuid())
+  customerId   String
+  customer     Customer  @relation(fields: [customerId], references: [id])
+  mobileNumber String
+  /// Stored hashed — a leaked database row must not grant access.
+  codeHash     String
+  expiresAt    DateTime
+  attempts     Int       @default(0)
+  consumedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([mobileNumber])
+  @@index([expiresAt])
+}
+
+/// A signed-in portal session. Revoking a row ends that device's access.
+model CustomerSession {
+  id         String    @id @default(uuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  lastSeenAt DateTime  @default(now())
+  userAgent  String?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([expiresAt])
 }

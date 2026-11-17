@@ -26,6 +26,7 @@ import { inspectionsRoutes, monthlyReportsRoutes } from './modules/inspections/i
 import { appointmentsRoutes } from './modules/appointments/appointments.routes';
 import { referralsRoutes } from './modules/referrals/referrals.routes';
 import { inventoryRoutes } from './modules/inventory/inventory.routes';
+import { portalRoutes } from './modules/portal/portal.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -112,6 +113,9 @@ app.register(referralsRoutes, { prefix: '/api/v1/referrals' });
 
 // Phase 2 — M10: inventory movements for the spare parts catalogue
 app.register(inventoryRoutes, { prefix: '/api/v1/inventory' });
+
+// Phase 2 — M7: the customer self-service portal (its own sign-in)
+app.register(portalRoutes, { prefix: '/api/v1/portal' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {
