@@ -25,6 +25,8 @@ const createJobCardSchema = z.object({
   notes: z.string().optional(),
   isVehiclePhotographed: z.boolean().optional(),
   additionalServices: z.string().optional(),
+  // M3 — the odometer reading taken at reception, recorded on the vehicle file.
+  mileage: z.coerce.number().int().min(0).optional(),
 });
 
 const updateJobCardSchema = z.object({
@@ -189,13 +191,37 @@ export class JobCardsController {
     const sequenceNum = String(countToday + 1).padStart(4, '0');
     const jobNumber = `WRK-${todayStr}-${sequenceNum}`;
 
+    const { mileage: readingAtEntry, ...cardData } = parseResult.data;
+
     const created = await prisma.jobCard.create({
       data: {
         jobNumber,
         branchId: customer.branchId,
-        ...parseResult.data,
+        ...cardData,
       },
     });
+
+    // M3 — every visit adds a point to the vehicle's odometer history. A
+    // reading lower than the last one is ignored rather than rejected, so a
+    // typo at reception can never block opening the card.
+    const reading =
+      readingAtEntry !== undefined && readingAtEntry >= vehicle.mileage
+        ? readingAtEntry
+        : vehicle.mileage;
+
+    await prisma.vehicleMileageLog.create({
+      data: {
+        vehicleId,
+        jobCardId: created.id,
+        mileage: reading,
+        source: 'JOB_CARD',
+        note: `قراءة العداد عند فتح الكرت ${jobNumber}`,
+      },
+    });
+
+    if (reading > vehicle.mileage) {
+      await prisma.vehicle.update({ where: { id: vehicleId }, data: { mileage: reading } });
+    }
 
     // M1 — subscription coverage: a free visit is consumed if the customer
     // still has one, otherwise the plan discount is recorded on the card.

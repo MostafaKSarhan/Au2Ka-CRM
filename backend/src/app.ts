@@ -20,6 +20,7 @@ import { partsRoutes } from './modules/parts/parts.routes';
 import { backupRoutes } from './modules/backup/backup.routes';
 import { plansRoutes } from './modules/plans/plans.routes';
 import { subscriptionsRoutes } from './modules/subscriptions/subscriptions.routes';
+import { vehicleFileRoutes, publicVehicleFileRoutes } from './modules/vehicleFile/vehicleFile.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -86,6 +87,10 @@ app.register(backupRoutes, { prefix: '/api/v1/backup' });
 // Phase 2 — M1: subscriptions & annual plans
 app.register(plansRoutes, { prefix: '/api/v1/plans' });
 app.register(subscriptionsRoutes, { prefix: '/api/v1/subscriptions' });
+
+// Phase 2 — M3: vehicle lifetime file (plus the customer's public share link)
+app.register(vehicleFileRoutes, { prefix: '/api/v1/vehicle-file' });
+app.register(publicVehicleFileRoutes, { prefix: '/api/v1/public' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

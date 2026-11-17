@@ -79,10 +79,16 @@ model Vehicle {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
+  // M3 — secure share link that opens the vehicle file for the customer
+  shareToken String? @unique
+
   jobCards       JobCard[]
   subscriptions  Subscription[]
-  vehicleModel   VehicleModel?  @relation(fields: [vehicleModelId], references: [id])
+  vehicleModel   VehicleModel?            @relation(fields: [vehicleModelId], references: [id])
   vehicleModelId String?
+  documents      VehicleDocument[]
+  replacements   VehiclePartReplacement[]
+  mileageLogs    VehicleMileageLog[]
 
   @@index([plateNumber])
   @@index([vehicleModelId])
@@ -116,11 +122,13 @@ model JobCard {
   subscriptionDiscount Decimal?      @db.Decimal(5, 2)
   isFreeVisit          Boolean       @default(false)
 
-  photos     JobCardPhotos[]
-  activities JobCardActivity[]
-  usages     SubscriptionUsage[]
-  branch     Branch?             @relation(fields: [branchId], references: [id])
-  branchId   String?
+  photos       JobCardPhotos[]
+  activities   JobCardActivity[]
+  usages       SubscriptionUsage[]
+  branch       Branch?                  @relation(fields: [branchId], references: [id])
+  branchId     String?
+  replacements VehiclePartReplacement[]
+  mileageLogs  VehicleMileageLog[]
 
   @@index([jobNumber])
   @@index([branchId])
@@ -250,6 +258,8 @@ model Part {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
+  replacements VehiclePartReplacement[]
+
   @@index([nameAr])
   @@index([category])
 }
@@ -343,4 +353,86 @@ model SubscriptionUsage {
 
   @@index([subscriptionId])
   @@index([jobCardId])
+}
+
+// =====================================================================
+// المرحلة الثانية — M3: الملف الكامل للسيارة
+// الملف يُبنى من البيانات المسجلة في النظام من تاريخ التشغيل فصاعدًا
+// =====================================================================
+
+enum VehicleDocumentType {
+  REGISTRATION
+  INSURANCE
+  PERIODIC_INSPECTION
+  OTHER
+}
+
+enum MileageSource {
+  MANUAL
+  JOB_CARD
+}
+
+model VehicleDocument {
+  id             String              @id @default(uuid())
+  vehicleId      String
+  vehicle        Vehicle             @relation(fields: [vehicleId], references: [id])
+  type           VehicleDocumentType
+  title          String?
+  documentNumber String?
+  issuer         String?
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  filePath       String?
+  notes          String?             @db.Text
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+
+  @@index([vehicleId])
+  @@index([expiryDate])
+}
+
+model VehiclePartReplacement {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  jobCardId String?
+  jobCard   JobCard? @relation(fields: [jobCardId], references: [id])
+  partId    String?
+  part      Part?    @relation(fields: [partId], references: [id])
+
+  // Name and number are copied in, so the record survives a catalogue edit
+  // and still reads correctly for parts bought outside the catalogue.
+  partName             String
+  partNumber           String?
+  quantity             Int       @default(1)
+  unitPrice            Decimal   @default(0) @db.Decimal(10, 2)
+  mileageAtReplacement Int?
+  replacedAt           DateTime  @default(now())
+  warrantyMonths       Int?
+  warrantyUntil        DateTime?
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  @@index([vehicleId])
+  @@index([jobCardId])
+  @@index([replacedAt])
+}
+
+model VehicleMileageLog {
+  id         String        @id @default(uuid())
+  vehicleId  String
+  vehicle    Vehicle       @relation(fields: [vehicleId], references: [id])
+  jobCardId  String?
+  jobCard    JobCard?      @relation(fields: [jobCardId], references: [id])
+  mileage    Int
+  source     MileageSource @default(MANUAL)
+  note       String?
+  recordedAt DateTime      @default(now())
+  createdAt  DateTime      @default(now())
+
+  @@index([vehicleId])
+  @@index([recordedAt])
 }

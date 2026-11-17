@@ -438,7 +438,98 @@ const translations = {
     sub_badge: 'مشترك',
     sub_badgeFreeVisit: 'زيارة مجانية',
     sub_badgeDiscount: 'خصم اشتراك',
-    sub_visitsLeftShort: 'زيارة مجانية متبقية'
+    sub_visitsLeftShort: 'زيارة مجانية متبقية',
+
+    // ===== M3 — الملف الكامل للسيارة =====
+    vf_title: 'الملف الكامل للسيارة',
+    vf_openFile: 'فتح الملف الكامل',
+    vf_owner: 'المالك',
+    vf_inSystemSince: 'مسجلة في النظام منذ',
+    vf_scopeNote: 'الملف مبني على البيانات المسجلة في النظام من تاريخ التشغيل فصاعدًا.',
+    vf_km: 'كم',
+
+    // الملخص
+    vf_visits: 'عدد الزيارات',
+    vf_currentMileage: 'قراءة العداد',
+    vf_totalSpent: 'إجمالي المصروف',
+    vf_partsReplaced: 'قطع مستبدلة',
+    vf_avgPerMonth: 'معدل الاستخدام شهريًا',
+    vf_lastReading: 'آخر قراءة مسجلة',
+
+    // المستندات
+    vf_documents: 'مستندات السيارة',
+    vf_noDocuments: 'لا توجد مستندات مسجلة — أضف الاستمارة والتأمين لتصلك التنبيهات',
+    vf_addDocument: 'إضافة مستند',
+    vf_documentAdded: 'تم إضافة المستند بنجاح',
+    vf_documentType: 'نوع المستند',
+    vf_documentTitle: 'اسم المستند',
+    vf_documentNumber: 'رقم المستند',
+    vf_issuer: 'جهة الإصدار',
+    vf_issueDate: 'تاريخ الإصدار',
+    vf_expiryDate: 'تاريخ الانتهاء',
+    vf_expiryHint: 'ينبّهك النظام قبل الانتهاء بـ 30 يومًا',
+    vf_expired: 'منتهي',
+    vf_daysToExpiry: 'يوم على الانتهاء',
+
+    // العداد
+    vf_mileageHistory: 'سجل العداد ومعدل الاستخدام',
+    vf_notEnoughMileage: 'تحتاج قراءتين على الأقل لرسم معدل الاستخدام',
+    vf_addMileage: 'تسجيل قراءة عداد',
+    vf_mileageAdded: 'تم تسجيل قراءة العداد',
+
+    // التكاليف
+    vf_costsByYear: 'التكاليف التراكمية بالسنوات',
+    vf_noCosts: 'لا توجد تكاليف مسجلة بعد',
+    vf_chartJobCards: 'كروت العمل',
+    vf_chartParts: 'قطع الغيار',
+    vf_chartCumulative: 'التراكمي',
+
+    // القطع
+    vf_replacedParts: 'سجل القطع المستبدلة',
+    vf_noParts: 'لم تُسجّل قطع مستبدلة لهذه السيارة',
+    vf_addPart: 'تسجيل قطعة مستبدلة',
+    vf_partAdded: 'تم تسجيل القطعة المستبدلة',
+    vf_part: 'القطعة',
+    vf_replacedAt: 'تاريخ الاستبدال',
+    vf_atMileage: 'عند العداد',
+    vf_cost: 'التكلفة',
+    vf_unitPrice: 'سعر الوحدة',
+    vf_warranty: 'الضمان',
+    vf_warrantyMonths: 'الضمان بالشهور',
+    vf_warrantyHint: 'اتركه فارغًا لو مفيش ضمان',
+    vf_warrantyExpired: 'انتهى الضمان',
+    vf_daysLeft: 'يوم',
+    vf_fromCatalog: 'اختيار من كتالوج القطع',
+    vf_fromCatalogHint: 'أو اكتب اسم القطعة يدويًا لو مش في الكتالوج',
+    vf_manualEntry: 'إدخال يدوي',
+    vf_linkJobCard: 'ربط بكرت عمل',
+    vf_noJobCard: 'بدون ربط',
+
+    // الخط الزمني
+    vf_timeline: 'الخط الزمني للسيارة',
+    vf_noTimeline: 'لا توجد أحداث مسجلة بعد',
+    vf_kindVisit: 'زيارة',
+    vf_kindPart: 'قطعة',
+    vf_kindDocument: 'مستند',
+
+    // الصور
+    vf_photoArchive: 'أرشيف الصور',
+    vf_noPhotos: 'لا توجد صور مرفوعة لهذه السيارة',
+
+    // المشاركة
+    vf_share: 'مشاركة مع العميل',
+    vf_shareTitle: 'رابط مشاركة ملف السيارة',
+    vf_shareHint: 'رابط آمن يفتح الملف للعميل بصيغة عرض فقط، بدون تسجيل دخول وبدون إظهار رقم جواله.',
+    vf_copyLink: 'نسخ الرابط',
+    vf_linkCopied: 'تم نسخ الرابط',
+    vf_rotateLink: 'رابط جديد',
+    vf_revokeLink: 'إلغاء الرابط نهائيًا',
+    vf_confirmRevoke: 'إلغاء الرابط يمنع أي شخص معه من فتح الملف. متأكد؟',
+    vf_shareRevoked: 'تم إلغاء رابط المشاركة',
+    vf_linkInvalid: 'الرابط غير صالح أو تم إلغاؤه',
+    vf_linkInvalidHint: 'تواصل مع الورشة للحصول على رابط جديد.',
+    vf_publicFooter: 'هذا الملف صادر من نظام Au2Ka لإدارة ورش السيارات.',
+    vf_print: 'طباعة'
   },
   en: {
     // Menu & Layout
@@ -875,7 +966,98 @@ const translations = {
     sub_badge: 'Subscriber',
     sub_badgeFreeVisit: 'Free visit',
     sub_badgeDiscount: 'Subscription discount',
-    sub_visitsLeftShort: 'free visits left'
+    sub_visitsLeftShort: 'free visits left',
+
+    // ===== M3 — Vehicle lifetime file =====
+    vf_title: 'Vehicle lifetime file',
+    vf_openFile: 'Open full file',
+    vf_owner: 'Owner',
+    vf_inSystemSince: 'In the system since',
+    vf_scopeNote: 'This file is built from data recorded in the system from go-live onwards.',
+    vf_km: 'km',
+
+    // Summary
+    vf_visits: 'Visits',
+    vf_currentMileage: 'Odometer',
+    vf_totalSpent: 'Total spent',
+    vf_partsReplaced: 'Parts replaced',
+    vf_avgPerMonth: 'Average use per month',
+    vf_lastReading: 'Last recorded reading',
+
+    // Documents
+    vf_documents: 'Vehicle documents',
+    vf_noDocuments: 'No documents yet — add registration and insurance to get expiry alerts',
+    vf_addDocument: 'Add document',
+    vf_documentAdded: 'Document added successfully',
+    vf_documentType: 'Document type',
+    vf_documentTitle: 'Document name',
+    vf_documentNumber: 'Document number',
+    vf_issuer: 'Issued by',
+    vf_issueDate: 'Issue date',
+    vf_expiryDate: 'Expiry date',
+    vf_expiryHint: 'You are warned 30 days before it expires',
+    vf_expired: 'Expired',
+    vf_daysToExpiry: 'days to expiry',
+
+    // Mileage
+    vf_mileageHistory: 'Odometer history and usage rate',
+    vf_notEnoughMileage: 'At least two readings are needed to chart the usage rate',
+    vf_addMileage: 'Record odometer reading',
+    vf_mileageAdded: 'Odometer reading recorded',
+
+    // Costs
+    vf_costsByYear: 'Cumulative costs by year',
+    vf_noCosts: 'No costs recorded yet',
+    vf_chartJobCards: 'Job cards',
+    vf_chartParts: 'Spare parts',
+    vf_chartCumulative: 'Cumulative',
+
+    // Parts
+    vf_replacedParts: 'Replaced parts log',
+    vf_noParts: 'No replaced parts recorded for this vehicle',
+    vf_addPart: 'Record a replaced part',
+    vf_partAdded: 'Replaced part recorded',
+    vf_part: 'Part',
+    vf_replacedAt: 'Replaced on',
+    vf_atMileage: 'At odometer',
+    vf_cost: 'Cost',
+    vf_unitPrice: 'Unit price',
+    vf_warranty: 'Warranty',
+    vf_warrantyMonths: 'Warranty in months',
+    vf_warrantyHint: 'Leave empty when there is no warranty',
+    vf_warrantyExpired: 'Warranty ended',
+    vf_daysLeft: 'days',
+    vf_fromCatalog: 'Pick from the parts catalogue',
+    vf_fromCatalogHint: 'Or type the part name if it is not in the catalogue',
+    vf_manualEntry: 'Manual entry',
+    vf_linkJobCard: 'Link to a job card',
+    vf_noJobCard: 'Not linked',
+
+    // Timeline
+    vf_timeline: 'Vehicle timeline',
+    vf_noTimeline: 'No events recorded yet',
+    vf_kindVisit: 'Visit',
+    vf_kindPart: 'Part',
+    vf_kindDocument: 'Document',
+
+    // Photos
+    vf_photoArchive: 'Photo archive',
+    vf_noPhotos: 'No photos uploaded for this vehicle',
+
+    // Sharing
+    vf_share: 'Share with the customer',
+    vf_shareTitle: 'Vehicle file share link',
+    vf_shareHint: 'A secure read-only link that opens the file for the customer — no login, and their phone number is not shown.',
+    vf_copyLink: 'Copy link',
+    vf_linkCopied: 'Link copied',
+    vf_rotateLink: 'New link',
+    vf_revokeLink: 'Revoke the link',
+    vf_confirmRevoke: 'Revoking stops anyone holding the link from opening the file. Continue?',
+    vf_shareRevoked: 'Share link revoked',
+    vf_linkInvalid: 'This link is invalid or has been revoked',
+    vf_linkInvalidHint: 'Contact the workshop for a new link.',
+    vf_publicFooter: 'This file was issued by the Au2Ka workshop management system.',
+    vf_print: 'Print'
   }
 };
 

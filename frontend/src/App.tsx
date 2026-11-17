@@ -10,6 +10,7 @@ import { SettingsView } from './features/settings/SettingsView';
 import { ReportsView } from './features/reports/ReportsView';
 import { MasterDataView } from './features/admin/MasterDataView';
 import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
+import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
 import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck } from 'lucide-react';
 
 export default function App() {
@@ -21,9 +22,13 @@ export default function App() {
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // M3 — the customer's shared vehicle file opens without a login. It is
+  // matched before anything else so the share link never hits the login screen.
+  const shareToken = new URLSearchParams(window.location.search).get('file');
+
   useEffect(() => {
-    initialize();
-  }, []);
+    if (!shareToken) initialize();
+  }, [shareToken]);
 
   // When user role is resolved after initialization, redirect technician to jobCards
   useEffect(() => {
@@ -31,6 +36,10 @@ export default function App() {
       setActiveTab('jobCards');
     }
   }, [user?.role]);
+
+  if (shareToken) {
+    return <PublicVehicleFile token={shareToken} />;
+  }
 
   if (!isAuthenticated) {
     return <LoginView />;
