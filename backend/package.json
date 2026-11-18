@@ -10,7 +10,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:seed:ref": "ts-node prisma/seed-reference.ts"
+    "prisma:seed:ref": "ts-node prisma/seed-reference.ts",
+    "check:system": "node tests/full-system-check.mjs",
+    "check:reset": "node tests/reset-test-data.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",

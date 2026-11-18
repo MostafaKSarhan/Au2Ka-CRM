@@ -11,6 +11,7 @@ import {
   dateKeyOf,
 } from './appointments.service';
 import { notify } from '../messaging/messaging.service';
+import { applyJobCardOpening } from '../jobCards/jobCard.open';
 
 const bookSchema = z.object({
   customerId: z.string().uuid('العميل مطلوب'),
@@ -337,12 +338,22 @@ export class AppointmentsController {
       data: { status: 'CONVERTED', jobCardId: jobCard.id },
     });
 
+    // A card opened from an appointment earns the customer exactly what a card
+    // opened at the desk earns: the subscription covers the visit, and a
+    // pending referral pays both sides.
+    const { coverageNote, referralNote } = await applyJobCardOpening({
+      jobCardId: jobCard.id,
+      customerId: appointment.customerId,
+      vehicleId: appointment.vehicleId,
+      onError: (err, what) => request.log.error({ err }, what),
+    });
+
     if (request.user) {
       await prisma.jobCardActivity.create({
         data: {
           jobCardId: jobCard.id,
           userId: request.user.id,
-          action: `تم فتح الكرت ${jobNumber} من الموعد ${appointment.reference}`,
+          action: `تم فتح الكرت ${jobNumber} من الموعد ${appointment.reference}${coverageNote}${referralNote}`,
         },
       });
     }

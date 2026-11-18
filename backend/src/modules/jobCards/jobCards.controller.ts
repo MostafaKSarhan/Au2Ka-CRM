@@ -6,32 +6,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
-import {
-  applyCoverageToJobCard,
-  expireOverdueSubscriptions,
-  findActiveSubscription,
-} from '../subscriptions/subscriptions.service';
 import { notify, queueMessage } from '../messaging/messaging.service';
-import { completeReferralOnFirstVisit, recordSpend } from '../referrals/referrals.service';
-
-/** What a job card is worth: estimated cost plus any priced extra services. */
-function jobCardTotal(jobCard: { estimatedCost: any; additionalServices: string | null }): number {
-  const base = jobCard.estimatedCost ? Number(jobCard.estimatedCost) : 0;
-
-  let extras = 0;
-  if (jobCard.additionalServices) {
-    try {
-      const parsed = JSON.parse(jobCard.additionalServices);
-      if (Array.isArray(parsed)) {
-        extras = parsed.reduce((sum: number, s: any) => sum + (Number(s?.price) || 0), 0);
-      }
-    } catch {
-      // Free-text services carry no price.
-    }
-  }
-
-  return base + extras;
-}
+import { recordSpend } from '../referrals/referrals.service';
+import { applyJobCardOpening, jobCardWorth } from './jobCard.open';
 
 /** M6 — which status change tells the customer something, and with what wording. */
 const STATUS_TEMPLATES: Record<string, string> = {
@@ -251,35 +228,14 @@ export class JobCardsController {
       await prisma.vehicle.update({ where: { id: vehicleId }, data: { mileage: reading } });
     }
 
-    // M1 — subscription coverage: a free visit is consumed if the customer
-    // still has one, otherwise the plan discount is recorded on the card.
-    await expireOverdueSubscriptions();
-    const subscription = await findActiveSubscription(customerId, vehicleId);
-
-    let coverageNote = '';
-    if (subscription) {
-      const coverage = await prisma.$transaction(tx =>
-        applyCoverageToJobCard(tx, subscription, created.id),
-      );
-
-      coverageNote = coverage.isFreeVisit
-        ? ` — تم خصم زيارة مجانية من اشتراك ${subscription.subscriptionNumber}`
-        : coverage.discountPercent > 0
-          ? ` — تم تطبيق خصم اشتراك ${coverage.discountPercent}%`
-          : ` — العميل مشترك (${subscription.subscriptionNumber}) بدون رصيد زيارات متبقٍ`;
-    }
-
-    // M5 — a referred customer's first visit is what earns both sides their
-    // reward. A failure here must never block opening the card.
-    let referralNote = '';
-    try {
-      const referral = await completeReferralOnFirstVisit(customerId, created.id);
-      if (referral) {
-        referralNote = ` — تم احتساب مكافأة الإحالة (${referral.referrerPoints} نقطة للمُحيل)`;
-      }
-    } catch (err) {
-      request.log.error({ err }, 'failed to complete referral on first visit');
-    }
+    // Subscription coverage and the referral reward, shared with the
+    // appointment route so neither door can skip them.
+    const { coverageNote, referralNote } = await applyJobCardOpening({
+      jobCardId: created.id,
+      customerId,
+      vehicleId,
+      onError: (err, what) => request.log.error({ err }, what),
+    });
 
     // Log Activity in Arabic
     if (request.user) {
@@ -431,7 +387,7 @@ export class JobCardsController {
       // customer's lifetime total, their points and their tier.
       if (updates.status === 'DELIVERED') {
         try {
-          const total = jobCardTotal(jobCard);
+          const total = await jobCardWorth(jobCard);
           await recordSpend(jobCard.customerId, total, jobCard.id);
         } catch (err) {
           request.log.error({ err }, 'failed to record customer spend');
