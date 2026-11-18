@@ -6,9 +6,7 @@ import axios from 'axios';
  * Kept separate from the staff client on purpose: the portal has its own
  * token, its own storage key, and must never send a staff JWT.
  */
-const hostname = window.location.hostname;
-const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-const API_ORIGIN = isLocalhost ? `http://${hostname}:5000` : 'https://api-crm.au2ka.cloud';
+import { API_ORIGIN } from '../../lib/apiOrigin';
 
 export const PORTAL_UPLOADS_BASE_URL = API_ORIGIN;
 

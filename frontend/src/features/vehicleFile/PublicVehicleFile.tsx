@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Shield, Printer } from 'lucide-react';
 import { useTranslation } from '../../store/LanguageContext';
+import { API_ORIGIN } from '../../lib/apiOrigin';
 import { VehicleFileContent } from './VehicleFileContent';
 import type { VehicleFile } from './VehicleFileContent';
 
@@ -17,12 +18,8 @@ export function PublicVehicleFile({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const hostname = window.location.hostname;
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    const origin = isLocalhost ? `http://${hostname}:5000` : 'https://api-crm.au2ka.cloud';
-
     axios
-      .get(`${origin}/api/v1/public/vehicle-file/${encodeURIComponent(token)}`)
+      .get(`${API_ORIGIN}/api/v1/public/vehicle-file/${encodeURIComponent(token)}`)
       .then(res => setFile(res.data))
       .catch(err => setError(err.response?.data?.message || t('vf_linkInvalid')))
       .finally(() => setLoading(false));

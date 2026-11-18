@@ -58,8 +58,19 @@ app.register(fastifySwaggerUi, {
 });
 
 // Register plugins
+//
+// CORS_ORIGINS is a comma-separated list of the sites allowed to call this
+// API — set it in production so only the workshop's own domains can. Left
+// unset (development, or a deployment where nginx serves the site and the API
+// on one origin and no cross-site call happens at all) any origin is
+// reflected, which is how this has always behaved.
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
 app.register(cors, {
-  origin: true,
+  origin: allowedOrigins.length ? allowedOrigins : true,
   credentials: true,
 });
 app.register(multipart, {
