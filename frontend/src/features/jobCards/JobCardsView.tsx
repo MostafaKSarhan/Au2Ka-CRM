@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera } from 'lucide-react';
+import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera, ClipboardCheck } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
 import html2canvas from 'html2canvas-pro';
 import { QRCodeCanvas } from 'qrcode.react';
+import { InspectionModal } from '../inspections/InspectionModal';
 import { useTranslation } from '../../store/LanguageContext';
 
 const STATUS_COLUMNS = [
@@ -54,6 +55,7 @@ export function JobCardsView() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [inspectionJobId, setInspectionJobId] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   // Creation Form
@@ -636,7 +638,10 @@ export function JobCardsView() {
                         className={`glass-card hover:border-zinc-700/60 p-4 rounded-lg cursor-pointer space-y-3 border border-zinc-800/50 hover:bg-zinc-800/10 transition ${isRtl ? 'text-right' : 'text-left'}`}
                       >
                         <div>
-                          <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                            <CoverageBadge job={job} t={t} />
+                          </div>
                           <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{job.customerComplaint}</p>
                         </div>
 
@@ -949,9 +954,20 @@ export function JobCardsView() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs font-bold text-zinc-500 font-mono">{t('jobDetailsTitle')}</span>
-                <h2 className="text-2xl font-bold text-white mt-0.5 font-mono">{selectedJob.jobNumber}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-white mt-0.5 font-mono">
+                  {selectedJob.jobNumber}
+                  <CoverageBadge job={selectedJob} t={t} />
+                </h2>
               </div>
               <div className="flex items-center gap-2">
+                {/* M2 — structured technical inspection form */}
+                <button
+                  onClick={() => setInspectionJobId(selectedJob.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-bold text-zinc-200 rounded transition cursor-pointer"
+                >
+                  <ClipboardCheck size={14} /> {t('insp_title')}
+                </button>
+
                 {/* Invoice Button Trigger */}
                 {(selectedJob.status === 'WAITING_APPROVAL' || selectedJob.status === 'COMPLETED' || selectedJob.status === 'DELIVERED') && (
                   <button
@@ -1781,6 +1797,43 @@ export function JobCardsView() {
           </div>
         </div>
       )}
+
+      {/* M2 — the technical inspection form for the open card */}
+      {inspectionJobId && (
+        <InspectionModal jobCardId={inspectionJobId} onClose={() => setInspectionJobId(null)} />
+      )}
     </div>
+  );
+}
+
+/**
+ * Shows how a subscription covered this job card (M1): either the free visit
+ * that was deducted when the card was opened, or the plan discount applied.
+ */
+function CoverageBadge({ job, t }: { job: any; t: (key: string) => string }) {
+  if (!job?.subscriptionId) return null;
+
+  const discount = Number(job.subscriptionDiscount || 0);
+
+  if (job.isFreeVisit) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+        ✓ {t('sub_badgeFreeVisit')}
+      </span>
+    );
+  }
+
+  if (discount > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-400">
+        {t('sub_badgeDiscount')} {discount}%
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-[10px] font-bold text-zinc-400">
+      {t('sub_badge')}
+    </span>
   );
 }

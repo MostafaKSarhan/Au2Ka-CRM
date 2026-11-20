@@ -8,20 +8,40 @@ import { VehiclesView } from './features/vehicles/VehiclesView';
 import { JobCardsView } from './features/jobCards/JobCardsView';
 import { SettingsView } from './features/settings/SettingsView';
 import { ReportsView } from './features/reports/ReportsView';
-import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4 } from 'lucide-react';
+import { MasterDataView } from './features/admin/MasterDataView';
+import { SubscriptionsView } from './features/subscriptions/SubscriptionsView';
+import { PublicVehicleFile } from './features/vehicleFile/PublicVehicleFile';
+import { CustomerPortal } from './features/portal/CustomerPortal';
+import { PwaBanner } from './features/pwa/PwaBanner';
+import { MessagesView } from './features/messaging/MessagesView';
+import { NotificationBell } from './features/messaging/NotificationBell';
+import { MonthlyReportsView } from './features/inspections/MonthlyReportsView';
+import { AppointmentsView } from './features/appointments/AppointmentsView';
+import { ReferralsView } from './features/referrals/ReferralsView';
+import { InventoryView } from './features/inventory/InventoryView';
+import { InvoicesView } from './features/zatca/InvoicesView';
+import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays, Gift, Boxes, Receipt as ReceiptIcon } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
   const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports'>(
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages' | 'monthlyReports' | 'appointments' | 'referrals' | 'inventory' | 'invoices'>(
     isTechnician ? 'jobCards' : 'dashboard'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // M3 and M7 — the shared vehicle file and the customer portal both open
+  // without a staff login, so they are matched before anything else and the
+  // staff session is never initialised for them.
+  const params = new URLSearchParams(window.location.search);
+  const shareToken = params.get('file');
+  const isPortal = params.get('portal') === '1';
+  const referralCode = params.get('ref');
+
   useEffect(() => {
-    initialize();
-  }, []);
+    if (!shareToken && !isPortal) initialize();
+  }, [shareToken, isPortal]);
 
   // When user role is resolved after initialization, redirect technician to jobCards
   useEffect(() => {
@@ -29,6 +49,16 @@ export default function App() {
       setActiveTab('jobCards');
     }
   }, [user?.role]);
+
+  if (shareToken) {
+    return <PublicVehicleFile token={shareToken} />;
+  }
+
+  // A referral link lands on the portal too — the code is shown to the
+  // customer so reception can record who referred them.
+  if (isPortal || referralCode) {
+    return <CustomerPortal />;
+  }
 
   if (!isAuthenticated) {
     return <LoginView />;
@@ -39,7 +69,15 @@ export default function App() {
     { id: 'customers', label: t('customers'), icon: Users, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'vehicles', label: t('vehicles'), icon: Car, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'jobCards', label: t('jobCards'), icon: Wrench, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
+    { id: 'appointments', label: t('appointments'), icon: CalendarDays, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'subscriptions', label: t('subscriptions'), icon: BadgeCheck, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'invoices', label: t('invoices'), icon: ReceiptIcon, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'inventory', label: t('inventory'), icon: Boxes, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
+    { id: 'referrals', label: t('referrals'), icon: Gift, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'messages', label: t('messages'), icon: MessageSquare, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'monthlyReports', label: t('monthlyReports'), icon: FileBarChart, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'reports', label: t('reports'), icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'masterData', label: t('masterData'), icon: Database, roles: ['ADMIN'] },
     { id: 'settings', label: t('settings'), icon: Settings, roles: ['ADMIN'] },
   ];
 
@@ -143,7 +181,11 @@ export default function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
-        <header className="h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-md">
+        <PwaBanner />
+
+        {/* backdrop-blur creates a stacking context, so the header needs its own
+            z-index for the notifications dropdown to sit above the page. */}
+        <header className="relative z-30 h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-md">
           {/* Mobile/Tablet hamburger & logo trigger */}
           <div className="flex items-center gap-3">
             <button 
@@ -160,6 +202,9 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* In-system alerts (M6) */}
+            <NotificationBell />
+
             {/* Language Switcher */}
             <button
               onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
@@ -183,7 +228,15 @@ export default function App() {
           {activeTab === 'customers' && !isTechnician && <CustomersView />}
           {activeTab === 'vehicles' && !isTechnician && <VehiclesView />}
           {activeTab === 'jobCards' && <JobCardsView />}
+          {activeTab === 'appointments' && !isTechnician && <AppointmentsView />}
+          {activeTab === 'subscriptions' && !isTechnician && <SubscriptionsView />}
+          {activeTab === 'invoices' && !isTechnician && <InvoicesView />}
+          {activeTab === 'inventory' && <InventoryView />}
+          {activeTab === 'referrals' && !isTechnician && <ReferralsView />}
+          {activeTab === 'messages' && !isTechnician && <MessagesView />}
+          {activeTab === 'monthlyReports' && !isTechnician && <MonthlyReportsView />}
           {activeTab === 'reports' && !isTechnician && <ReportsView />}
+          {activeTab === 'masterData' && user?.role === 'ADMIN' && <MasterDataView />}
           {activeTab === 'settings' && !isTechnician && <SettingsView />}
         </main>
       </div>

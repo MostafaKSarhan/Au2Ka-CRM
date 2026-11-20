@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
-import { Search, Car, User, PlusCircle } from 'lucide-react';
+import { VehicleFileView } from '../vehicleFile/VehicleFileView';
+import { Search, Car, User, PlusCircle, FolderOpen } from 'lucide-react';
 
 const POPULAR_BRANDS = [
   'تويوتا', 'هيونداي', 'كيا', 'نيسان', 'فورد',
@@ -20,6 +21,7 @@ export function VehiclesView() {
 
   // Modal controls
   const [showAddModal, setShowAddModal] = useState(false);
+  const [fileVehicleId, setFileVehicleId] = useState<string | null>(null);
 
   // Forms
   const [form, setForm] = useState({
@@ -160,6 +162,14 @@ export function VehiclesView() {
                   {isRtl ? `${v.mileage.toLocaleString('ar-EG')} كم` : `${v.mileage.toLocaleString('en-US')} km`}
                 </div>
               </div>
+
+              {/* M3 — opens the vehicle's lifetime file */}
+              <button
+                onClick={() => setFileVehicleId(v.id)}
+                className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 py-2 text-xs font-bold text-zinc-300 transition hover:border-primary/40 hover:text-white"
+              >
+                <FolderOpen size={14} /> {t('vf_openFile')}
+              </button>
             </div>
           ))}
         </div>
@@ -296,6 +306,10 @@ export function VehiclesView() {
             </form>
           </div>
         </div>
+      )}
+
+      {fileVehicleId && (
+        <VehicleFileView vehicleId={fileVehicleId} onClose={() => setFileVehicleId(null)} />
       )}
     </div>
   );

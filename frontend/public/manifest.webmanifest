@@ -1,0 +1,41 @@
+{
+  "name": "Au2Ka CRM — نظام إدارة ورش السيارات",
+  "short_name": "Au2Ka",
+  "description": "إدارة كروت الاستقبال والعملاء والاشتراكات والمواعيد والمخزون",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080d1a",
+  "theme_color": "#080d1a",
+  "dir": "rtl",
+  "lang": "ar",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "كروت استقبال السيارات",
+      "short_name": "الكروت",
+      "url": "/?tab=jobCards"
+    },
+    {
+      "name": "بوابة العملاء",
+      "short_name": "بوابة العميل",
+      "url": "/?portal=1"
+    }
+  ]
+}
