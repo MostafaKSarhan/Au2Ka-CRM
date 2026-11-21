@@ -24,8 +24,9 @@ interface Referral {
 
 const TIER_STYLES: Record<string, string> = {
   REGULAR: 'border-zinc-700 bg-zinc-800/60 text-zinc-400',
-  SILVER: 'border-sky-500/25 bg-sky-500/10 text-sky-400',
-  VIP: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
+  SILVER: 'border-slate-400/30 bg-slate-400/10 text-slate-300',
+  GOLD: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
+  PLATINUM: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -108,8 +109,9 @@ export function ReferralsView() {
       pointValue: String(settings?.pointValue ?? 1),
       pointsPerRiyal: String(settings?.pointsPerRiyal ?? 0),
       tierBasis: settings?.tierBasis || 'SPEND',
-      silverThreshold: String(settings?.silverThreshold ?? 5000),
-      vipThreshold: String(settings?.vipThreshold ?? 15000),
+      silverThreshold: String(settings?.silverThreshold ?? 1000),
+      goldThreshold: String(settings?.goldThreshold ?? 5000),
+      platinumThreshold: String(settings?.platinumThreshold ?? 15000),
     });
     setMsg('');
     setShowSettings(true);
@@ -127,7 +129,8 @@ export function ReferralsView() {
         pointsPerRiyal: Number(settingsForm.pointsPerRiyal),
         tierBasis: settingsForm.tierBasis,
         silverThreshold: Number(settingsForm.silverThreshold),
-        vipThreshold: Number(settingsForm.vipThreshold),
+        goldThreshold: Number(settingsForm.goldThreshold),
+        platinumThreshold: Number(settingsForm.platinumThreshold),
       });
       setSettings(res.data.settings);
       setMsg('✅ ' + t('ref_settingsSaved'));
@@ -207,7 +210,8 @@ export function ReferralsView() {
   const tierLabel: Record<string, string> = {
     REGULAR: t('ref_tierRegular'),
     SILVER: t('ref_tierSilver'),
-    VIP: t('ref_tierVip'),
+    GOLD: t('ref_tierGold'),
+    PLATINUM: t('ref_tierPlatinum'),
   };
 
   return (
@@ -245,7 +249,7 @@ export function ReferralsView() {
             value={(report.byStatus?.REGISTERED || 0) + (report.byStatus?.PENDING || 0)}
             tone="sky"
           />
-          <Stat icon={Crown} label={t('ref_statVip')} value={report.tiers?.VIP || 0} tone="amber" />
+          <Stat icon={Crown} label={t('ref_statPlatinum')} value={report.tiers?.PLATINUM || 0} tone="amber" />
           <Stat
             icon={Coins}
             label={t('ref_statPoints')}
@@ -434,8 +438,8 @@ export function ReferralsView() {
               </Select>
             </Field>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label={t('ref_silverThreshold')}>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label={t('ref_silverThreshold')} hint={t('ref_thresholdHint')}>
                 <TextInput
                   type="number"
                   min={0}
@@ -443,12 +447,20 @@ export function ReferralsView() {
                   onChange={e => setSettingsForm({ ...settingsForm, silverThreshold: e.target.value })}
                 />
               </Field>
-              <Field label={t('ref_vipThreshold')}>
+              <Field label={t('ref_goldThreshold')}>
                 <TextInput
                   type="number"
                   min={0}
-                  value={settingsForm.vipThreshold}
-                  onChange={e => setSettingsForm({ ...settingsForm, vipThreshold: e.target.value })}
+                  value={settingsForm.goldThreshold}
+                  onChange={e => setSettingsForm({ ...settingsForm, goldThreshold: e.target.value })}
+                />
+              </Field>
+              <Field label={t('ref_platinumThreshold')}>
+                <TextInput
+                  type="number"
+                  min={0}
+                  value={settingsForm.platinumThreshold}
+                  onChange={e => setSettingsForm({ ...settingsForm, platinumThreshold: e.target.value })}
                 />
               </Field>
             </div>

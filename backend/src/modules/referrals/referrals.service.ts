@@ -97,9 +97,21 @@ export async function addPoints(
   });
 }
 
-/** Which tier a figure falls into, given the thresholds. */
-export function tierFor(value: number, silver: number, vip: number): CustomerTier {
-  if (value >= vip) return 'VIP';
+/**
+ * Which tier a figure falls into, given the thresholds.
+ *
+ * The tier is a rating the workshop gives the customer, not something the
+ * customer buys: it is reached by spending, and the ladder has four rungs so
+ * a new customer can see a next step rather than one distant jump.
+ */
+export function tierFor(
+  value: number,
+  silver: number,
+  gold: number,
+  platinum: number,
+): CustomerTier {
+  if (value >= platinum) return 'PLATINUM';
+  if (value >= gold) return 'GOLD';
   if (value >= silver) return 'SILVER';
   return 'REGULAR';
 }
@@ -136,14 +148,16 @@ export async function refreshTier(customerId: string): Promise<CustomerTier> {
       ? tierFor(
           Number(subscription.plan.price),
           Number(settings.silverThreshold),
-          Number(settings.vipThreshold),
+          Number(settings.goldThreshold),
+          Number(settings.platinumThreshold),
         )
       : 'REGULAR';
   } else {
     tier = tierFor(
       Number(customer.lifetimeSpend),
       Number(settings.silverThreshold),
-      Number(settings.vipThreshold),
+      Number(settings.goldThreshold),
+      Number(settings.platinumThreshold),
     );
   }
 

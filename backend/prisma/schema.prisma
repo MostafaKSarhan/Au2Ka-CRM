@@ -796,10 +796,12 @@ model Appointment {
 // غير مشمولة في هذا النطاق.
 // =====================================================================
 
+/// مستوى العميل — يُحسب تلقائيًا من إنفاقه التراكمي، ولا يشتريه ولا يدفع ثمنه.
 enum CustomerTier {
   REGULAR
   SILVER
-  VIP
+  GOLD
+  PLATINUM
 }
 
 enum ReferralStatus {
@@ -844,9 +846,11 @@ model ReferralSettings {
   /// Points granted per riyal spent; 0 turns spend-earning off.
   pointsPerRiyal Decimal @default(0) @db.Decimal(10, 4)
 
-  tierBasis       TierBasis @default(SPEND)
-  silverThreshold Decimal   @default(5000) @db.Decimal(10, 2)
-  vipThreshold    Decimal   @default(15000) @db.Decimal(10, 2)
+  tierBasis         TierBasis @default(SPEND)
+  /// حدود الإنفاق التراكمي التي ينتقل عندها العميل من مستوى إلى الذي يليه.
+  silverThreshold   Decimal   @default(1000) @db.Decimal(10, 2)
+  goldThreshold     Decimal   @default(5000) @db.Decimal(10, 2)
+  platinumThreshold Decimal   @default(15000) @db.Decimal(10, 2)
 
   isActive  Boolean  @default(true)
   updatedAt DateTime @updatedAt

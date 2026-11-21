@@ -22,7 +22,8 @@ const settingsSchema = z.object({
   pointsPerRiyal: z.coerce.number().min(0).max(100).optional(),
   tierBasis: z.enum(['SPEND', 'SUBSCRIPTION']).optional(),
   silverThreshold: z.coerce.number().min(0).optional(),
-  vipThreshold: z.coerce.number().min(0).optional(),
+  goldThreshold: z.coerce.number().min(0).optional(),
+  platinumThreshold: z.coerce.number().min(0).optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -62,10 +63,17 @@ export class ReferralsController {
     const data = parse(settingsSchema, request.body);
     const current = await getSettings();
 
+    // السلّم لا يصعد إلا لأعلى: حد كل مستوى فوق الذي قبله، وإلا صار مستوى
+    // لا يبلغه أحد أبدًا.
     const silver = data.silverThreshold ?? Number(current.silverThreshold);
-    const vip = data.vipThreshold ?? Number(current.vipThreshold);
-    if (vip < silver) {
-      throw new AppError('حد مستوى VIP يجب أن يكون أعلى من حد المستوى المميز', 400);
+    const gold = data.goldThreshold ?? Number(current.goldThreshold);
+    const platinum = data.platinumThreshold ?? Number(current.platinumThreshold);
+
+    if (gold <= silver) {
+      throw new AppError('حد المستوى الذهبي يجب أن يكون أعلى من الفضي', 400);
+    }
+    if (platinum <= gold) {
+      throw new AppError('حد المستوى البلاتيني يجب أن يكون أعلى من الذهبي', 400);
     }
 
     const settings = await prisma.referralSettings.update({ where: { id: current.id }, data });

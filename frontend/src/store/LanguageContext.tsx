@@ -791,8 +791,9 @@ const translations = {
 
     // المستويات
     ref_tierRegular: 'عادي',
-    ref_tierSilver: 'مميز',
-    ref_tierVip: 'VIP',
+    ref_tierSilver: 'فضي',
+    ref_tierGold: 'ذهبي',
+    ref_tierPlatinum: 'بلاتيني',
 
     // قاعدة المكافأة
     ref_settings: 'قاعدة المكافأة',
@@ -810,13 +811,15 @@ const translations = {
     ref_tierBasis: 'أساس تحديد المستوى',
     ref_basisSpend: 'إجمالي الإنفاق',
     ref_basisSubscription: 'قيمة الباقة المشترك فيها',
-    ref_silverThreshold: 'حد المستوى المميز',
-    ref_vipThreshold: 'حد مستوى VIP',
+    ref_silverThreshold: 'حد المستوى الفضي',
+    ref_goldThreshold: 'حد المستوى الذهبي',
+    ref_platinumThreshold: 'حد المستوى البلاتيني',
+    ref_thresholdHint: 'الإنفاق التراكمي بالريال الذي يرتقي عنده العميل',
 
     // إحصائيات
     ref_statCompleted: 'إحالات مكتملة',
     ref_statPending: 'إحالات قيد الانتظار',
-    ref_statVip: 'عملاء VIP',
+    ref_statPlatinum: 'عملاء بلاتينيون',
     ref_statPoints: 'النقاط القائمة',
 
     // ===== M10 — إدارة المخزون وقطع الغيار =====
@@ -1826,8 +1829,9 @@ const translations = {
 
     // Tiers
     ref_tierRegular: 'Regular',
-    ref_tierSilver: 'Preferred',
-    ref_tierVip: 'VIP',
+    ref_tierSilver: 'Silver',
+    ref_tierGold: 'Gold',
+    ref_tierPlatinum: 'Platinum',
 
     // Reward rule
     ref_settings: 'Reward rule',
@@ -1845,13 +1849,15 @@ const translations = {
     ref_tierBasis: 'Tier is based on',
     ref_basisSpend: 'Lifetime spend',
     ref_basisSubscription: 'Subscribed plan value',
-    ref_silverThreshold: 'Preferred tier threshold',
-    ref_vipThreshold: 'VIP tier threshold',
+    ref_silverThreshold: 'Silver threshold',
+    ref_goldThreshold: 'Gold threshold',
+    ref_platinumThreshold: 'Platinum threshold',
+    ref_thresholdHint: 'Lifetime spend in SAR at which the customer moves up',
 
     // Stats
     ref_statCompleted: 'Completed referrals',
     ref_statPending: 'Pending referrals',
-    ref_statVip: 'VIP customers',
+    ref_statPlatinum: 'Platinum customers',
     ref_statPoints: 'Outstanding points',
 
     // ===== M10 — Inventory & spare parts =====
