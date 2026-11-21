@@ -15,7 +15,8 @@
 | الملف | الغرض |
 |---|---|
 | `deploy.sh` | النشر كاملًا: نسخة احتياطية، سحب الكود، تثبيت، تحديث المخطط، بناء، إعادة تشغيل |
-| `nginx/au2ka.fasla.cloud.conf` | الموقع: يقدّم الواجهة ويمرّر `/api/` و `/uploads/` للباكند |
+| `caddy/au2ka.caddy` | **المستعمل حاليًا** — خادم FaslaTech يعمل بـ Caddy، وهو يصدر الشهادة ويجددها وحده |
+| `nginx/au2ka.fasla.cloud.conf` | البديل لخادم يعمل بـ nginx: يقدّم الواجهة ويمرّر `/api/` و `/uploads/` للباكند |
 | `nginx/au2ka-api.fasla.cloud.conf` | نطاق مستقل للـ API — اختياري، غير مستخدم في الإعداد الافتراضي |
 | `systemd/au2ka-api.service` | خدمة الباكند، تعمل من `dist/` لا من `ts-node` |
 | `.env.production.example` | قالب بيئة الإنتاج — يُنسخ إلى `backend/.env` ويُملأ على الخادم |
