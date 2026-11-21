@@ -174,21 +174,21 @@ export function InspectionItemsTab() {
                   <button
                     onClick={() => move(item, -1)}
                     disabled={index === 0}
-                    className="cursor-pointer text-zinc-600 transition hover:text-primary disabled:opacity-25"
+                    className="cursor-pointer text-zinc-600 transition hover:text-primary-text disabled:opacity-25"
                   >
                     <ArrowUp size={11} />
                   </button>
                   <button
                     onClick={() => move(item, 1)}
                     disabled={index === sorted.length - 1}
-                    className="cursor-pointer text-zinc-600 transition hover:text-primary disabled:opacity-25"
+                    className="cursor-pointer text-zinc-600 transition hover:text-primary-text disabled:opacity-25"
                   >
                     <ArrowDown size={11} />
                   </button>
                 </div>
               </div>
             </td>
-            <td className="px-3 py-2.5 font-mono text-[11px] text-primary">{item.code}</td>
+            <td className="px-3 py-2.5 font-mono text-[11px] text-primary-text">{item.code}</td>
             <td className="px-3 py-2.5 font-semibold text-white">{item.nameAr}</td>
             <td className="px-3 py-2.5 text-zinc-400">{item.nameEn}</td>
             <td className="px-3 py-2.5 text-xs text-zinc-500">{item.category || '—'}</td>

@@ -52,7 +52,7 @@ export function SettingsView() {
           {user ? (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className={`rounded-full bg-primary/20 p-4 text-primary ${isRtl ? 'ml-2' : 'mr-2'}`}>
+                <div className={`rounded-full bg-primary/20 p-4 text-primary-text ${isRtl ? 'ml-2' : 'mr-2'}`}>
                   <User size={32} />
                 </div>
                 <div>
@@ -121,7 +121,7 @@ export function SettingsView() {
       {isAdmin && (
         <div className="glass-panel rounded-xl p-6">
           <h2 className="mb-2 flex items-center gap-2 border-b border-zinc-800 pb-2 text-lg font-bold text-white">
-            <Users size={20} className="text-primary" /> {t("usersTab")}
+            <Users size={20} className="text-primary-text" /> {t("usersTab")}
           </h2>
           <p className="text-sm text-zinc-400">
             {lang === "ar"

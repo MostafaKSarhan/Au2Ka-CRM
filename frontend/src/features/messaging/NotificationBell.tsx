@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bell, Check, Wrench, BadgeCheck, FileText, Info } from 'lucide-react';
 import { api } from '../../lib/api';
+import { dateTimeLocal } from '../../lib/datetime';
 import { useTranslation } from '../../store/LanguageContext';
 
 interface Notification {
@@ -22,7 +23,7 @@ const ICONS: Record<string, React.ElementType> = {
 };
 
 const TONES: Record<string, string> = {
-  JOB_CARD: 'text-primary bg-primary/10',
+  JOB_CARD: 'text-primary-text bg-primary/10',
   SUBSCRIPTION: 'text-emerald-400 bg-emerald-500/10',
   DOCUMENT: 'text-amber-400 bg-amber-500/10',
   SYSTEM: 'text-sky-400 bg-sky-500/10',
@@ -144,7 +145,7 @@ export function NotificationBell() {
                         </span>
                       )}
                       <span className="mt-1 block font-mono text-[10px] text-zinc-600" dir="ltr">
-                        {new Date(n.createdAt).toISOString().slice(0, 16).replace('T', ' ')}
+                        {dateTimeLocal(n.createdAt)}
                       </span>
                     </span>
                     {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}

@@ -192,7 +192,7 @@ export function CitiesTab() {
                 onClick={() => setFilterCountry(filterCountry === c.id ? '' : c.id)}
                 className="cursor-pointer font-semibold"
               >
-                <span className="me-1.5 font-mono text-[11px] text-primary">{c.code}</span>
+                <span className="me-1.5 font-mono text-[11px] text-primary-text">{c.code}</span>
                 {isAr ? c.nameAr : c.nameEn}
                 <span className="ms-1.5 text-[11px] text-zinc-500">({c._count.cities})</span>
               </button>

@@ -5,6 +5,19 @@ import {
   findActiveSubscription,
 } from '../subscriptions/subscriptions.service';
 import { completeReferralOnFirstVisit } from '../referrals/referrals.service';
+import { nextDailyNumber } from '../../utils/dailyNumber';
+
+/** رقم كرت العمل التالي — واحد لكل الأبواب التي تفتح كرتًا. */
+export async function nextJobNumber(): Promise<string> {
+  return nextDailyNumber('WRK', async startsWith => {
+    const latest = await prisma.jobCard.findFirst({
+      where: { jobNumber: { startsWith } },
+      orderBy: { jobNumber: 'desc' },
+      select: { jobNumber: true },
+    });
+    return latest?.jobNumber;
+  });
+}
 
 /**
  * Everything that must happen the moment a job card is opened, whichever door

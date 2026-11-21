@@ -264,7 +264,7 @@ export function ZatcaTab() {
                   navigator.clipboard?.writeText(settings.csrSubject!);
                   setMsg('✅ ' + t('vf_linkCopied'));
                 }}
-                className="cursor-pointer rounded p-1.5 text-zinc-500 transition hover:text-primary"
+                className="cursor-pointer rounded p-1.5 text-zinc-500 transition hover:text-primary-text"
               >
                 <Copy size={14} />
               </button>

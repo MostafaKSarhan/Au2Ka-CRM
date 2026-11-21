@@ -205,7 +205,7 @@ export function InvoicesView() {
           {invoices.map(inv => (
             <tr key={inv.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
               <td className="px-3 py-2.5">
-                <button onClick={() => openInvoice(inv.id)} className="cursor-pointer font-mono text-xs text-primary hover:underline">
+                <button onClick={() => openInvoice(inv.id)} className="cursor-pointer font-mono text-xs text-primary-text hover:underline">
                   {inv.invoiceNumber}
                 </button>
                 <span className="block font-mono text-[10px] text-zinc-600" dir="ltr">
@@ -218,7 +218,7 @@ export function InvoicesView() {
               <td className="px-3 py-2.5 text-zinc-300">
                 {inv.buyerName || inv.customer?.fullName || '—'}
                 {inv.jobCard && (
-                  <span className="block font-mono text-[10px] text-primary">{inv.jobCard.jobNumber}</span>
+                  <span className="block font-mono text-[10px] text-primary-text">{inv.jobCard.jobNumber}</span>
                 )}
               </td>
               <td className="px-3 py-2.5 font-mono text-xs text-zinc-400">{Number(inv.netAmount).toLocaleString()}</td>
@@ -339,12 +339,12 @@ function InvoiceDocument({
         <div className="glass-panel space-y-5 rounded-xl p-6">
           <div className="flex items-start justify-between gap-3 border-b border-zinc-800 pb-4">
             <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-primary/20 p-2 text-primary">
+              <span className="rounded-lg bg-primary/20 p-2 text-primary-text">
                 <Shield size={22} />
               </span>
               <div>
                 <p className="text-xl font-black tracking-wider text-white">
-                  Au<span className="text-primary">2</span>Ka
+                  Au<span className="text-primary-text">2</span>Ka
                 </p>
                 <p className="text-[11px] text-zinc-500">
                   {invoice.type === 'SIMPLIFIED' ? t('zt_simplified') : t('zt_standard')}
@@ -374,7 +374,7 @@ function InvoiceDocument({
             {invoice.jobCard && (
               <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
                 <p className="text-[11px] text-zinc-500">{t('vf_linkJobCard')}</p>
-                <p className="font-mono text-sm font-bold text-primary">{invoice.jobCard.jobNumber}</p>
+                <p className="font-mono text-sm font-bold text-primary-text">{invoice.jobCard.jobNumber}</p>
               </div>
             )}
           </div>
@@ -444,7 +444,7 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
   return (
     <div className="flex items-center justify-between">
       <span className={bold ? 'font-bold text-white' : 'text-zinc-400'}>{label}</span>
-      <span className={`font-mono ${bold ? 'text-base font-bold text-primary' : 'text-zinc-300'}`}>{value}</span>
+      <span className={`font-mono ${bold ? 'text-base font-bold text-primary-text' : 'text-zinc-300'}`}>{value}</span>
     </div>
   );
 }
@@ -462,7 +462,7 @@ function Stat({
 }) {
   const tones: Record<string, string> = {
     sky: 'text-sky-400 bg-sky-500/10',
-    primary: 'text-primary bg-primary/10',
+    primary: 'text-primary-text bg-primary/10',
     amber: 'text-amber-400 bg-amber-500/10',
     emerald: 'text-emerald-400 bg-emerald-500/10',
   };

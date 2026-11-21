@@ -170,7 +170,7 @@ export function MonthlyReportsView() {
           {filtered.map(r => (
             <tr key={r.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
               <td className="px-3 py-2.5">
-                <button onClick={() => openReport(r)} className="cursor-pointer font-semibold text-white hover:text-primary">
+                <button onClick={() => openReport(r)} className="cursor-pointer font-semibold text-white hover:text-primary-text">
                   {r.customer.fullName}
                 </button>
                 <span className="block font-mono text-[11px] text-zinc-600" dir="ltr">
@@ -179,7 +179,7 @@ export function MonthlyReportsView() {
               </td>
               <td className="px-3 py-2.5 text-xs text-zinc-400">
                 {r.vehicle.brand} {r.vehicle.model}
-                <span className="block font-mono text-[11px] text-primary">{r.vehicle.plateNumber}</span>
+                <span className="block font-mono text-[11px] text-primary-text">{r.vehicle.plateNumber}</span>
               </td>
               <td className="px-3 py-2.5 text-sm text-zinc-300">{r.visits}</td>
               <td className="px-3 py-2.5 font-mono text-[11px] text-zinc-500">
@@ -286,12 +286,12 @@ function ReportDocument({
           {/* Header in the workshop's identity */}
           <div className="flex items-start justify-between gap-3 border-b border-zinc-800 pb-4">
             <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-primary/20 p-2 text-primary">
+              <span className="rounded-lg bg-primary/20 p-2 text-primary-text">
                 <Shield size={22} />
               </span>
               <div>
                 <p className="text-xl font-black tracking-wider text-white">
-                  Au<span className="text-primary">2</span>Ka
+                  Au<span className="text-primary-text">2</span>Ka
                 </p>
                 <p className="text-[11px] text-zinc-500">{t('rep_docTitle')}</p>
               </div>
@@ -316,7 +316,7 @@ function ReportDocument({
               <p className="text-[11px] text-zinc-500">{t('sub_vehicle')}</p>
               <p className="text-sm font-bold text-white">
                 {report.vehicle?.brand} {report.vehicle?.model}
-                <span className="ms-2 font-mono text-primary">{report.vehicle?.plateNumber}</span>
+                <span className="ms-2 font-mono text-primary-text">{report.vehicle?.plateNumber}</span>
               </p>
             </div>
           </div>

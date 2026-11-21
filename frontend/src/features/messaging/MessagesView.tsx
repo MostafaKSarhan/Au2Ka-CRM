@@ -3,6 +3,7 @@ import {
   MessageSquare, Send, RefreshCw, X, Search, CheckCheck, AlertTriangle, BellOff, Play,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { dateTimeLocal } from '../../lib/datetime';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
 import {
@@ -199,24 +200,36 @@ export function MessagesView() {
               <td className="px-3 py-2.5 text-xs text-zinc-400">
                 {m.template ? (isAr ? m.template.nameAr : m.template.nameEn) : t('msg_freeText')}
                 {m.jobCard && (
-                  <span className="block font-mono text-[10px] text-primary">{m.jobCard.jobNumber}</span>
+                  <span className="block font-mono text-[10px] text-primary-text">{m.jobCard.jobNumber}</span>
                 )}
               </td>
               <td className="max-w-[260px] px-3 py-2.5">
+                {/* النص مطويّ على سطرين. بدون سطر «عرض الكامل» لا شيء يدل
+                    على أنه قابل للفتح، فكان الموظف يظن أن الرسالة هي هذا
+                    القدر المقصوص. */}
                 <button
                   onClick={() => setExpanded(expanded === m.id ? null : m.id)}
+                  title={m.body}
                   className={`cursor-pointer whitespace-pre-line text-start text-[11px] leading-relaxed text-zinc-400 ${
                     expanded === m.id ? '' : 'line-clamp-2'
                   }`}
                 >
                   {m.body}
                 </button>
+                {m.body.length > 70 && (
+                  <button
+                    onClick={() => setExpanded(expanded === m.id ? null : m.id)}
+                    className="mt-0.5 block cursor-pointer text-[10px] font-bold text-primary-text transition hover:text-white"
+                  >
+                    {expanded === m.id ? t('msg_collapse') : t('msg_showFull')}
+                  </button>
+                )}
                 {m.lastError && (
                   <span className="mt-1 block text-[10px] font-bold text-red-400">{m.lastError}</span>
                 )}
               </td>
               <td className="px-3 py-2.5 font-mono text-[11px] text-zinc-500" dir="ltr">
-                {new Date(m.sentAt || m.scheduledAt).toISOString().slice(0, 16).replace('T', ' ')}
+                {dateTimeLocal(m.sentAt || m.scheduledAt)}
                 {m.attempts > 0 && (
                   <span className="block text-[10px] text-zinc-600">
                     {t('msg_attempts')}: {m.attempts}
@@ -271,7 +284,7 @@ export function MessagesView() {
       </div>
 
       <p className="flex items-start gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-[11px] leading-relaxed text-zinc-500">
-        <MessageSquare size={14} className="mt-0.5 shrink-0 text-primary" />
+        <MessageSquare size={14} className="mt-0.5 shrink-0 text-primary-text" />
         {t('msg_scopeNote')}
       </p>
     </div>

@@ -122,7 +122,7 @@ export function InspectionModal({ jobCardId, onClose }: { jobCardId: string; onC
       <div className={`mx-auto w-full max-w-3xl ${isAr ? 'text-right' : 'text-left'}`}>
         <div className="glass-panel sticky top-0 z-10 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
           <div className="flex items-center gap-2.5">
-            <span className="rounded-lg bg-primary/15 p-2 text-primary">
+            <span className="rounded-lg bg-primary/15 p-2 text-primary-text">
               <ClipboardCheck size={18} />
             </span>
             <div>
@@ -179,7 +179,7 @@ export function InspectionModal({ jobCardId, onClose }: { jobCardId: string; onC
           ) : (
             grouped.map(([category, groupRows]) => (
               <div key={category} className="glass-panel space-y-2 rounded-xl p-4">
-                <h3 className="border-b border-zinc-800 pb-2 text-sm font-bold text-primary">{category}</h3>
+                <h3 className="border-b border-zinc-800 pb-2 text-sm font-bold text-primary-text">{category}</h3>
                 {groupRows.map(row => (
                   <div key={row.id} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">

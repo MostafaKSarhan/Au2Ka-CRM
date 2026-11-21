@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
+import { TrendingDown, Minus } from 'lucide-react';
 import {
   Users,
   Car,
@@ -34,6 +35,28 @@ import { JobCardDetailView } from '../jobCards/JobCardDetailView';
 
 interface DashboardViewProps {
   onNavigate?: (tab: 'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports') => void;
+}
+
+/**
+ * نسبة التغيّر على البطاقة.
+ *
+ * كانت تُرسم دائمًا خضراء بسهم صاعد وعلامة زائد، فتقول «نموّ» حتى حين
+ * يكون التغيّر صفرًا — إشارة تقرأها الإدارة خطأً. اللون هنا يتبع الرقم:
+ * أخضر للصعود، أحمر للهبوط، ورمادي محايد للثبات.
+ */
+function GrowthBadge({ value }: { value: number }) {
+  const up = value > 0;
+  const down = value < 0;
+  const Icon = up ? TrendingUp : down ? TrendingDown : Minus;
+  const tone = up ? 'text-emerald-500' : down ? 'text-red-400' : 'text-zinc-500';
+
+  return (
+    <span className={`flex items-center gap-0.5 font-bold ${tone}`} dir="ltr">
+      <Icon size={10} />
+      {up ? '+' : ''}
+      {value}%
+    </span>
+  );
 }
 
 export function DashboardView({ onNavigate }: DashboardViewProps) {
@@ -234,14 +257,12 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
               <span className="text-[10px] text-zinc-400 font-semibold">{t('customers')}</span>
               <h3 className="text-xl font-black text-white">{stats.totalCustomers.count}</h3>
             </div>
-            <div className="p-2 bg-zinc-900/60 rounded-lg text-primary">
+            <div className="p-2 bg-zinc-900/60 rounded-lg text-primary-text">
               <Users size={16} />
             </div>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
-            <span className="text-emerald-500 font-bold flex items-center gap-0.5">
-              <TrendingUp size={10} /> +{stats.totalCustomers.growth}%
-            </span>
+            <GrowthBadge value={stats.totalCustomers.growth} />
             <button onClick={() => onNavigate?.('customers')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
               {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
@@ -260,9 +281,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
-            <span className="text-emerald-500 font-bold flex items-center gap-0.5">
-              <TrendingUp size={10} /> +{stats.totalVehicles.growth}%
-            </span>
+            <GrowthBadge value={stats.totalVehicles.growth} />
             <button onClick={() => onNavigate?.('vehicles')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
               {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
@@ -281,9 +300,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
-            <span className="text-emerald-500 font-bold flex items-center gap-0.5">
-              <TrendingUp size={10} /> +{stats.totalJobCards.growth}%
-            </span>
+            <GrowthBadge value={stats.totalJobCards.growth} />
             <button onClick={() => onNavigate?.('jobCards')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
               {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
@@ -318,7 +335,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className={`mt-2.5 text-[10px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            <span className="text-green-500/80 font-bold">{isRtl ? 'بانتظار تسليم العميل' : 'Awaiting customer pickup'}</span>
+            <span className="text-zinc-500">{isRtl ? 'بانتظار تسليم العميل' : 'Awaiting customer pickup'}</span>
           </div>
         </div>
 
@@ -334,7 +351,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className={`mt-2.5 text-[10px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            <span className="text-indigo-400">{isRtl ? 'انتهت دورتها بالكامل' : 'Lifecycle finished fully'}</span>
+            <span className="text-zinc-500">{isRtl ? 'انتهت دورتها بالكامل' : 'Lifecycle finished fully'}</span>
           </div>
         </div>
 
@@ -347,19 +364,20 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
         <div className="lg:col-span-1 glass-panel rounded-2xl p-6 border border-zinc-900 flex flex-col justify-between">
           <div className="flex items-center justify-between pb-4 border-b border-zinc-900">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              {isRtl ? '📊 نسب الحالات' : '📊 Status Share'}
+              <BarChart4 size={16} className="text-primary-text" />
+              {isRtl ? 'نسب الحالات' : 'Status Share'}
             </h2>
             <div className="flex bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
               <button
                 onClick={() => setChartType('bar')}
-                className={`p-1.5 rounded cursor-pointer transition ${chartType === 'bar' ? 'bg-primary text-white' : 'text-zinc-500'}`}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer transition ${chartType === 'bar' ? 'bg-primary text-white' : 'text-zinc-500'}`}
                 title={isRtl ? 'مخطط الأعمدة' : 'Bar Chart'}
               >
                 <BarChart4 size={14} />
               </button>
               <button
                 onClick={() => setChartType('pie')}
-                className={`p-1.5 rounded cursor-pointer transition ${chartType === 'pie' ? 'bg-primary text-white' : 'text-zinc-500'}`}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer transition ${chartType === 'pie' ? 'bg-primary text-white' : 'text-zinc-500'}`}
                 title={isRtl ? 'المخطط الدائري' : 'Pie Chart'}
               >
                 <PieIcon size={14} />
@@ -407,11 +425,12 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
         <div className="lg:col-span-2 glass-panel rounded-2xl p-6 border border-zinc-900 space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              {isRtl ? '🚗 أحدث كروت صيانة جارية بالورشة' : '🚗 Recent Active Job Cards'}
+              <Car size={16} className="text-primary-text" />
+              {isRtl ? 'أحدث كروت صيانة جارية بالورشة' : 'Recent Active Job Cards'}
             </h2>
             <button
               onClick={() => onNavigate?.('reports')}
-              className="text-xs text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
+              className="text-xs text-primary-text hover:underline flex items-center gap-0.5 cursor-pointer"
             >
               {isRtl ? 'كل كروت العمل والتقارير' : 'All Job Cards & Reports'} <ExternalLink size={12} />
             </button>
@@ -456,10 +475,10 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                       <td className="py-3 text-center">
                         <button
                           onClick={() => setSelectedJob(job)}
-                          className="p-1 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
-                          title="معاينة تفاصيل الكرت"
+                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-white"
+                          title={isRtl ? 'معاينة تفاصيل الكرت' : 'Preview job card'}
                         >
-                          <Eye size={13} />
+                          <Eye size={14} />
                         </button>
                       </td>
                     </tr>

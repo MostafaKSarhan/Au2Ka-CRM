@@ -26,7 +26,7 @@ interface Movement {
 
 const TYPE_STYLES: Record<string, string> = {
   IN: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
-  OUT: 'border-primary/25 bg-primary/10 text-primary',
+  OUT: 'border-primary/25 bg-primary/10 text-primary-text',
   ADJUSTMENT: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
 };
 
@@ -293,7 +293,7 @@ export function InventoryView() {
               <td className="px-3 py-2.5 font-mono text-xs text-zinc-300">{m.balanceAfter}</td>
               <td className="max-w-[220px] px-3 py-2.5">
                 <span className="block truncate text-[11px] text-zinc-400">{isAr ? m.reasonAr : m.reasonEn}</span>
-                {m.jobCard && <span className="font-mono text-[10px] text-primary">{m.jobCard.jobNumber}</span>}
+                {m.jobCard && <span className="font-mono text-[10px] text-primary-text">{m.jobCard.jobNumber}</span>}
               </td>
               <td className="px-3 py-2.5 font-mono text-[11px] text-zinc-500" dir="ltr">
                 {m.createdAt.slice(0, 10)}
@@ -560,7 +560,7 @@ function Stat({
 }) {
   const tones: Record<string, string> = {
     sky: 'text-sky-400 bg-sky-500/10',
-    primary: 'text-primary bg-primary/10',
+    primary: 'text-primary-text bg-primary/10',
     emerald: 'text-emerald-400 bg-emerald-500/10',
     amber: 'text-amber-400 bg-amber-500/10',
   };

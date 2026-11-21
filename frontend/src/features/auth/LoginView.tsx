@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
-import { Shield, Phone, Lock } from 'lucide-react';
+import { Shield, Phone, Lock, Globe } from 'lucide-react';
 
 export function LoginView() {
   const login = useAuthStore((state) => state.login);
@@ -43,16 +43,16 @@ export function LoginView() {
         <button
           type="button"
           onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-          className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white px-2.5 py-1.5 cursor-pointer transition z-10`}
+          className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white px-2.5 py-1.5 cursor-pointer transition z-10`}
         >
-          🌐 {lang === 'ar' ? 'English' : 'العربية'}
+          <Globe size={13} /> {lang === 'ar' ? 'English' : 'العربية'}
         </button>
 
         <div className="text-center relative">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary-text">
             <Shield size={28} />
           </div>
-          <h2 className="mt-4 text-4xl font-black tracking-wider text-white">Au<span className="text-primary">2</span>Ka</h2>
+          <h2 className="mt-4 text-4xl font-black tracking-wider text-white">Au<span className="text-primary-text">2</span>Ka</h2>
           <p className="mt-2 text-xs text-zinc-400 font-medium">{t('loginHeader')}</p>
         </div>
 

@@ -281,7 +281,7 @@ export function CustomersView() {
               
               {/* Part 1: Customer Info */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-primary">{isRtl ? 'أولاً: معلومات العميل' : '1. Customer Information'}</h3>
+                <h3 className="text-sm font-bold text-primary-text">{isRtl ? 'أولاً: معلومات العميل' : '1. Customer Information'}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('fullName')}</label>
@@ -443,7 +443,7 @@ export function CustomersView() {
                 <h3 className="text-sm font-semibold text-zinc-300">{t('vehiclesCountLabel')}</h3>
                 <button
                   onClick={() => setShowAddVehicleModal(true)}
-                  className="text-xs text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-primary-text hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   <PlusCircle size={14} /> {isRtl ? 'إضافة سيارة للعميل' : 'Add Vehicle for Customer'}
                 </button>
@@ -455,7 +455,7 @@ export function CustomersView() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   {selectedCustomer.vehicles.map((v: any) => (
                     <div key={v.id} className="p-3 bg-zinc-900/60 rounded border border-zinc-800 flex items-center gap-3">
-                      <Car className="text-primary" size={20} />
+                      <Car className="text-primary-text" size={20} />
                       <div className={isRtl ? 'text-right' : 'text-left'}>
                         <p className="text-sm font-semibold text-white">{v.brand} {v.model}</p>
                         <p className="text-xs text-zinc-400 font-mono">

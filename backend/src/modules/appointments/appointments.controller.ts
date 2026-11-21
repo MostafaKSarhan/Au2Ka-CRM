@@ -11,7 +11,7 @@ import {
   dateKeyOf,
 } from './appointments.service';
 import { notify } from '../messaging/messaging.service';
-import { applyJobCardOpening } from '../jobCards/jobCard.open';
+import { applyJobCardOpening, nextJobNumber } from '../jobCards/jobCard.open';
 
 const bookSchema = z.object({
   customerId: z.string().uuid('العميل مطلوب'),
@@ -315,11 +315,7 @@ export class AppointmentsController {
       throw new AppError('حدّد سيارة العميل أولًا حتى يمكن فتح كرت عمل', 400);
     }
 
-    const todayStr = dateKeyOf(new Date()).replace(/-/g, '');
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const countToday = await prisma.jobCard.count({ where: { createdAt: { gte: startOfToday } } });
-    const jobNumber = `WRK-${todayStr}-${String(countToday + 1).padStart(4, '0')}`;
+    const jobNumber = await nextJobNumber();
 
     const jobCard = await prisma.jobCard.create({
       data: {

@@ -8,7 +8,7 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { notify, queueMessage } from '../messaging/messaging.service';
 import { recordSpend } from '../referrals/referrals.service';
-import { applyJobCardOpening, jobCardWorth } from './jobCard.open';
+import { applyJobCardOpening, jobCardWorth, nextJobNumber } from './jobCard.open';
 
 /** M6 — which status change tells the customer something, and with what wording. */
 const STATUS_TEMPLATES: Record<string, string> = {
@@ -180,21 +180,8 @@ export class JobCardsController {
     const vehicle = await prisma.vehicle.findFirst({ where: { id: vehicleId, deletedAt: null } });
     if (!vehicle) throw new AppError('Vehicle not found', 404);
 
-    // Generate Sequential unique jobNumber WRK-YYYYMMDD-XXXX
-    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-
-    const countToday = await prisma.jobCard.count({
-      where: {
-        createdAt: {
-          gte: startOfToday,
-        },
-      },
-    });
-
-    const sequenceNum = String(countToday + 1).padStart(4, '0');
-    const jobNumber = `WRK-${todayStr}-${sequenceNum}`;
+    // Sequential unique jobNumber WRK-YYYYMMDD-XXXX
+    const jobNumber = await nextJobNumber();
 
     const { mileage: readingAtEntry, ...cardData } = parseResult.data;
 

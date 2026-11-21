@@ -263,7 +263,7 @@ export function WhatsAppTab() {
                     navigator.clipboard?.writeText(webhookUrl);
                     setMsg('✅ ' + t('vf_linkCopied'));
                   }}
-                  className="cursor-pointer rounded p-1.5 text-zinc-500 transition hover:text-primary"
+                  className="cursor-pointer rounded p-1.5 text-zinc-500 transition hover:text-primary-text"
                 >
                   <Copy size={14} />
                 </button>
@@ -321,7 +321,7 @@ export function WhatsAppTab() {
         >
           {templates.map(tpl => (
             <tr key={tpl.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
-              <td className="px-3 py-2.5 font-mono text-[11px] text-primary">{tpl.code}</td>
+              <td className="px-3 py-2.5 font-mono text-[11px] text-primary-text">{tpl.code}</td>
               <td className="px-3 py-2.5 font-semibold text-white">{isAr ? tpl.nameAr : tpl.nameEn}</td>
               <td className="px-3 py-2.5 font-mono text-xs text-zinc-400" dir="ltr">
                 {tpl.metaTemplateName || <span className="text-zinc-600">—</span>}

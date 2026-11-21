@@ -222,7 +222,7 @@ export function PartsTab() {
           const low = p.quantity <= p.reorderLevel;
           return (
             <tr key={p.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
-              <td className="px-3 py-2.5 font-mono text-xs text-primary">{p.partNumber}</td>
+              <td className="px-3 py-2.5 font-mono text-xs text-primary-text">{p.partNumber}</td>
               <td className="px-3 py-2.5">
                 <span className="font-semibold text-white">{p.nameAr}</span>
                 <span className="block text-[11px] text-zinc-600">{p.nameEn}</span>

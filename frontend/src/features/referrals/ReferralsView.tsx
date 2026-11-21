@@ -301,17 +301,17 @@ export function ReferralsView() {
               <span className="font-mono text-[10px] text-amber-400">{c.pointsBalance ?? 0}</span>
               <button
                 onClick={() => openCode(c.id)}
-                className="cursor-pointer text-zinc-500 transition hover:text-primary"
+                className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-primary-text"
                 title={t('ref_showCode')}
               >
-                <Gift size={13} />
+                <Gift size={14} />
               </button>
               <button
                 onClick={() => openWallet(c.id)}
-                className="cursor-pointer text-zinc-500 transition hover:text-primary"
+                className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-primary-text"
                 title={t('ref_wallet')}
               >
-                <Wallet size={13} />
+                <Wallet size={14} />
               </button>
             </div>
           ))}
@@ -355,7 +355,7 @@ export function ReferralsView() {
                 </span>
               </td>
               <td className="px-3 py-2.5 text-zinc-300">{r.referred?.fullName || '—'}</td>
-              <td className="px-3 py-2.5 font-mono text-xs text-primary">{r.code}</td>
+              <td className="px-3 py-2.5 font-mono text-xs text-primary-text">{r.code}</td>
               <td className="px-3 py-2.5 font-mono text-[11px] text-zinc-500" dir="ltr">
                 {r.firstVisitAt ? r.firstVisitAt.slice(0, 10) : '—'}
               </td>
@@ -522,7 +522,7 @@ export function ReferralsView() {
           <div className="space-y-4">
             <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 text-center">
               <p className="text-[11px] text-zinc-500">{t('ref_code')}</p>
-              <p className="font-mono text-3xl font-black tracking-widest text-primary">{codeFor.code}</p>
+              <p className="font-mono text-3xl font-black tracking-widest text-primary-text">{codeFor.code}</p>
             </div>
 
             <div className="flex justify-center rounded-xl bg-white p-4">
@@ -654,7 +654,7 @@ function Stat({
     emerald: 'text-emerald-400 bg-emerald-500/10',
     sky: 'text-sky-400 bg-sky-500/10',
     amber: 'text-amber-400 bg-amber-500/10',
-    primary: 'text-primary bg-primary/10',
+    primary: 'text-primary-text bg-primary/10',
   };
   return (
     <div className="glass-panel flex items-center gap-3 rounded-xl p-4">

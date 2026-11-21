@@ -240,7 +240,7 @@ export function WorkingHoursTab() {
         >
           {holidays.map(h => (
             <tr key={h.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
-              <td className="px-3 py-2.5 font-mono text-xs text-primary" dir="ltr">
+              <td className="px-3 py-2.5 font-mono text-xs text-primary-text" dir="ltr">
                 {h.date.slice(0, 10)}
               </td>
               <td className="px-3 py-2.5 font-semibold text-white">{h.nameAr}</td>

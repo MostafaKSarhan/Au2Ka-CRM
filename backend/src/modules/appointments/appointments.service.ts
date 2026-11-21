@@ -1,4 +1,5 @@
 import { prisma } from '../../config/db';
+import { nextDailyNumber } from '../../utils/dailyNumber';
 import { AppError } from '../../utils/appError';
 import { findActiveSubscription } from '../subscriptions/subscriptions.service';
 import { notify, queueMessage } from '../messaging/messaging.service';
@@ -188,11 +189,14 @@ export async function getDayPlan(date: Date, forSubscriber = false): Promise<Day
 
 /** Builds the next appointment reference in the form APT-YYYYMMDD-XXXX. */
 export async function generateReference(): Promise<string> {
-  const todayStr = dateKeyOf(new Date()).replace(/-/g, '');
-  const start = startOfDay(new Date());
-
-  const count = await prisma.appointment.count({ where: { createdAt: { gte: start } } });
-  return `APT-${todayStr}-${String(count + 1).padStart(4, '0')}`;
+  return nextDailyNumber('APT', async startsWith => {
+    const latest = await prisma.appointment.findFirst({
+      where: { reference: { startsWith } },
+      orderBy: { reference: 'desc' },
+      select: { reference: true },
+    });
+    return latest?.reference;
+  });
 }
 
 export interface BookInput {

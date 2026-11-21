@@ -360,7 +360,7 @@ export function SubscriptionsView() {
               <td className="px-3 py-2.5">
                 <button
                   onClick={() => openDetail(s)}
-                  className="cursor-pointer font-mono text-xs text-primary hover:underline"
+                  className="cursor-pointer font-mono text-xs text-primary-text hover:underline"
                 >
                   {s.subscriptionNumber}
                 </button>
@@ -616,7 +616,7 @@ export function SubscriptionsView() {
                     className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-xs"
                   >
                     <div>
-                      <span className="font-mono text-primary">{u.jobCard?.jobNumber}</span>
+                      <span className="font-mono text-primary-text">{u.jobCard?.jobNumber}</span>
                       <span className="block text-[11px] text-zinc-500">{u.note}</span>
                     </div>
                     <span
@@ -652,7 +652,7 @@ function StatCard({
 }) {
   const tones: Record<string, string> = {
     emerald: 'text-emerald-400 bg-emerald-500/10',
-    primary: 'text-primary bg-primary/10',
+    primary: 'text-primary-text bg-primary/10',
     sky: 'text-sky-400 bg-sky-500/10',
     amber: 'text-amber-400 bg-amber-500/10',
   };

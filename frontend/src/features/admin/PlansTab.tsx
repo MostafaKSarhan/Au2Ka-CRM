@@ -189,7 +189,7 @@ export function PlansTab() {
                 </div>
 
                 <div className="my-3 flex items-baseline gap-1.5">
-                  <span className="text-2xl font-black text-primary">{Number(p.price).toLocaleString()}</span>
+                  <span className="text-2xl font-black text-primary-text">{Number(p.price).toLocaleString()}</span>
                   <span className="text-xs text-zinc-500">
                     {t('sub_currency')} / {p.durationMonths} {t('sub_months')}
                   </span>

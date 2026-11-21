@@ -179,7 +179,7 @@ export function BranchesTab() {
       >
         {branches.map(b => (
           <tr key={b.id} className="border-b border-zinc-900 transition hover:bg-zinc-900/40">
-            <td className="px-3 py-2.5 font-mono text-xs text-primary">{b.code}</td>
+            <td className="px-3 py-2.5 font-mono text-xs text-primary-text">{b.code}</td>
             <td className="px-3 py-2.5 font-semibold text-white">{b.nameAr}</td>
             <td className="px-3 py-2.5 text-zinc-400">{b.nameEn}</td>
             <td className="px-3 py-2.5 text-zinc-400">

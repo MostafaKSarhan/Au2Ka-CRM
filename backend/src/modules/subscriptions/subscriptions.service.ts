@@ -1,5 +1,6 @@
 import { Prisma, Subscription } from '@prisma/client';
 import { prisma } from '../../config/db';
+import { nextDailyNumber } from '../../utils/dailyNumber';
 
 /**
  * Shared subscription logic (M1), used by both the subscriptions module and
@@ -33,17 +34,14 @@ export async function expireOverdueSubscriptions(): Promise<number> {
 
 /** Builds the next subscription number in the form SUB-YYYYMMDD-XXXX. */
 export async function generateSubscriptionNumber(): Promise<string> {
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
-  const countToday = await prisma.subscription.count({
-    where: { createdAt: { gte: startOfToday } },
+  return nextDailyNumber('SUB', async startsWith => {
+    const latest = await prisma.subscription.findFirst({
+      where: { subscriptionNumber: { startsWith } },
+      orderBy: { subscriptionNumber: 'desc' },
+      select: { subscriptionNumber: true },
+    });
+    return latest?.subscriptionNumber;
   });
-
-  return `SUB-${todayStr}-${String(countToday + 1).padStart(4, '0')}`;
 }
 
 /**

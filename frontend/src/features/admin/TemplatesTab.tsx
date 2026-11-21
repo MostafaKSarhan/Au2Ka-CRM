@@ -200,7 +200,7 @@ export function TemplatesTab() {
                       </span>
                     )}
                   </p>
-                  <p className="font-mono text-[11px] text-primary">{tpl.code}</p>
+                  <p className="font-mono text-[11px] text-primary-text">{tpl.code}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <IconButton onClick={() => handlePreview(tpl)} title={t('msg_preview')}>

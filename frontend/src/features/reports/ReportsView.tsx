@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
-import { FileText, Users, Car, Search, Download, Printer, Filter, ChevronLeft, ChevronRight, Eye, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileText, Users, Car, Search, Download, Printer, Filter, ChevronLeft, ChevronRight, Eye, RefreshCw, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { JobCardDetailView } from '../jobCards/JobCardDetailView';
 import { useTranslation } from '../../store/LanguageContext';
 
@@ -226,7 +226,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
       {/* Filter panel */}
       <div className="glass-panel rounded-xl p-5 border border-zinc-900 space-y-4">
         <div className="flex items-center gap-2 text-sm font-bold text-white mb-2">
-          <Filter size={16} className="text-primary" /> {t('advancedFilter')}
+          <Filter size={16} className="text-primary-text" /> {t('advancedFilter')}
         </div>
         
         <div className={`grid gap-4 grid-cols-2 md:grid-cols-5 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -403,7 +403,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                     <td className="p-3 text-center">
                       <button
                         onClick={() => onViewJob(job)}
-                        className="p-1 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-white cursor-pointer"
                         title={lang === 'ar' ? 'عرض كامل كرت العمل' : 'View Full Job Card'}
                       >
                         <Eye size={14} />
@@ -425,7 +425,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
               disabled={pagination.page <= 1}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -435,7 +435,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -449,7 +449,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
-              <span className="text-3xl">📊</span>
+              <FileSpreadsheet size={28} className="mx-auto text-emerald-400" />
               <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
                 {t('excelNextSteps')}
@@ -662,7 +662,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
               disabled={pagination.page <= 1}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -672,7 +672,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -685,7 +685,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
-              <span className="text-3xl">📊</span>
+              <FileSpreadsheet size={28} className="mx-auto text-emerald-400" />
               <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
                 {t('excelNextSteps')}
@@ -896,7 +896,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
               disabled={pagination.page <= 1}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -906,7 +906,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
               disabled={pagination.page >= pagination.pages}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+              className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
@@ -919,7 +919,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 no-print text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-md w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
-              <span className="text-3xl">📊</span>
+              <FileSpreadsheet size={28} className="mx-auto text-emerald-400" />
               <h3 className="text-lg font-black text-white">{t('excelDownloaded')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
                 {t('excelNextSteps')}

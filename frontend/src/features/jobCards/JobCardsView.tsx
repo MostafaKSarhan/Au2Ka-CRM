@@ -678,7 +678,7 @@ export function JobCardsView() {
 
             {/* ─── Customer Section ─── */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><User size={15} className="text-primary" /> {t('selectCustomer')}</label>
+              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><User size={15} className="text-primary-text" /> {t('selectCustomer')}</label>
 
               <select
                 value={showNewCustomerForm ? '__add_new__' : form.customerId}
@@ -705,7 +705,7 @@ export function JobCardsView() {
 
               {showNewCustomerForm && (
                 <form onSubmit={handleCreateCustomerInline} className="space-y-3 border-t border-zinc-800 pt-3">
-                  <p className="text-xs text-amber-400 font-semibold">{isRtl ? '📝 بيانات العميل الجديد' : '📝 New Customer Details'}</p>
+                  <p className="text-xs text-amber-400 font-semibold"><UserPlus size={13} className="inline-block me-1 align-text-bottom" />{isRtl ? 'بيانات العميل الجديد' : '📝 New Customer Details'}</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] text-zinc-400 mb-1">{t('fullName')} *</label>
@@ -762,7 +762,7 @@ export function JobCardsView() {
 
             {/* ─── Vehicle Section ─── */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><CarIcon size={15} className="text-primary" /> {t('vehicleInfo')}</label>
+              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><CarIcon size={15} className="text-primary-text" /> {t('vehicleInfo')}</label>
 
               {!form.customerId && !showNewVehicleForm && (
                 <p className="text-xs text-zinc-500 italic">{isRtl ? 'اختر عميلاً أولاً لعرض سياراته.' : 'Select a customer first to view their vehicles.'}</p>
@@ -795,7 +795,7 @@ export function JobCardsView() {
 
               {showNewVehicleForm && (
                 <form onSubmit={handleCreateVehicleInline} className="space-y-3 border-t border-zinc-800 pt-3">
-                  <p className="text-xs text-amber-400 font-semibold">{isRtl ? '🚗 بيانات السيارة الجديدة' : '🚗 New Vehicle Details'}</p>
+                  <p className="text-xs text-amber-400 font-semibold"><CarIcon size={13} className="inline-block me-1 align-text-bottom" />{isRtl ? 'بيانات السيارة الجديدة' : '🚗 New Vehicle Details'}</p>
                   {!form.customerId && (
                     <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded">{isRtl ? '⚠️ يجب اختيار العميل أولاً قبل إضافة السيارة' : '⚠️ Select customer first before adding vehicle'}</p>
                   )}
@@ -1164,7 +1164,7 @@ export function JobCardsView() {
 
                 <div className="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 space-y-4">
                   <h4 className="text-xs font-bold text-zinc-200 border-b border-zinc-900 pb-2 flex items-center gap-1.5">
-                    <User size={14} className="text-primary" /> {t('jobTechSecTitle')}
+                    <User size={14} className="text-primary-text" /> {t('jobTechSecTitle')}
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1194,7 +1194,7 @@ export function JobCardsView() {
                         type="checkbox"
                         checked={!!editForm.isVehiclePhotographed}
                         onChange={(e) => setEditForm({ ...editForm, isVehiclePhotographed: e.target.checked })}
-                        className="rounded border-zinc-800 bg-zinc-900 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-900 text-primary-text focus:ring-primary w-4 h-4 cursor-pointer"
                       />
                       {t('photoConfirmation')}
                     </label>
@@ -1204,7 +1204,7 @@ export function JobCardsView() {
                         type="checkbox"
                         checked={!!editForm.isDataCompleted}
                         onChange={(e) => setEditForm({ ...editForm, isDataCompleted: e.target.checked })}
-                        className="rounded border-zinc-800 bg-zinc-900 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-900 text-primary-text focus:ring-primary w-4 h-4 cursor-pointer"
                       />
                       {t('dataCompleteConfirmation')}
                     </label>
@@ -1357,7 +1357,7 @@ export function JobCardsView() {
                   onClick={downloadInvoiceAsImage}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white rounded cursor-pointer transition shadow-sm"
                 >
-                  📥 {isRtl ? 'تحميل كصورة' : 'Download as Image'}
+                  <Download size={14} /> {isRtl ? 'تحميل كصورة' : 'Download as Image'}
                 </button>
                 <button
                   onClick={() => window.print()}
@@ -1641,7 +1641,7 @@ export function JobCardsView() {
                         className="w-28 h-28"
                       />
                       <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-white font-bold transition rounded-lg">
-                        <span>{isRtl ? 'تكبير الكود 🔍' : 'Zoom Code 🔍'}</span>
+                        <span>{isRtl ? 'تكبير الكود' : 'Zoom Code'}</span>
                         <span className="text-[8px] mt-1 text-emerald-300">{isRtl ? 'لتوثيق الموافقة' : 'To verify approval'}</span>
                       </div>
                     </div>
@@ -1686,7 +1686,7 @@ export function JobCardsView() {
                   onClick={downloadInvoiceAsImage}
                   className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm"
                 >
-                  📥 {isRtl ? 'تحميل الكارت كصورة' : 'Download Card as Image'}
+                  <Download size={14} /> {isRtl ? 'تحميل الكارت كصورة' : 'Download Card as Image'}
                 </button>
                 <a
                   href={getWhatsAppShareLink()}

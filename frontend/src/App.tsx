@@ -20,7 +20,7 @@ import { AppointmentsView } from './features/appointments/AppointmentsView';
 import { ReferralsView } from './features/referrals/ReferralsView';
 import { InventoryView } from './features/inventory/InventoryView';
 import { InvoicesView } from './features/zatca/InvoicesView';
-import { Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays, Gift, Boxes, Receipt as ReceiptIcon } from 'lucide-react';
+import { Globe, Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays, Gift, Boxes, Receipt as ReceiptIcon } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
@@ -107,10 +107,10 @@ export default function App() {
         <div className="p-6">
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-primary/20 p-2 text-primary">
+              <div className="rounded-lg bg-primary/20 p-2 text-primary-text">
                 <Shield size={22} />
               </div>
-              <span className="font-black tracking-wider text-xl">Au<span className="text-primary">2</span>Ka</span>
+              <span className="font-black tracking-wider text-xl">Au<span className="text-primary-text">2</span>Ka</span>
             </div>
             {/* Close button for mobile/tablet */}
             <button 
@@ -123,7 +123,7 @@ export default function App() {
 
           {/* Technician notice badge */}
           {isTechnician && (
-            <div className="mt-4 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-center text-right">
+            <div className="mt-4 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-center">
               <p className="text-[11px] font-bold text-amber-400">{t('techMode')}</p>
               <p className="text-[10px] text-amber-300/70 mt-0.5">{t('techScope')}</p>
             </div>
@@ -196,8 +196,8 @@ export default function App() {
               <Menu size={22} />
             </button>
             <div className="flex items-center gap-2 lg:hidden">
-              <Shield size={20} className="text-primary" />
-              <span className="font-black text-base text-white">Au<span className="text-primary">2</span>Ka</span>
+              <Shield size={20} className="text-primary-text" />
+              <span className="font-black text-base text-white">Au<span className="text-primary-text">2</span>Ka</span>
             </div>
           </div>
 
@@ -210,12 +210,12 @@ export default function App() {
               onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white cursor-pointer transition"
             >
-              🌐 {lang === 'ar' ? 'English' : 'العربية'}
+              <Globe size={13} /> {lang === 'ar' ? 'English' : 'العربية'}
             </button>
 
             {/* User Role Tag */}
             <span className="rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1 text-xs font-bold text-zinc-400">
-              {t('userRole')}: <span className="text-primary">
+              {t('userRole')}: <span className="text-primary-text">
                 {user?.role === 'ADMIN' ? t('adminRole') : user?.role === 'RECEPTION' ? t('receptionShort') : t('technicianShort')}
               </span>
             </span>

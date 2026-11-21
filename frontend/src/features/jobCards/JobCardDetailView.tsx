@@ -81,7 +81,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
           {/* Customer Info Card */}
           <div className="glass-panel rounded-2xl p-6 border border-zinc-900 space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <User className="text-primary" size={18} /> {t('customerInfo')}
+              <User className="text-primary-text" size={18} /> {t('customerInfo')}
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>

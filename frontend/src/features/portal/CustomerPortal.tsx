@@ -13,7 +13,7 @@ type Tab = 'home' | 'cards' | 'booking' | 'reports';
 const STATUS_LABELS: Record<string, { ar: string; en: string; tone: string }> = {
   RECEIVED: { ar: 'تم الاستلام', en: 'Received', tone: 'border-sky-500/25 bg-sky-500/10 text-sky-400' },
   INSPECTION: { ar: 'قيد الفحص', en: 'Under inspection', tone: 'border-amber-500/25 bg-amber-500/10 text-amber-400' },
-  WAITING_APPROVAL: { ar: 'بانتظار موافقتك', en: 'Awaiting your approval', tone: 'border-primary/25 bg-primary/10 text-primary' },
+  WAITING_APPROVAL: { ar: 'بانتظار موافقتك', en: 'Awaiting your approval', tone: 'border-primary/25 bg-primary/10 text-primary-text' },
   IN_PROGRESS: { ar: 'تحت الإصلاح', en: 'Being repaired', tone: 'border-amber-500/25 bg-amber-500/10 text-amber-400' },
   COMPLETED: { ar: 'جاهزة للاستلام', en: 'Ready for collection', tone: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400' },
   DELIVERED: { ar: 'تم التسليم', en: 'Delivered', tone: 'border-zinc-700 bg-zinc-800/60 text-zinc-400' },
@@ -53,12 +53,12 @@ export function CustomerPortal() {
       <header className="sticky top-0 z-30 border-b border-zinc-900 bg-zinc-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-primary/20 p-2 text-primary">
+            <span className="rounded-lg bg-primary/20 p-2 text-primary-text">
               <Shield size={18} />
             </span>
             <div>
               <p className="text-lg font-black tracking-wider">
-                Au<span className="text-primary">2</span>Ka
+                Au<span className="text-primary-text">2</span>Ka
               </p>
               <p className="text-[10px] text-zinc-500">{t('pt_title')}</p>
             </div>
@@ -101,7 +101,7 @@ export function CustomerPortal() {
                 key={item.id}
                 onClick={() => setTab(item.id)}
                 className={`flex flex-1 cursor-pointer flex-col items-center gap-0.5 py-2.5 text-[10px] font-bold transition ${
-                  active ? 'text-primary' : 'text-zinc-500'
+                  active ? 'text-primary-text' : 'text-zinc-500'
                 }`}
               >
                 <Icon size={18} />
@@ -173,11 +173,11 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
     >
       <div className="glass-panel w-full max-w-sm space-y-5 rounded-2xl p-6">
         <div className="text-center">
-          <span className="inline-flex rounded-xl bg-primary/20 p-3 text-primary">
+          <span className="inline-flex rounded-xl bg-primary/20 p-3 text-primary-text">
             <Shield size={26} />
           </span>
           <h1 className="mt-3 text-2xl font-black tracking-wider">
-            Au<span className="text-primary">2</span>Ka
+            Au<span className="text-primary-text">2</span>Ka
           </h1>
           <p className="mt-1 text-xs text-zinc-400">{t('pt_loginSubtitle')}</p>
         </div>
@@ -355,7 +355,7 @@ function PortalHome() {
 
         <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-center">
           <p className="text-[11px] text-zinc-500">{t('pt_yourReferralCode')}</p>
-          <p className="font-mono text-xl font-black tracking-widest text-primary">
+          <p className="font-mono text-xl font-black tracking-widest text-primary-text">
             {data.referralCode}
           </p>
           <p className="mt-1 text-[10px] text-zinc-600">{t('pt_referralHint')}</p>
@@ -379,7 +379,7 @@ function PortalHome() {
                 <p className="text-sm font-bold text-white">
                   {v.brand} {v.model}
                 </p>
-                <p className="font-mono text-[11px] text-primary" dir="ltr">
+                <p className="font-mono text-[11px] text-primary-text" dir="ltr">
                   {v.plateNumber}
                 </p>
               </div>
@@ -415,7 +415,7 @@ function VehicleFileSheet({ file, onClose }: { file: any; onClose: () => void })
           <h3 className="text-xl font-bold text-white">
             {file.vehicle.brand} {file.vehicle.model}
           </h3>
-          <p className="font-mono text-sm text-primary" dir="ltr">
+          <p className="font-mono text-sm text-primary-text" dir="ltr">
             {file.vehicle.plateNumber}
           </p>
 
@@ -537,7 +537,7 @@ function PortalCards() {
         return (
           <div key={c.id} className="glass-panel rounded-xl p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-sm font-bold text-primary">{c.jobNumber}</span>
+              <span className="font-mono text-sm font-bold text-primary-text">{c.jobNumber}</span>
               <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${status?.tone}`}>
                 {isAr ? status?.ar : status?.en}
               </span>
@@ -900,7 +900,7 @@ function PortalReports() {
             <div className="glass-panel space-y-4 rounded-xl p-5">
               <p className="text-sm font-bold text-white">
                 {open.vehicle.brand} {open.vehicle.model}
-                <span className="ms-2 font-mono text-xs text-primary" dir="ltr">
+                <span className="ms-2 font-mono text-xs text-primary-text" dir="ltr">
                   {open.vehicle.plateNumber}
                 </span>
               </p>

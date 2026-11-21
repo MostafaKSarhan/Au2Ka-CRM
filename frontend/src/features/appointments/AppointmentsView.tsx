@@ -33,7 +33,7 @@ interface Appointment {
 const STATUS_STYLES: Record<string, string> = {
   BOOKED: 'border-sky-500/25 bg-sky-500/10 text-sky-400',
   CONFIRMED: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
-  ARRIVED: 'border-primary/25 bg-primary/10 text-primary',
+  ARRIVED: 'border-primary/25 bg-primary/10 text-primary-text',
   CONVERTED: 'border-zinc-700 bg-zinc-800/60 text-zinc-400',
   CANCELLED: 'border-red-500/25 bg-red-500/10 text-red-400',
   NO_SHOW: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
@@ -296,7 +296,7 @@ export function AppointmentsView() {
       <div className="glass-panel space-y-4 rounded-xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
           <div className="flex items-center gap-2.5">
-            <span className="rounded-lg bg-primary/15 p-2 text-primary">
+            <span className="rounded-lg bg-primary/15 p-2 text-primary-text">
               <Clock size={18} />
             </span>
             <div>
@@ -375,7 +375,7 @@ export function AppointmentsView() {
               >
                 <div className="flex items-center gap-3">
                   <div className="text-center">
-                    <p className="font-mono text-sm font-bold text-primary" dir="ltr">
+                    <p className="font-mono text-sm font-bold text-primary-text" dir="ltr">
                       {new Date(a.scheduledAt).toTimeString().slice(0, 5)}
                     </p>
                     <p className="font-mono text-[10px] text-zinc-600">{a.reference}</p>
@@ -402,7 +402,7 @@ export function AppointmentsView() {
                   </span>
 
                   {a.jobCard && (
-                    <span className="font-mono text-[11px] text-primary">{a.jobCard.jobNumber}</span>
+                    <span className="font-mono text-[11px] text-primary-text">{a.jobCard.jobNumber}</span>
                   )}
 
                   {a.status === 'BOOKED' && (
@@ -452,7 +452,7 @@ export function AppointmentsView() {
         <Modal title={t('appt_book')} onClose={() => setShowBook(false)}>
           <form onSubmit={submitBooking} className="space-y-3">
             <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5 text-center">
-              <p className="font-mono text-sm font-bold text-primary" dir="ltr">
+              <p className="font-mono text-sm font-bold text-primary-text" dir="ltr">
                 {date} — {bookForm.time}
               </p>
             </div>
@@ -568,7 +568,7 @@ function Stat({
   const tones: Record<string, string> = {
     sky: 'text-sky-400 bg-sky-500/10',
     emerald: 'text-emerald-400 bg-emerald-500/10',
-    primary: 'text-primary bg-primary/10',
+    primary: 'text-primary-text bg-primary/10',
     amber: 'text-amber-400 bg-amber-500/10',
   };
   return (

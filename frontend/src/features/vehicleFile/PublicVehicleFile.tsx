@@ -33,11 +33,11 @@ export function PublicVehicleFile({ token }: { token: string }) {
       <div className="mx-auto max-w-4xl space-y-4">
         <header className="no-print flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950/80 p-4">
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-primary/20 p-2 text-primary">
+            <span className="rounded-lg bg-primary/20 p-2 text-primary-text">
               <Shield size={20} />
             </span>
             <span className="text-xl font-black tracking-wider">
-              Au<span className="text-primary">2</span>Ka
+              Au<span className="text-primary-text">2</span>Ka
             </span>
           </div>
           <div className="flex items-center gap-2">

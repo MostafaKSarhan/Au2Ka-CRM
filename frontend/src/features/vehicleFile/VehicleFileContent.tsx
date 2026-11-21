@@ -80,7 +80,7 @@ export function VehicleFileContent({ file, readOnly }: { file: VehicleFile; read
                 </span>
               )}
             </h2>
-            <p className="mt-1 font-mono text-sm text-primary" dir="ltr">
+            <p className="mt-1 font-mono text-sm text-primary-text" dir="ltr">
               {v.plateNumber}
             </p>
             <p className="mt-1 text-xs text-zinc-500">
@@ -248,7 +248,7 @@ export function VehicleFileContent({ file, readOnly }: { file: VehicleFile; read
                     <td className="px-3 py-2.5 font-mono text-xs text-zinc-400" dir="ltr">
                       {fmtDate(r.replacedAt)}
                       {r.jobCard?.jobNumber && (
-                        <span className="block text-[10px] text-primary">{r.jobCard.jobNumber}</span>
+                        <span className="block text-[10px] text-primary-text">{r.jobCard.jobNumber}</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5 font-mono text-xs text-zinc-400">
@@ -309,7 +309,7 @@ export function VehicleFileContent({ file, readOnly }: { file: VehicleFile; read
                     <span
                       className={`rounded border px-1.5 py-0.5 font-bold ${
                         entry.kind === 'JOB_CARD'
-                          ? 'border-primary/25 bg-primary/10 text-primary'
+                          ? 'border-primary/25 bg-primary/10 text-primary-text'
                           : entry.kind === 'PART'
                             ? 'border-sky-500/25 bg-sky-500/10 text-sky-400'
                             : 'border-amber-500/25 bg-amber-500/10 text-amber-400'
@@ -396,7 +396,7 @@ function Panel({
   return (
     <div className="glass-panel space-y-3 rounded-xl p-5">
       <h3 className="flex items-center gap-2 border-b border-zinc-800 pb-2 text-base font-bold text-white">
-        <span className="rounded-lg bg-primary/15 p-1.5 text-primary">
+        <span className="rounded-lg bg-primary/15 p-1.5 text-primary-text">
           <Icon size={16} />
         </span>
         {title}

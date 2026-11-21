@@ -142,7 +142,7 @@ export function VehiclesView() {
           {vehicles.map((v) => (
             <div key={v.id} className={`glass-panel rounded-xl p-5 space-y-4 flex flex-col justify-between ${isRtl ? 'text-right' : 'text-left'}`}>
               <div className="flex items-start gap-4">
-                <div className={`rounded-lg bg-primary/10 p-3 text-primary ${isRtl ? 'ml-2' : 'mr-2'}`}>
+                <div className={`rounded-lg bg-primary/10 p-3 text-primary-text ${isRtl ? 'ml-2' : 'mr-2'}`}>
                   <Car size={24} />
                 </div>
                 <div>

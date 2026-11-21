@@ -17,7 +17,7 @@ export function SectionHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
       <div className="flex items-center gap-2.5">
-        <span className="rounded-lg bg-primary/15 p-2 text-primary">
+        <span className="rounded-lg bg-primary/15 p-2 text-primary-text">
           <Icon size={18} />
         </span>
         <div>
@@ -45,7 +45,7 @@ export function Field({
     <div>
       <label className="mb-1 block text-xs font-semibold text-zinc-400">
         {label}
-        {required && <span className="ms-1 text-primary">*</span>}
+        {required && <span className="ms-1 text-primary-text">*</span>}
       </label>
       {children}
       {hint && <p className="mt-1 text-[11px] text-zinc-600">{hint}</p>}
@@ -143,11 +143,13 @@ export function IconButton({
   const toneClass =
     tone === 'danger'
       ? 'text-zinc-500 hover:text-red-400'
-      : 'text-zinc-500 hover:text-primary';
+      : 'text-zinc-500 hover:text-primary-text';
   return (
     <button
       {...rest}
-      className={`cursor-pointer rounded p-1.5 transition ${toneClass} ${rest.className || ''}`}
+      // 32px مساحة لمس على الأقل: النظام يُستعمل على تابلت داخل الورشة،
+      // وأيقونة بحجمها وحدها هدف صغير جدًا لإصبع.
+      className={`inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded transition ${toneClass} ${rest.className || ''}`}
     >
       {children}
     </button>
