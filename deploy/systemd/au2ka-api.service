@@ -34,8 +34,10 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=true
-# الباكند يكتب الملفات المرفوعة داخل مجلده، فيبقى قابلًا للكتابة
-ReadWritePaths=/var/www/faslatech/Au2Ka-CRM/backend/uploads
+# الباكند يكتب الملفات المرفوعة داخل مجلده، فيبقى قابلًا للكتابة.
+# البادئة «-» تجعل المسار غير قاتل إن لم يكن موجودًا بعد: بدونها تفشل
+# الخدمة بـ 226/NAMESPACE على تثبيت جديد قبل رفع أول صورة.
+ReadWritePaths=-/var/www/faslatech/Au2Ka-CRM/backend/uploads
 
 [Install]
 WantedBy=multi-user.target

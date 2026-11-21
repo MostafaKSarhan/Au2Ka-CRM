@@ -50,9 +50,13 @@ git pull --ff-only origin "$BRANCH"
 # 3) الباكند
 echo "==> الباكند: الحزم والمخطط والبناء"
 npm ci --prefix backend --omit=dev --include=dev
-npx --prefix backend prisma generate
-npx --prefix backend prisma db push
+# من داخل backend لا بـ --prefix: npx لا يغيّر مجلد العمل، و Prisma يبحث
+# عن المخطط في مجلد العمل وحده فيفشل بصمت.
+( cd backend && npx prisma generate && npx prisma db push --skip-generate )
 npm run build --prefix backend
+
+# مجلد الملفات المرفوعة — الخدمة تطلبه قابلًا للكتابة
+mkdir -p backend/uploads
 
 # 4) البيانات المرجعية (قابل لإعادة التشغيل، لا يكرّر ولا يمسح)
 echo "==> البيانات المرجعية"
