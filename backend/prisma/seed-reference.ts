@@ -1,3 +1,9 @@
+// يحمّل backend/.env صراحةً: سكربتات البذر تعمل خارج الخادم، ولا تمر
+// على dotenv.config() الموجود في server.ts، فكانت تفشل على خادم النشر
+// بـ "Environment variable not found: DATABASE_URL" بينما تعمل محليًا
+// بالمصادفة عبر التحميل الضمني في عميل Prisma.
+import 'dotenv/config';
+
 /**
  * Phase 2 — R0 reference data.
  *
