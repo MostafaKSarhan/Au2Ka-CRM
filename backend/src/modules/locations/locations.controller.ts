@@ -79,10 +79,17 @@ export class LocationsController {
 
   // ---------- Cities ----------
   static async listCities(request: FastifyRequest, reply: FastifyReply) {
-    const { countryId } = request.query as { countryId?: string };
+    const { countryId, search } = request.query as { countryId?: string; search?: string };
+    const term = search?.trim();
 
     const cities = await prisma.city.findMany({
-      where: { deletedAt: null, ...(countryId ? { countryId } : {}) },
+      where: {
+        deletedAt: null,
+        ...(countryId ? { countryId } : {}),
+        ...(term
+          ? { OR: [{ nameAr: { contains: term } }, { nameEn: { contains: term } }] }
+          : {}),
+      },
       include: {
         country: { select: { id: true, code: true, nameAr: true, nameEn: true } },
         _count: { select: { branches: { where: { deletedAt: null } } } },

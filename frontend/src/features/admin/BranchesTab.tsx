@@ -4,7 +4,7 @@ import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
 import {
   SectionHeader, Field, TextInput, TextArea, Select, PrimaryButton, GhostButton,
-  IconButton, Banner, StatusPill, Modal, TableShell,
+  IconButton, Banner, StatusPill, Modal, TableShell, SearchBox,
 } from './ui';
 
 interface City {
@@ -41,16 +41,22 @@ export function BranchesTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
 
   useEffect(() => {
     load();
-  }, []);
+  }, [search, cityFilter]);
 
   async function load() {
     setLoading(true);
     try {
+      const params: Record<string, string> = {};
+      if (search.trim()) params.search = search.trim();
+      if (cityFilter) params.cityId = cityFilter;
+
       const [branchRes, cityRes] = await Promise.all([
-        api.get('/branches'),
+        api.get('/branches', { params }),
         api.get('/locations/cities'),
       ]);
       setBranches(branchRes.data.branches || []);
@@ -146,6 +152,23 @@ export function BranchesTab() {
       />
 
       <Banner message={msg} />
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <SearchBox
+          className="sm:col-span-2"
+          value={search}
+          onChange={setSearch}
+          placeholder={t('md_searchBranch')}
+        />
+        <Select value={cityFilter} onChange={e => setCityFilter(e.target.value)}>
+          <option value="">{t('md_allCities')}</option>
+          {cities.map(c => (
+            <option key={c.id} value={c.id}>
+              {isAr ? c.nameAr : c.nameEn}
+            </option>
+          ))}
+        </Select>
+      </div>
 
       <TableShell
         headers={[t('md_code'), t('md_nameAr'), t('md_nameEn'), t('md_city'), t('md_phone'), t('md_linked'), t('md_status'), t('actions')]}

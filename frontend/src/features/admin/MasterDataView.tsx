@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare, ClipboardCheck, Clock, MessageCircle, Receipt } from 'lucide-react';
+import { Building2, MapPin, Users, Car, Wrench, DatabaseBackup, BadgeCheck, MessageSquare, ClipboardCheck, Clock, MessageCircle, Receipt } from 'lucide-react';
 import { useTranslation } from '../../store/LanguageContext';
 import { BranchesTab } from './BranchesTab';
 import { CitiesTab } from './CitiesTab';
+import { EmployeesTab } from './EmployeesTab';
 import { VehicleModelsTab } from './VehicleModelsTab';
 import { PartsTab } from './PartsTab';
 import { PlansTab } from './PlansTab';
@@ -13,7 +14,7 @@ import { WhatsAppTab } from './WhatsAppTab';
 import { ZatcaTab } from './ZatcaTab';
 import { BackupTab } from './BackupTab';
 
-type TabId = 'branches' | 'cities' | 'models' | 'parts' | 'plans' | 'templates' | 'checklist' | 'hours' | 'whatsapp' | 'zatca' | 'backup';
+type TabId = 'branches' | 'cities' | 'employees' | 'models' | 'parts' | 'plans' | 'templates' | 'checklist' | 'hours' | 'whatsapp' | 'zatca' | 'backup';
 
 export function MasterDataView() {
   const { lang, t } = useTranslation();
@@ -22,6 +23,7 @@ export function MasterDataView() {
   const tabs: Array<{ id: TabId; label: string; icon: React.ElementType }> = [
     { id: 'branches', label: t('md_branches'), icon: Building2 },
     { id: 'cities', label: t('md_citiesAndCountries'), icon: MapPin },
+    { id: 'employees', label: t('md_employees'), icon: Users },
     { id: 'models', label: t('md_models'), icon: Car },
     { id: 'parts', label: t('md_parts'), icon: Wrench },
     { id: 'plans', label: t('sub_plans'), icon: BadgeCheck },
@@ -63,6 +65,7 @@ export function MasterDataView() {
 
       {tab === 'branches' && <BranchesTab />}
       {tab === 'cities' && <CitiesTab />}
+      {tab === 'employees' && <EmployeesTab />}
       {tab === 'models' && <VehicleModelsTab />}
       {tab === 'parts' && <PartsTab />}
       {tab === 'plans' && <PlansTab />}

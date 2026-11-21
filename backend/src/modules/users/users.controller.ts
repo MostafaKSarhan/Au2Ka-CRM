@@ -45,13 +45,27 @@ async function assertBranchExists(branchId?: string | null) {
 
 export class UsersController {
   static async list(request: FastifyRequest, reply: FastifyReply) {
-    const { branchId, role } = request.query as { branchId?: string; role?: string };
+    const { branchId, role, search } = request.query as {
+      branchId?: string;
+      role?: string;
+      search?: string;
+    };
+    const term = search?.trim();
 
     const users = await prisma.user.findMany({
       where: {
         deletedAt: null,
         ...(branchId ? { branchId } : {}),
         ...(role ? { role: role as any } : {}),
+        ...(term
+          ? {
+              OR: [
+                { firstName: { contains: term } },
+                { lastName: { contains: term } },
+                { mobileNumber: { contains: term } },
+              ],
+            }
+          : {}),
       },
       select: userSelect,
       orderBy: { createdAt: 'desc' },

@@ -4,7 +4,7 @@ import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
 import {
   SectionHeader, Field, TextInput, Select, PrimaryButton, GhostButton,
-  IconButton, Banner, StatusPill, Modal, TableShell,
+  IconButton, Banner, StatusPill, Modal, TableShell, SearchBox,
 } from './ui';
 
 interface Country {
@@ -48,16 +48,22 @@ export function CitiesTab() {
   const [cityForm, setCityForm] = useState(emptyCity);
   const [saving, setSaving] = useState(false);
 
+  const [citySearch, setCitySearch] = useState('');
+
   useEffect(() => {
     load();
-  }, [filterCountry]);
+  }, [filterCountry, citySearch]);
 
   async function load() {
     setLoading(true);
     try {
+      const params: Record<string, string> = {};
+      if (filterCountry) params.countryId = filterCountry;
+      if (citySearch.trim()) params.search = citySearch.trim();
+
       const [countryRes, cityRes] = await Promise.all([
         api.get('/locations/countries'),
-        api.get('/locations/cities', { params: filterCountry ? { countryId: filterCountry } : {} }),
+        api.get('/locations/cities', { params }),
       ]);
       setCountries(countryRes.data.countries || []);
       setCities(cityRes.data.cities || []);
@@ -220,6 +226,12 @@ export function CitiesTab() {
               <PlusCircle size={16} /> {t('md_addCity')}
             </PrimaryButton>
           }
+        />
+
+        <SearchBox
+          value={citySearch}
+          onChange={setCitySearch}
+          placeholder={t('md_searchCity')}
         />
 
         <TableShell

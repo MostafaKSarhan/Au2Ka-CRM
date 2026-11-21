@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 /** Shared building blocks for the master-data screens, so each tab stays short. */
 
@@ -34,14 +34,19 @@ export function Field({
   label,
   children,
   hint,
+  required,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: string;
+  required?: boolean;
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-semibold text-zinc-400">{label}</label>
+      <label className="mb-1 block text-xs font-semibold text-zinc-400">
+        {label}
+        {required && <span className="ms-1 text-primary">*</span>}
+      </label>
       {children}
       {hint && <p className="mt-1 text-[11px] text-zinc-600">{hint}</p>}
     </div>
@@ -53,6 +58,45 @@ const controlClass =
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${controlClass} ${props.className || ''}`} />;
+}
+
+/**
+ * The search box every master-data tab uses, so the magnifier sits on the
+ * right in Arabic and on the left in English without each tab repeating the
+ * positioning.
+ */
+export function SearchBox({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+}) {
+  return (
+    <div className={`relative ${className}`}>
+      <Search size={16} className="absolute top-1/2 start-3 -translate-y-1/2 text-zinc-600" />
+      <TextInput
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="ps-9"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          aria-label="clear"
+          className="absolute top-1/2 end-3 -translate-y-1/2 text-zinc-600 transition hover:text-white"
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
 }
 
 export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
