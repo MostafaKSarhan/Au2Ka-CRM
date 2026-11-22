@@ -27,6 +27,7 @@ import { appointmentsRoutes } from './modules/appointments/appointments.routes';
 import { referralsRoutes } from './modules/referrals/referrals.routes';
 import { inventoryRoutes } from './modules/inventory/inventory.routes';
 import { portalRoutes } from './modules/portal/portal.routes';
+import { joinRequestsRoutes, publicJoinRoutes } from './modules/joinRequests/joinRequests.routes';
 import { whatsappRoutes, whatsappWebhookRoutes } from './modules/whatsapp/whatsapp.routes';
 import { zatcaRoutes } from './modules/zatca/zatca.routes';
 
@@ -129,6 +130,10 @@ app.register(inventoryRoutes, { prefix: '/api/v1/inventory' });
 
 // Phase 2 — M7: the customer self-service portal (its own sign-in)
 app.register(portalRoutes, { prefix: '/api/v1/portal' });
+
+// طلبات الانضمام: الإرسال عام لمن ليس عميلًا بعد، والمراجعة للموظفين
+app.register(publicJoinRoutes, { prefix: '/api/v1/public' });
+app.register(joinRequestsRoutes, { prefix: '/api/v1/join-requests' });
 
 // Phase 2 — M8: official WhatsApp Business Cloud API
 app.register(whatsappRoutes, { prefix: '/api/v1/whatsapp' });

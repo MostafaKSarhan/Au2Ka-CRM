@@ -40,16 +40,17 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  activities     JobCardActivity[]
-  branch         Branch?           @relation(fields: [branchId], references: [id])
-  branchId       String?
-  sentMessages   OutboundMessage[]
-  notifications  Notification[]
-  inspections    Inspection[]
-  appointments   Appointment[]
-  pointsEntries  PointsEntry[]
-  stockMovements StockMovement[]
-  invoices       Invoice[]
+  activities           JobCardActivity[]
+  branch               Branch?           @relation(fields: [branchId], references: [id])
+  branchId             String?
+  sentMessages         OutboundMessage[]
+  notifications        Notification[]
+  inspections          Inspection[]
+  appointments         Appointment[]
+  pointsEntries        PointsEntry[]
+  stockMovements       StockMovement[]
+  invoices             Invoice[]
+  joinRequestsReviewed JoinRequest[]
 
   @@index([branchId])
 }
@@ -87,6 +88,7 @@ model Customer {
   otps             CustomerOtp[]
   portalSessions   CustomerSession[]
   invoices         Invoice[]
+  joinRequests     JoinRequest[]
 
   @@index([fullName])
   @@index([branchId])
@@ -497,6 +499,7 @@ enum NotificationType {
   JOB_CARD
   SUBSCRIPTION
   DOCUMENT
+  JOIN_REQUEST
   SYSTEM
 }
 
@@ -960,6 +963,47 @@ model CustomerOtp {
   @@index([customerId])
   @@index([mobileNumber])
   @@index([expiresAt])
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// طلب انضمام يرسله زائر ليس عميلًا بعد، غالبًا وصل من رمز إحالة صديقه.
+///
+/// لا يصير عميلًا بإرسال النموذج: يبقى الطلب معلّقًا حتى يعتمده موظف. ولو
+/// فُتح التسجيل الذاتي على مصراعيه لامتلأ سجل العملاء بحسابات لم تزر
+/// الورشة قط، ولنسب كل واحد نفسه لأي كود إحالة وحصد نقاطًا بلا زيارة.
+model JoinRequest {
+  id           String            @id @default(uuid())
+  fullName     String
+  mobileNumber String
+  /// بيانات السيارة كما كتبها الزائر؛ تُراجع عند الاعتماد.
+  brand        String?
+  model        String?
+  plateNumber  String?
+  note         String?           @db.Text
+  /// كود الإحالة الذي وصل به، إن وُجد. يُربط عند الاعتماد لا قبله.
+  referralCode String?
+  status       JoinRequestStatus @default(PENDING)
+
+  /// يُملأ عند الاعتماد: العميل الذي أُنشئ من هذا الطلب.
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation(fields: [reviewedById], references: [id])
+  rejectReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+  @@index([mobileNumber])
 }
 
 /// A signed-in portal session. Revoking a row ends that device's access.

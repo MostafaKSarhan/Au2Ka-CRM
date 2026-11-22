@@ -20,13 +20,22 @@ export class VehiclesController {
     const limit = Math.max(1, Math.min(100, Number(query.limit || 20)));
     const skip = (page - 1) * limit;
 
+    // customerId كان يُتجاهل بصمت، فمن مرّره ظن أنه يحصر النتائج على سيارات
+    // عميل واحد بينما ترجع له سيارات الورشة كلها.
+    const customerId = typeof query.customerId === 'string' ? query.customerId : undefined;
+
     const whereClause = {
       deletedAt: null,
-      OR: [
-        { plateNumber: { contains: search } },
-        { brand: { contains: search } },
-        { model: { contains: search } },
-      ],
+      ...(customerId ? { customerId } : {}),
+      ...(search
+        ? {
+            OR: [
+              { plateNumber: { contains: search } },
+              { brand: { contains: search } },
+              { model: { contains: search } },
+            ],
+          }
+        : {}),
     };
 
     const [total, vehicles] = await Promise.all([

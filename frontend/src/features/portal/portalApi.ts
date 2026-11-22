@@ -55,3 +55,20 @@ portalApi.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+/**
+ * طلب الانضمام — واجهة عامة خارج مسار البوابة.
+ *
+ * لا يمر على portalApi لأن ذاك يحمل توكن العميل ويعيد التوجيه عند 401،
+ * وصاحب الطلب لا توكن له أصلًا.
+ */
+export async function submitJoinRequest(payload: {
+  fullName: string;
+  mobileNumber: string;
+  brand?: string | null;
+  model?: string | null;
+  plateNumber?: string | null;
+  referralCode?: string | null;
+}) {
+  return axios.post(`${API_ORIGIN}/api/v1/public/join-request`, payload);
+}

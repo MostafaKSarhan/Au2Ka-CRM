@@ -5,7 +5,7 @@ import {
   AlertOctagon, Gauge, Receipt, QrCode, Share2, Copy,
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
-import { portalApi, getPortalToken, setPortalToken } from './portalApi';
+import { portalApi, getPortalToken, setPortalToken, submitJoinRequest } from './portalApi';
 import { useTranslation } from '../../store/LanguageContext';
 import { PwaBanner } from '../pwa/PwaBanner';
 
@@ -127,6 +127,7 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [joining, setJoining] = useState(false);
 
   // من فتح البوابة من رمز إحالة صديقه. الربط نفسه يبقى بيد الورشة —
   // فلو صنعه العميل بنفسه لنسب كل زائر إحالةً لمن شاء — لكن إخفاء الكود
@@ -280,12 +281,206 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
           </form>
         )}
 
+        {/* من وصل برمز إحالة وليس عميلًا بعد لا يستطيع الدخول هنا — فيجد
+            طريقًا بدل باب مقفل. */}
+        <div className="border-t border-zinc-800 pt-3 text-center">
+          <p className="text-[11px] text-zinc-500">{t('pt_notCustomerYet')}</p>
+          <button
+            onClick={() => setJoining(true)}
+            className="mt-1 cursor-pointer text-xs font-bold text-primary-text transition hover:text-white"
+          >
+            {t('pt_requestJoin')}
+          </button>
+        </div>
+
         <button
           onClick={() => setLang(isAr ? 'en' : 'ar')}
           className="w-full cursor-pointer text-[11px] text-zinc-600 transition hover:text-zinc-300"
         >
           {isAr ? 'English' : 'العربية'}
         </button>
+      </div>
+
+      {joining && <JoinRequestForm referralCode={invitedBy} onClose={() => setJoining(false)} />}
+    </div>
+  );
+}
+
+/**
+ * نموذج طلب الانضمام.
+ *
+ * لا ينشئ حسابًا: يرسل البيانات للورشة لتراجعها. وهذا ما يقوله النص
+ * صراحةً، كي لا ينتظر الزائر رسالة دخول لن تصله.
+ */
+function JoinRequestForm({
+  referralCode,
+  onClose,
+}: {
+  referralCode: string | null;
+  onClose: () => void;
+}) {
+  const { lang, t } = useTranslation();
+  const isAr = lang === 'ar';
+
+  const [form, setForm] = useState({
+    fullName: '',
+    mobileNumber: '',
+    brand: '',
+    model: '',
+    plateNumber: '',
+  });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+
+  const canSend = form.fullName.trim().length >= 3 && /^05\d{8}$/.test(form.mobileNumber.trim());
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      await submitJoinRequest({
+        fullName: form.fullName.trim(),
+        mobileNumber: form.mobileNumber.trim(),
+        brand: form.brand.trim() || null,
+        model: form.model.trim() || null,
+        plateNumber: form.plateNumber.trim() || null,
+        referralCode: referralCode || null,
+      });
+      setDone(true);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || t('pt_joinFailed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const field =
+    'w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-primary/60';
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center"
+      dir={isAr ? 'rtl' : 'ltr'}
+    >
+      <div className="glass-panel max-h-[92vh] w-full max-w-sm overflow-y-auto rounded-2xl p-5">
+        <div className="mb-4 flex items-center justify-between border-b border-zinc-800 pb-3">
+          <h2 className="text-sm font-bold text-white">{t('pt_requestJoin')}</h2>
+          <button
+            onClick={onClose}
+            aria-label={t('cancel')}
+            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded text-zinc-500 transition hover:text-white"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="space-y-3 py-4 text-center">
+            <span className="inline-flex rounded-full bg-emerald-500/15 p-3 text-emerald-400">
+              <Check size={26} />
+            </span>
+            <p className="text-sm font-bold text-white">{t('pt_joinSentTitle')}</p>
+            <p className="text-xs leading-relaxed text-zinc-400">{t('pt_joinSentBody')}</p>
+            <button
+              onClick={onClose}
+              className="mt-2 w-full cursor-pointer rounded-lg bg-primary py-2.5 text-sm font-bold text-white transition hover:bg-primary-hover"
+            >
+              {t('pt_close')}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="space-y-3">
+            {referralCode && (
+              <p className="rounded-lg border border-primary/25 bg-primary/10 p-2 text-center text-[11px] text-primary-text">
+                <Gift size={12} className="inline-block me-1 align-text-bottom" />
+                {t('pt_joinWithCode')} <b className="font-mono">{referralCode}</b>
+              </p>
+            )}
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-zinc-400">
+                {t('fullName')} *
+              </label>
+              <input
+                className={field}
+                value={form.fullName}
+                onChange={e => setForm({ ...form, fullName: e.target.value })}
+                placeholder={isAr ? 'الاسم الثلاثي' : 'Full name'}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-zinc-400">
+                {t('pt_mobile')} *
+              </label>
+              <input
+                className={field}
+                dir="ltr"
+                inputMode="numeric"
+                value={form.mobileNumber}
+                onChange={e => setForm({ ...form, mobileNumber: e.target.value })}
+                placeholder="05xxxxxxxx"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-zinc-400">
+                  {t('vehicleBrand')}
+                </label>
+                <input
+                  className={field}
+                  value={form.brand}
+                  onChange={e => setForm({ ...form, brand: e.target.value })}
+                  placeholder={isAr ? 'تويوتا' : 'Toyota'}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-zinc-400">
+                  {t('vehicleModel')}
+                </label>
+                <input
+                  className={field}
+                  value={form.model}
+                  onChange={e => setForm({ ...form, model: e.target.value })}
+                  placeholder={isAr ? 'كامري' : 'Camry'}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-zinc-400">
+                {t('plateNumber')}
+              </label>
+              <input
+                className={field}
+                value={form.plateNumber}
+                onChange={e => setForm({ ...form, plateNumber: e.target.value })}
+                placeholder={isAr ? 'أ ب ج 1234' : 'ABC 1234'}
+              />
+            </div>
+
+            {error && (
+              <p className="rounded-lg border border-red-500/20 bg-red-500/10 p-2.5 text-xs font-bold text-red-400">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={!canSend || busy}
+              className="w-full cursor-pointer rounded-lg bg-primary py-2.5 text-sm font-bold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {busy ? t('pt_sending') : t('pt_sendRequest')}
+            </button>
+
+            <p className="text-center text-[10px] leading-relaxed text-zinc-600">
+              {t('pt_joinDisclaimer')}
+            </p>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -18,15 +18,16 @@ import { NotificationBell } from './features/messaging/NotificationBell';
 import { MonthlyReportsView } from './features/inspections/MonthlyReportsView';
 import { AppointmentsView } from './features/appointments/AppointmentsView';
 import { ReferralsView } from './features/referrals/ReferralsView';
+import { JoinRequestsView } from './features/joinRequests/JoinRequestsView';
 import { InventoryView } from './features/inventory/InventoryView';
 import { InvoicesView } from './features/zatca/InvoicesView';
-import { Globe, Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays, Gift, Boxes, Receipt as ReceiptIcon } from 'lucide-react';
+import { UserPlus, Globe, Shield, LayoutDashboard, Users, Car, Wrench, Settings, LogOut, User, Menu, X, BarChart4, Database, BadgeCheck, MessageSquare, FileBarChart, CalendarDays, Gift, Boxes, Receipt as ReceiptIcon } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, initialize, user, logout } = useAuthStore();
   const { lang, setLang, t } = useTranslation();
   const isTechnician = user?.role === 'TECHNICIAN';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages' | 'monthlyReports' | 'appointments' | 'referrals' | 'inventory' | 'invoices'>(
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'vehicles' | 'jobCards' | 'settings' | 'reports' | 'masterData' | 'subscriptions' | 'messages' | 'monthlyReports' | 'appointments' | 'referrals' | 'inventory' | 'invoices' | 'joinRequests'>(
     isTechnician ? 'jobCards' : 'dashboard'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -74,6 +75,7 @@ export default function App() {
     { id: 'invoices', label: t('invoices'), icon: ReceiptIcon, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'inventory', label: t('inventory'), icon: Boxes, roles: ['ADMIN', 'RECEPTION', 'TECHNICIAN'] },
     { id: 'referrals', label: t('referrals'), icon: Gift, roles: ['ADMIN', 'RECEPTION'] },
+    { id: 'joinRequests', label: t('jr_title'), icon: UserPlus, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'messages', label: t('messages'), icon: MessageSquare, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'monthlyReports', label: t('monthlyReports'), icon: FileBarChart, roles: ['ADMIN', 'RECEPTION'] },
     { id: 'reports', label: t('reports'), icon: BarChart4, roles: ['ADMIN', 'RECEPTION'] },
@@ -233,6 +235,7 @@ export default function App() {
           {activeTab === 'invoices' && !isTechnician && <InvoicesView />}
           {activeTab === 'inventory' && <InventoryView />}
           {activeTab === 'referrals' && !isTechnician && <ReferralsView />}
+          {activeTab === 'joinRequests' && !isTechnician && <JoinRequestsView />}
           {activeTab === 'messages' && !isTechnician && <MessagesView />}
           {activeTab === 'monthlyReports' && !isTechnician && <MonthlyReportsView />}
           {activeTab === 'reports' && !isTechnician && <ReportsView />}
