@@ -81,6 +81,6 @@ echo "==> فحص الصحة"
 curl -fsS http://127.0.0.1:5123/health && echo
 
 echo "==> تم. للتحقق الشامل بعد النشر:"
-echo "    API_URL=https://au2ka.fasla.cloud WEB_URL=https://au2ka.fasla.cloud \\"
+echo "    API_URL=https://au2ka.faslacloud.com WEB_URL=https://au2ka.faslacloud.com \\"
 echo "      npm run check:system --prefix backend"
 echo "    (يكتب بيانات اختبار — شغّله قبل تسليم النظام للعميل، ثم check:reset)"

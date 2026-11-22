@@ -2,7 +2,7 @@
 
 ## أين يعمل النظام الآن
 
-النظام منشور على **خادم FaslaTech** على `au2ka.fasla.cloud`، وهذا ترتيب مؤقت
+النظام منشور على **خادم FaslaTech** على `au2ka.faslacloud.com`، وهذا ترتيب مؤقت
 يستمر حتى سداد كامل مستحقات المشروع، ثم يُنقل إلى خادم العميل بعد تأكيد
 الاستلام. التفصيل في [الاستضافة-والتسليم.md](../docs/الاستضافة-والتسليم.md).
 
@@ -16,7 +16,7 @@
 |---|---|
 | `deploy.sh` | النشر كاملًا: نسخة احتياطية، سحب الكود، تثبيت، تحديث المخطط، بناء، إعادة تشغيل |
 | `caddy/au2ka.caddy` | **المستعمل حاليًا** — خادم FaslaTech يعمل بـ Caddy، وهو يصدر الشهادة ويجددها وحده |
-| `nginx/au2ka.fasla.cloud.conf` | البديل لخادم يعمل بـ nginx: يقدّم الواجهة ويمرّر `/api/` و `/uploads/` للباكند |
+| `nginx/au2ka.faslacloud.com.conf` | البديل لخادم يعمل بـ nginx: يقدّم الواجهة ويمرّر `/api/` و `/uploads/` للباكند |
 | `nginx/au2ka-api.fasla.cloud.conf` | نطاق مستقل للـ API — اختياري، غير مستخدم في الإعداد الافتراضي |
 | `systemd/au2ka-api.service` | خدمة الباكند، تعمل من `dist/` لا من `ts-node` |
 | `.env.production.example` | قالب بيئة الإنتاج — يُنسخ إلى `backend/.env` ويُملأ على الخادم |
@@ -90,10 +90,10 @@ sudo systemctl status au2ka-api
 
 ```bash
 # 7) nginx و HTTPS
-sudo cp deploy/nginx/au2ka.fasla.cloud.conf /etc/nginx/sites-available/au2ka
+sudo cp deploy/nginx/au2ka.faslacloud.com.conf /etc/nginx/sites-available/au2ka
 sudo ln -s /etc/nginx/sites-available/au2ka /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d au2ka.fasla.cloud
+sudo certbot --nginx -d au2ka.faslacloud.com
 ```
 
 شهادة HTTPS ليست رفاهية هنا: تطبيق الجوال (PWA) لا يُثبَّت ولا يعمل عامل
@@ -110,7 +110,7 @@ cd /var/www/faslatech/Au2Ka-CRM && sudo -u www-data bash deploy/deploy.sh
 ## التحقق بعد النشر
 
 ```bash
-API_URL=https://au2ka.fasla.cloud WEB_URL=https://au2ka.fasla.cloud \
+API_URL=https://au2ka.faslacloud.com WEB_URL=https://au2ka.faslacloud.com \
   npm run check:system --prefix backend
 ```
 
