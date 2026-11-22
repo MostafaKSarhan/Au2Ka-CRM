@@ -4,6 +4,7 @@ import { AppError } from '../../utils/appError';
 import { z } from 'zod';
 import { issueOtp, revokeSession, verifyOtp } from './portal.auth';
 import { queueMessage } from '../messaging/messaging.service';
+import * as whatsapp from '../whatsapp/whatsapp.service';
 import { buildVehicleFile } from '../vehicleFile/vehicleFile.service';
 import { bookAppointment, getDayPlan } from '../appointments/appointments.service';
 import { ensureReferralCode, pointsToRiyals } from '../referrals/referrals.service';
@@ -59,8 +60,16 @@ export class PortalController {
       request.log.info({ mobileNumber, code: otp.code }, 'portal OTP issued (development only)');
     }
 
+    // لا يُقال للعميل «أُرسل إلى جوالك» إلا إذا كان هناك ما يرسله فعلًا.
+    // قبل ربط واتساب الرسمي يبقى الرمز في الطابور ولا يصل أحدًا، فكان
+    // العميل ينتظر رسالة لن تأتي ويظن النظام معطّلًا.
+    const canDeliver = await whatsapp.isEnabled();
+
     return reply.send({
-      message: 'تم إرسال رمز التحقق إلى جوالك',
+      message: canDeliver
+        ? 'تم إرسال رمز التحقق إلى جوالك'
+        : 'الرمز جاهز لدى الورشة — اطلبه من الاستقبال',
+      deliveredToPhone: canDeliver,
       expiresAt: otp.expiresAt,
     });
   }

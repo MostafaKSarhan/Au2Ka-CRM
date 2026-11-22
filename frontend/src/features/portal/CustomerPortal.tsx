@@ -145,8 +145,10 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
     setBusy(true);
     setError('');
     try {
-      await portalApi.post('/auth/request-otp', { mobileNumber: mobile.trim() });
-      setInfo(t('pt_codeSent'));
+      const res = await portalApi.post('/auth/request-otp', { mobileNumber: mobile.trim() });
+      // قبل ربط واتساب الرسمي لا يصل الرمز إلى الجوال، فيقوله الخادم
+      // صراحةً بدل أن ينتظر العميل رسالة لن تأتي.
+      setInfo(res.data?.deliveredToPhone === false ? t('pt_codeAtReception') : t('pt_codeSent'));
       setStep('code');
     } catch (err: any) {
       setError(err.response?.data?.message || t('pt_codeFailed'));
