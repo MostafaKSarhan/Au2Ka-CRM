@@ -297,6 +297,12 @@ const translations = {
     md_searchCity: 'ابحث باسم المدينة',
     md_savingNow: 'جارٍ الحفظ…',
 
+    // القائمة المنسدلة القابلة للبحث
+    ss_choose: 'اختر…',
+    ss_search: 'ابحث…',
+    ss_noMatch: 'لا نتائج مطابقة',
+    ss_clear: 'مسح البحث',
+
     // الدول والمدن
     md_citiesAndCountries: 'الدول والمدن',
     md_countries: 'الدول',
@@ -1336,6 +1342,12 @@ const translations = {
     md_confirmDeleteEmployee: 'Delete the employee "{name}"?',
     md_searchCity: 'Search by city name',
     md_savingNow: 'Saving…',
+
+    // Searchable dropdown
+    ss_choose: 'Choose…',
+    ss_search: 'Search…',
+    ss_noMatch: 'No matches',
+    ss_clear: 'Clear search',
 
     // Countries & cities
     md_citiesAndCountries: 'Countries & Cities',

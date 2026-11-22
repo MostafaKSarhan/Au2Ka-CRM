@@ -6,6 +6,7 @@ import {
   SectionHeader, Field, TextInput, Select, PrimaryButton, GhostButton,
   IconButton, Banner, StatusPill, Modal, TableShell,
 } from './ui';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 interface Brand {
   id: string;
@@ -314,14 +315,12 @@ export function VehicleModelsTab() {
         <Modal title={editingModel ? t('md_editModel') : t('md_addModel')} onClose={() => setModelModal(false)}>
           <form onSubmit={submitModel} className="space-y-3">
             <Field label={t('md_brand')}>
-              <Select required value={modelForm.brandId} onChange={e => setModelForm({ ...modelForm, brandId: e.target.value })}>
-                <option value="">{t('md_selectBrand')}</option>
-                {brands.map(b => (
-                  <option key={b.id} value={b.id}>
-                    {isAr ? b.nameAr : b.nameEn}
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={modelForm.brandId}
+                placeholder={t('md_selectBrand')}
+                onChange={val => setModelForm({ ...modelForm, brandId: val })}
+                options={brands.map(b => ({ value: b.id, label: isAr ? b.nameAr : b.nameEn }))}
+              />
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label={t('md_nameAr')}>

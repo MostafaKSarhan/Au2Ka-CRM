@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useTranslation } from '../../store/LanguageContext';
 import { Search, UserPlus, Phone, BookOpen, PlusCircle, Car, BadgeCheck } from 'lucide-react';
 
@@ -324,10 +325,14 @@ export function CustomersView() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                    <select
+                    <SearchableSelect
                       value={isCustomBrand ? 'CUSTOM' : custForm.brand}
-                      onChange={(e) => {
-                        const val = e.target.value;
+                      placeholder={t('vehicleBrand')}
+                      options={[
+                        ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                        { value: 'CUSTOM', label: isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)', pinned: true },
+                      ]}
+                      onChange={(val) => {
                         if (val === 'CUSTOM') {
                           setIsCustomBrand(true);
                         } else {
@@ -335,11 +340,7 @@ export function CustomersView() {
                           setCustForm({ ...custForm, brand: val });
                         }
                       }}
-                      className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                    >
-                      {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                      <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                    </select>
+                    />
 
                     {isCustomBrand && (
                       <input
@@ -509,10 +510,14 @@ export function CustomersView() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                  <select
+                  <SearchableSelect
                     value={isSingleCustomBrand ? 'CUSTOM' : vehForm.brand}
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    placeholder={t('vehicleBrand')}
+                    options={[
+                      ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                      { value: 'CUSTOM', label: isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)', pinned: true },
+                    ]}
+                    onChange={(val) => {
                       if (val === 'CUSTOM') {
                         setIsSingleCustomBrand(true);
                       } else {
@@ -520,11 +525,7 @@ export function CustomersView() {
                         setVehForm({ ...vehForm, brand: val });
                       }
                     }}
-                    className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                  >
-                    {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                    <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                  </select>
+                  />
 
                   {isSingleCustomBrand && (
                     <input

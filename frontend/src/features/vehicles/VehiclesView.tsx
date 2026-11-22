@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useTranslation } from '../../store/LanguageContext';
 import { VehicleFileView } from '../vehicleFile/VehicleFileView';
 import { Search, Car, User, PlusCircle, FolderOpen } from 'lucide-react';
@@ -211,25 +212,24 @@ export function VehiclesView() {
             <form onSubmit={handleAddVehicle} className={`space-y-4 ${isRtl ? 'text-right' : 'text-left'}`}>
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('selectCustomer')}</label>
-                <select
+                <SearchableSelect
                   value={form.customerId}
-                  onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-                  className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                >
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.fullName} ({c.mobileNumber})
-                    </option>
-                  ))}
-                </select>
+                  placeholder={t('selectCustomer')}
+                  options={customers.map(c => ({ value: c.id, label: c.fullName, hint: c.mobileNumber }))}
+                  onChange={(val) => setForm({ ...form, customerId: val })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                  <select
+                  <SearchableSelect
                     value={isCustomBrand ? 'CUSTOM' : form.brand}
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    placeholder={t('vehicleBrand')}
+                    options={[
+                      ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                      { value: 'CUSTOM', label: isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)', pinned: true },
+                    ]}
+                    onChange={(val) => {
                       if (val === 'CUSTOM') {
                         setIsCustomBrand(true);
                       } else {
@@ -237,11 +237,7 @@ export function VehiclesView() {
                         setForm({ ...form, brand: val });
                       }
                     }}
-                    className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                  >
-                    {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                    <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                  </select>
+                  />
 
                   {isCustomBrand && (
                     <input

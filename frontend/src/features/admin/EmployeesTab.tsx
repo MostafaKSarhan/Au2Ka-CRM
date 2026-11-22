@@ -6,6 +6,7 @@ import {
   SectionHeader, Field, TextInput, Select, PrimaryButton, GhostButton,
   IconButton, Banner, StatusPill, Modal, TableShell, SearchBox,
 } from './ui';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 /**
  * الموظفون والفنيون — إضافة وتعديل وحذف وبحث، وكل موظف مرتبط بفرعه.
@@ -205,14 +206,15 @@ export function EmployeesTab() {
           <option value="RECEPTION">{t('receptionRole')}</option>
           <option value="TECHNICIAN">{t('technicianRole')}</option>
         </Select>
-        <Select value={branchFilter} onChange={e => setBranchFilter(e.target.value)}>
-          <option value="">{t('md_allBranches')}</option>
-          {branches.map(b => (
-            <option key={b.id} value={b.id}>
-              {isAr ? b.nameAr : b.nameEn}
-            </option>
-          ))}
-        </Select>
+        <SearchableSelect
+          value={branchFilter}
+          placeholder={t('md_allBranches')}
+          onChange={setBranchFilter}
+          options={[
+            { value: '', label: t('md_allBranches') },
+            ...branches.map(b => ({ value: b.id, label: isAr ? b.nameAr : b.nameEn })),
+          ]}
+        />
       </div>
 
       <TableShell
@@ -319,17 +321,15 @@ export function EmployeesTab() {
             </Select>
           </Field>
           <Field label={t('md_branch')} hint={t('md_branchHint')}>
-            <Select
+            <SearchableSelect
               value={form.branchId}
-              onChange={e => setForm({ ...form, branchId: e.target.value })}
-            >
-              <option value="">{t('md_noBranch')}</option>
-              {branches.map(b => (
-                <option key={b.id} value={b.id}>
-                  {isAr ? b.nameAr : b.nameEn}
-                </option>
-              ))}
-              </Select>
+              placeholder={t('md_noBranch')}
+              onChange={val => setForm({ ...form, branchId: val })}
+              options={[
+                { value: '', label: t('md_noBranch') },
+                ...branches.map(b => ({ value: b.id, label: isAr ? b.nameAr : b.nameEn })),
+              ]}
+            />
             </Field>
           </div>
 

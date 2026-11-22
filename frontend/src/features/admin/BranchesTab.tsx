@@ -6,6 +6,7 @@ import {
   SectionHeader, Field, TextInput, TextArea, Select, PrimaryButton, GhostButton,
   IconButton, Banner, StatusPill, Modal, TableShell, SearchBox,
 } from './ui';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 interface City {
   id: string;
@@ -160,14 +161,15 @@ export function BranchesTab() {
           onChange={setSearch}
           placeholder={t('md_searchBranch')}
         />
-        <Select value={cityFilter} onChange={e => setCityFilter(e.target.value)}>
-          <option value="">{t('md_allCities')}</option>
-          {cities.map(c => (
-            <option key={c.id} value={c.id}>
-              {isAr ? c.nameAr : c.nameEn}
-            </option>
-          ))}
-        </Select>
+        <SearchableSelect
+          value={cityFilter}
+          placeholder={t('md_allCities')}
+          onChange={setCityFilter}
+          options={[
+            { value: '', label: t('md_allCities') },
+            ...cities.map(c => ({ value: c.id, label: isAr ? c.nameAr : c.nameEn })),
+          ]}
+        />
       </div>
 
       <TableShell
@@ -239,14 +241,16 @@ export function BranchesTab() {
             </div>
 
             <Field label={t('md_city')}>
-              <Select required value={form.cityId} onChange={e => setForm({ ...form, cityId: e.target.value })}>
-                <option value="">{t('md_selectCity')}</option>
-                {cities.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {(isAr ? c.nameAr : c.nameEn) + ' — ' + (isAr ? c.country.nameAr : c.country.nameEn)}
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={form.cityId}
+                placeholder={t('md_selectCity')}
+                onChange={val => setForm({ ...form, cityId: val })}
+                options={cities.map(c => ({
+                  value: c.id,
+                  label: isAr ? c.nameAr : c.nameEn,
+                  hint: isAr ? c.country.nameAr : c.country.nameEn,
+                }))}
+              />
             </Field>
 
             <Field label={t('md_address')}>

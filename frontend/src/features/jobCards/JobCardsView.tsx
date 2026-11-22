@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera, ClipboardCheck } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import html2canvas from 'html2canvas-pro';
 import { QRCodeCanvas } from 'qrcode.react';
 import { InspectionModal } from '../inspections/InspectionModal';
@@ -680,10 +681,14 @@ export function JobCardsView() {
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
               <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><User size={15} className="text-primary-text" /> {t('selectCustomer')}</label>
 
-              <select
+              <SearchableSelect
                 value={showNewCustomerForm ? '__add_new__' : form.customerId}
-                onChange={(e) => {
-                  const val = e.target.value;
+                placeholder={isRtl ? 'اختر العميل أو ابحث عنه' : 'Choose or search a customer'}
+                options={[
+                  { value: '__add_new__', label: isRtl ? 'إضافة عميل جديد' : 'Add New Customer', pinned: true },
+                  ...customers.map(c => ({ value: c.id, label: c.fullName, hint: c.mobileNumber })),
+                ]}
+                onChange={(val) => {
                   if (val === '__add_new__') {
                     setShowNewCustomerForm(true);
                     setShowNewVehicleForm(false);
@@ -694,14 +699,7 @@ export function JobCardsView() {
                     setInlineMsg('');
                   }
                 }}
-                className="w-full rounded-lg bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none focus:border-primary"
-              >
-                <option value="__add_new__" className="text-emerald-400">{isRtl ? '➕ إضافة عميل جديد' : '➕ Add New Customer'}</option>
-                <option value="">{isRtl ? '-- اختر العميل الموجود --' : '-- Select Existing Customer --'}</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.fullName} — {c.mobileNumber}</option>
-                ))}
-              </select>
+              />
 
               {showNewCustomerForm && (
                 <form onSubmit={handleCreateCustomerInline} className="space-y-3 border-t border-zinc-800 pt-3">
@@ -769,10 +767,18 @@ export function JobCardsView() {
               )}
 
               {form.customerId && (
-                <select
+                <SearchableSelect
                   value={showNewVehicleForm ? '__add_new__' : form.vehicleId}
-                  onChange={(e) => {
-                    const val = e.target.value;
+                  placeholder={isRtl ? 'اختر السيارة أو ابحث عنها' : 'Choose or search a vehicle'}
+                  options={[
+                    { value: '__add_new__', label: isRtl ? 'إضافة سيارة جديدة' : 'Add New Vehicle', pinned: true },
+                    ...vehicles.map(v => ({
+                      value: v.id,
+                      label: `${v.brand} ${v.model}`,
+                      hint: v.plateNumber,
+                    })),
+                  ]}
+                  onChange={(val) => {
                     if (val === '__add_new__') {
                       setShowNewVehicleForm(true);
                       setShowNewCustomerForm(false);
@@ -783,14 +789,7 @@ export function JobCardsView() {
                       setInlineMsg('');
                     }
                   }}
-                  className="w-full rounded-lg bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none focus:border-primary"
-                >
-                <option value="__add_new__" className="text-emerald-400">{isRtl ? '➕ إضافة سيارة جديدة' : '➕ Add New Vehicle'}</option>
-                <option value="">{isRtl ? '-- اختر السيارة --' : '-- Select Vehicle --'}</option>
-                {vehicles.map((v) => (
-                  <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plateNumber}</option>
-                ))}
-                </select>
+                />
               )}
 
               {showNewVehicleForm && (
@@ -903,19 +902,16 @@ export function JobCardsView() {
                       className="w-full rounded bg-zinc-900/50 border border-zinc-800 p-2 text-sm text-amber-300 font-semibold focus:outline-none cursor-not-allowed"
                     />
                   ) : (
-                    <select
+                    <SearchableSelect
                       value={form.technicianName}
-                      onChange={(e) => setForm({ ...form, technicianName: e.target.value })}
-                      className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white focus:outline-none focus:border-primary"
-                    >
-                      <option value="">{t('selectTechnician')}</option>
-                      {technicians.map((t: any) => (
-                        <option key={t.id} value={`${t.firstName} ${t.lastName}`}>
-                          {t.firstName} {t.lastName}
-                        </option>
-                      ))}
-                      <option value="__custom__" disabled>─────────────</option>
-                    </select>
+                      placeholder={t('selectTechnician')}
+                      options={technicians.map((tech: any) => ({
+                        value: `${tech.firstName} ${tech.lastName}`,
+                        label: `${tech.firstName} ${tech.lastName}`,
+                        hint: tech.branch ? (isRtl ? tech.branch.nameAr : tech.branch.nameEn) : undefined,
+                      }))}
+                      onChange={(val) => setForm({ ...form, technicianName: val })}
+                    />
                   )}
                 </div>
               </div>

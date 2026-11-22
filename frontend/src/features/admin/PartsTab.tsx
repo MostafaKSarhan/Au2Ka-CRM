@@ -6,6 +6,7 @@ import {
   SectionHeader, Field, TextInput, TextArea, Select, PrimaryButton, GhostButton,
   IconButton, Banner, Modal, TableShell,
 } from './ui';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 interface Part {
   id: string;
@@ -181,20 +182,18 @@ export function PartsTab() {
             className="ps-9"
           />
         </div>
-        <Select
+        <SearchableSelect
           value={category}
-          onChange={e => {
-            setCategory(e.target.value);
+          placeholder={t('md_allCategories')}
+          onChange={val => {
+            setCategory(val);
             setPage(1);
           }}
-        >
-          <option value="">{t('md_allCategories')}</option>
-          {categories.map(c => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </Select>
+          options={[
+            { value: '', label: t('md_allCategories') },
+            ...categories.map(c => ({ value: c, label: c })),
+          ]}
+        />
       </div>
 
       <label className="flex w-fit cursor-pointer items-center gap-2 text-xs font-semibold text-zinc-400">
