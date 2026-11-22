@@ -76,7 +76,7 @@ export function VehiclesView() {
     setErrorMsg('');
     const finalBrand = isCustomBrand ? form.customBrand.trim() : form.brand;
     if (!finalBrand) {
-      setErrorMsg(lang === 'ar' ? 'يرجى تحديد أو كتابة ماركة السيارة' : 'Please select or type the vehicle brand');
+      setErrorMsg(t('vh_pleaseSelectOrType'));
       return;
     }
 
@@ -93,7 +93,7 @@ export function VehiclesView() {
       setIsCustomBrand(false);
       loadVehicles();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || (lang === 'ar' ? 'فشل حفظ بيانات السيارة' : 'Failed to save vehicle details'));
+      setErrorMsg(err.response?.data?.message || (t('cu_failedToSaveVehicle')));
     }
   }
 
@@ -149,7 +149,7 @@ export function VehiclesView() {
                 <div>
                   <h3 className="font-bold text-white text-base">{v.brand} {v.model}</h3>
                   <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                    {isRtl ? `رقم اللوحة: ${v.plateNumber}` : `Plate Number: ${v.plateNumber}`}
+                    {t('ui_plateLabel').replace('{plate}', v.plateNumber)}
                   </p>
                 </div>
               </div>
@@ -157,10 +157,10 @@ export function VehiclesView() {
               <div className="border-t border-zinc-800/80 pt-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-zinc-400">
                   <User size={14} className={isRtl ? 'ml-1' : 'mr-1'} />
-                  <span>{v.customer?.fullName || (isRtl ? 'مالك غير معروف' : 'Unknown Owner')}</span>
+                  <span>{v.customer?.fullName || (t('vh_unknownOwner'))}</span>
                 </div>
                 <div className="text-zinc-500 font-medium font-mono">
-                  {isRtl ? `${v.mileage.toLocaleString('ar-EG')} كم` : `${v.mileage.toLocaleString('en-US')} km`}
+                  {t('ui_kmValue').replace('{km}', v.mileage.toLocaleString(isRtl ? 'ar-EG' : 'en-US'))}
                 </div>
               </div>
 
@@ -180,7 +180,7 @@ export function VehiclesView() {
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-zinc-800 pt-4">
           <p className="text-xs text-zinc-500">
-            {isRtl ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+            {t('ui_pageOf').replace('{page}', String(page)).replace('{total}', String(totalPages))}
           </p>
           <div className="flex gap-2">
             <button
@@ -188,14 +188,14 @@ export function VehiclesView() {
               onClick={() => setPage(p => Math.max(1, p - 1))}
               className="rounded bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-white hover:bg-zinc-800 disabled:opacity-50 cursor-pointer"
             >
-              {isRtl ? 'السابق' : 'Previous'}
+              {t('cu_previous')}
             </button>
             <button
               disabled={page === totalPages}
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               className="rounded bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-white hover:bg-zinc-800 disabled:opacity-50 cursor-pointer"
             >
-              {isRtl ? 'التالي' : 'Next'}
+              {t('cu_next')}
             </button>
           </div>
         </div>
@@ -227,7 +227,7 @@ export function VehiclesView() {
                     placeholder={t('vehicleBrand')}
                     options={[
                       ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
-                      { value: 'CUSTOM', label: isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)', pinned: true },
+                      { value: 'CUSTOM', label: t('cu_otherManualEntry'), pinned: true },
                     ]}
                     onChange={(val) => {
                       if (val === 'CUSTOM') {
@@ -245,7 +245,7 @@ export function VehiclesView() {
                       required
                       value={form.customBrand}
                       onChange={(e) => setForm({ ...form, customBrand: e.target.value })}
-                      placeholder={isRtl ? 'اكتب ماركة السيارة هنا...' : 'Type vehicle brand here...'}
+                      placeholder={t('cu_typeVehicleBrandHere')}
                       className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white mt-2 focus:outline-none"
                     />
                   )}
@@ -296,7 +296,7 @@ export function VehiclesView() {
                   type="submit"
                   className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover cursor-pointer"
                 >
-                  {isRtl ? 'حفظ السيارة' : 'Save Vehicle'}
+                  {t('cu_saveVehicle')}
                 </button>
               </div>
             </form>

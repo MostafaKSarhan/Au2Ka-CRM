@@ -250,10 +250,10 @@ export function VehicleFileView({ vehicleId, onClose }: { vehicleId: string; onC
           <form onSubmit={submitDocument} className="space-y-3">
             <Field label={t('vf_documentType')}>
               <Select value={docForm.type} onChange={e => setDocForm({ ...docForm, type: e.target.value })}>
-                <option value="REGISTRATION">{isAr ? 'استمارة السيارة' : 'Registration'}</option>
-                <option value="INSURANCE">{isAr ? 'وثيقة التأمين' : 'Insurance'}</option>
-                <option value="PERIODIC_INSPECTION">{isAr ? 'الفحص الدوري' : 'Periodic inspection'}</option>
-                <option value="OTHER">{isAr ? 'مستند آخر' : 'Other'}</option>
+                <option value="REGISTRATION">{t('vf2_registration')}</option>
+                <option value="INSURANCE">{t('vf2_insurance')}</option>
+                <option value="PERIODIC_INSPECTION">{t('vf2_periodicInspection')}</option>
+                <option value="OTHER">{t('vf2_other')}</option>
               </Select>
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">

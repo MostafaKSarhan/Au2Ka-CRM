@@ -407,7 +407,7 @@ function JoinRequestForm({
                 className={field}
                 value={form.fullName}
                 onChange={e => setForm({ ...form, fullName: e.target.value })}
-                placeholder={isAr ? 'الاسم الثلاثي' : 'Full name'}
+                placeholder={t('pt_fullNamePlaceholder')}
               />
             </div>
 
@@ -434,7 +434,7 @@ function JoinRequestForm({
                   className={field}
                   value={form.brand}
                   onChange={e => setForm({ ...form, brand: e.target.value })}
-                  placeholder={isAr ? 'تويوتا' : 'Toyota'}
+                  placeholder={t('pt_brandPlaceholder')}
                 />
               </div>
               <div>
@@ -445,7 +445,7 @@ function JoinRequestForm({
                   className={field}
                   value={form.model}
                   onChange={e => setForm({ ...form, model: e.target.value })}
-                  placeholder={isAr ? 'كامري' : 'Camry'}
+                  placeholder={t('pt_modelPlaceholder')}
                 />
               </div>
             </div>
@@ -458,7 +458,7 @@ function JoinRequestForm({
                 className={field}
                 value={form.plateNumber}
                 onChange={e => setForm({ ...form, plateNumber: e.target.value })}
-                placeholder={isAr ? 'أ ب ج 1234' : 'ABC 1234'}
+                placeholder={t('pt_platePlaceholder')}
               />
             </div>
 

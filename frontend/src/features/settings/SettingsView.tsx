@@ -48,7 +48,7 @@ export function SettingsView() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* User Profile Card */}
         <div className="glass-panel rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">{lang === 'ar' ? 'ملف المستخدم الحالي' : 'Current User Profile'}</h2>
+          <h2 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">{t('st_currentUserProfile')}</h2>
           {user ? (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
@@ -76,7 +76,7 @@ export function SettingsView() {
               </button>
             </div>
           ) : (
-            <p className="text-sm text-zinc-500">{lang === 'ar' ? 'غير مسجل دخول' : 'Not logged in'}</p>
+            <p className="text-sm text-zinc-500">{t('st_notLoggedIn')}</p>
           )}
         </div>
 
@@ -102,7 +102,7 @@ export function SettingsView() {
                 className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none font-mono text-left"
                 style={{ direction: 'ltr' }}
               />
-              <span className="block text-[10px] text-zinc-500 mt-1">{lang === 'ar' ? 'اكتب الرقم مباشرة متضمناً كود الدولة بدون أصفار أو رمز (+) في البداية.' : 'Write the number directly including the country code without zeros or (+) at the beginning.'}</span>
+              <span className="block text-[10px] text-zinc-500 mt-1">{t('st_writeTheNumberDirectly')}</span>
             </div>
 
             <button
@@ -134,20 +134,20 @@ export function SettingsView() {
       {/* Roles details */}
       <div className="glass-panel rounded-xl p-6">
         <h2 className="text-lg font-bold text-white border-b border-zinc-800 pb-2 mb-4 flex items-center gap-2">
-          <Shield size={18} className="text-accent" /> {lang === 'ar' ? 'جدول صلاحيات الموظفين بالورشة' : 'Workshop Employees Permissions'}
+          <Shield size={18} className="text-accent" /> {t('st_workshopEmployeesPermissions')}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3 text-xs text-zinc-400">
           <div className="p-3 bg-zinc-900/40 rounded border border-zinc-800">
-            <p className="font-semibold text-white text-xs">{lang === 'ar' ? 'صلاحية مدير النظام (Admin)' : 'System Admin (Admin)'}</p>
-            <p className="text-xs text-zinc-500 mt-1">{lang === 'ar' ? 'له كامل الصلاحيات لإدارة العملاء، تسجيل وتعديل بيانات السيارات، فتح كروت العمل، وتحديث الحالات وحذف البيانات.' : 'Has full access permissions to manage customers, vehicles, create job cards, and delete records.'}</p>
+            <p className="font-semibold text-white text-xs">{t('st_systemAdminAdmin')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('st_hasFullAccessPermissions')}</p>
           </div>
           <div className="p-3 bg-zinc-900/40 rounded border border-zinc-800">
-            <p className="font-semibold text-white text-xs">{lang === 'ar' ? 'صلاحية الاستقبال (Reception)' : 'Receptionist (Reception)'}</p>
-            <p className="text-xs text-zinc-500 mt-1">{lang === 'ar' ? 'مخصص لاستقبال سيارات العملاء، تعبئة بيانات المالك، تسجيل مواصفات السيارة واللوحة، وتصوير الهيكل الخارجي وحفظ كرت الاستقبال.' : 'Dedicated to customer intake, owner registrations, specifying vehicles details, and photographing body condition.'}</p>
+            <p className="font-semibold text-white text-xs">{t('st_receptionistReception')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('st_dedicatedToCustomerIntake')}</p>
           </div>
           <div className="p-3 bg-zinc-900/40 rounded border border-zinc-800">
-            <p className="font-semibold text-white text-xs">{lang === 'ar' ? 'صلاحية فني الصيانة (Technician)' : 'Maintenance Tech (Technician)'}</p>
-            <p className="text-xs text-zinc-500 mt-1">{lang === 'ar' ? 'عرض كروت العمل النشطة، وتعبئة الفحص الفني الأولي للأعطال، وتحديد القطع المطلوبة للإصلاح وملاحظات الصيانة.' : 'Review active job cards, complete initial technical inspection, choose repairs required, and log remarks.'}</p>
+            <p className="font-semibold text-white text-xs">{t('st_maintenanceTechTechnician')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('st_reviewActiveJobCards')}</p>
           </div>
         </div>
       </div>

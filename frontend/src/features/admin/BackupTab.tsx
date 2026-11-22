@@ -147,9 +147,7 @@ export function BackupTab() {
 {`mysql -u <user> -p ${info?.database || '<database>'} < au2ka-backup-....sql`}
         </pre>
         <p className="mt-3 text-[11px] leading-relaxed text-zinc-600">
-          {isAr
-            ? 'ملاحظة: الاستعادة تستبدل كل البيانات الحالية بمحتوى الملف. خُذ نسخة قبل أي استعادة.'
-            : 'Note: restoring replaces all current data with the file contents. Take a backup before restoring.'}
+          {t('md_restoreNote')}
         </p>
       </div>
     </div>

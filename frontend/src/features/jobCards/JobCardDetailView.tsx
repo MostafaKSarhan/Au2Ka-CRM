@@ -85,7 +85,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="block text-xs text-zinc-500">{isRtl ? 'الاسم الكامل' : 'Full Name'}</span>
+                <span className="block text-xs text-zinc-500">{t('jd_fullName')}</span>
                 <span className="font-semibold text-zinc-200 mt-1 block">{job.customer?.fullName}</span>
               </div>
               <div>
@@ -108,7 +108,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
             </h3>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="block text-xs text-zinc-500">{isRtl ? 'الماركة / الموديل' : 'Brand / Model'}</span>
+                <span className="block text-xs text-zinc-500">{t('jd_brandModel')}</span>
                 <span className="font-semibold text-zinc-200 mt-1 block">{job.vehicle?.brand} {job.vehicle?.model}</span>
               </div>
               <div>
@@ -118,7 +118,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
               <div>
                 <span className="block text-xs text-zinc-500">{t('mileage')}</span>
                 <span className="font-semibold text-zinc-200 mt-1 block font-mono">
-                  {isRtl ? `${job.vehicle?.mileage} كم` : `${job.vehicle?.mileage} km`}
+                  {t('ui_kmValue').replace('{km}', String(job.vehicle?.mileage ?? 0))}
                 </span>
               </div>
             </div>
@@ -143,7 +143,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
               <Wrench className="text-blue-400" size={16} /> {t('jobInspectionLabel')}
             </h4>
             <p className="text-sm text-zinc-300 bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/60 leading-relaxed min-h-[100px]">
-              {job.initialInspection || (isRtl ? 'لم يتم تسجيل فحص مبدئي بعد.' : 'No initial inspection recorded yet.')}
+              {job.initialInspection || (t('jd_noInitialInspectionRecorded'))}
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
               <Clock className="text-yellow-500" size={16} /> {t('jobRepairsLabel')}
             </h4>
             <p className="text-sm text-zinc-300 bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/60 leading-relaxed min-h-[100px]">
-              {job.requiredRepairs || (isRtl ? 'لم يتم تحديد إصلاحات مطلوبة بعد.' : 'No repairs specified yet.')}
+              {job.requiredRepairs || (t('jd_noRepairsSpecifiedYet'))}
             </p>
           </div>
         </div>
@@ -168,24 +168,24 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
             <div className="divide-y divide-zinc-900">
               <div className="flex justify-between py-2.5 text-sm">
                 <span className="text-zinc-400">{t('baseCost')}:</span>
-                <span className="font-bold text-white font-mono">{baseCost} {isRtl ? 'ريال' : 'SAR'}</span>
+                <span className="font-bold text-white font-mono">{baseCost} {t('jc_sar')}</span>
               </div>
               {servicesList.map((srv, idx) => (
                 <div key={idx} className="flex justify-between py-2.5 text-sm">
                   <span className="text-zinc-400">{srv.name}:</span>
-                  <span className="font-semibold text-zinc-300 font-mono">+{srv.price} {isRtl ? 'ريال' : 'SAR'}</span>
+                  <span className="font-semibold text-zinc-300 font-mono">+{srv.price} {t('jc_sar')}</span>
                 </div>
               ))}
               <div className="flex justify-between py-3 text-base border-t border-zinc-800 font-black">
                 <span className="text-zinc-200">{t('grandTotal')}:</span>
-                <span className="text-emerald-400 font-mono">{grandTotal} {isRtl ? 'ريال' : 'SAR'}</span>
+                <span className="text-emerald-400 font-mono">{grandTotal} {t('jc_sar')}</span>
               </div>
             </div>
           </div>
 
           {/* Approval & Tech Info */}
           <div className="glass-panel rounded-2xl p-6 border border-zinc-900 space-y-4">
-            <h3 className="text-base font-bold text-white">{isRtl ? 'حالة الاعتماد والفني المسؤول' : 'Approval & Assigned Tech'}</h3>
+            <h3 className="text-base font-bold text-white">{t('jd_approvalAssignedTech')}</h3>
             <div className="space-y-4 text-sm">
               <div className="flex justify-between items-center bg-zinc-900/40 p-3.5 rounded-xl border border-zinc-800">
                 <span className="text-zinc-400">{t('approvalDecision')}:</span>
@@ -199,7 +199,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
               </div>
               <div className="flex justify-between items-center bg-zinc-900/40 p-3.5 rounded-xl border border-zinc-800">
                 <span className="text-zinc-400">{t('assignTechnician')}:</span>
-                <span className="font-bold text-white">{job.technicianName || (isRtl ? 'غير محدد بعد' : 'Not assigned yet')}</span>
+                <span className="font-bold text-white">{job.technicianName || (t('jd_notAssignedYet'))}</span>
               </div>
             </div>
           </div>
@@ -246,7 +246,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
                       )}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition duration-200">
                         <ZoomIn size={16} className="text-white" />
-                        <span className="text-[10px] text-white font-bold">{isRtl ? 'معاينة' : 'Preview'}</span>
+                        <span className="text-[10px] text-white font-bold">{t('jc_preview')}</span>
                       </div>
                     </div>
                   );
@@ -258,7 +258,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
           {/* Timeline of Activity */}
           <div className="glass-panel rounded-2xl p-6 border border-zinc-900 space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <FileText className="text-cyan-400" size={18} /> {isRtl ? 'سجل وتاريخ كرت الاستقبال' : 'Job Card intake logs'}
+              <FileText className="text-cyan-400" size={18} /> {t('jd_jobCardIntakeLogs')}
             </h3>
             
             <div className={`relative ${isRtl ? 'pl-2 pr-0 border-r' : 'pr-2 pl-0 border-l'} border-zinc-900 space-y-6`}>
@@ -266,7 +266,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
               <div className={`relative ${isRtl ? 'pr-6' : 'pl-6'}`}>
                 <span className={`absolute ${isRtl ? '-right-[7px]' : '-left-[7px]'} top-1 w-3 h-3 rounded-full bg-zinc-800 border-2 border-zinc-950 flex items-center justify-center`}></span>
                 <span className="text-[10px] text-zinc-500 font-mono">{new Date(job.createdAt).toLocaleString(isRtl ? 'ar-EG' : 'en-US')}</span>
-                <p className="text-xs font-semibold text-zinc-300 mt-0.5">{isRtl ? 'فتح وإنشاء كرت استقبال السيارة' : 'Create & Open Job Card'}</p>
+                <p className="text-xs font-semibold text-zinc-300 mt-0.5">{t('jd_createOpenJobCard')}</p>
               </div>
 
               {/* Dynamic Activities */}
@@ -294,7 +294,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
             onClick={() => setActivePhoto(null)}
             className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-2 bg-zinc-900 text-white rounded-lg cursor-pointer text-xs font-bold`}
           >
-            {isRtl ? '✕ إغلاق المعاينة' : '✕ Close Preview'}
+            {t('jd_closePreview')}
           </button>
           
           <div className="max-w-4xl max-h-[85vh] overflow-hidden flex items-center justify-center">
@@ -320,7 +320,7 @@ export function JobCardDetailView({ job, onClose }: JobCardDetailViewProps) {
             download
             className="absolute bottom-4 bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition"
           >
-            <Download size={14} /> {isRtl ? 'تحميل الملف الأصلي' : 'Download Original File'}
+            <Download size={14} /> {t('jd_downloadOriginalFile')}
           </a>
         </div>
       )}

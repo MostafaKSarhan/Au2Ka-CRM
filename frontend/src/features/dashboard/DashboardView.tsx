@@ -145,7 +145,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
   // Map database status codes to labels for chart display
   const mappedChartData = chartData.map((item, idx) => ({
     name: statusLabels[item.status] || item.status,
-    [lang === 'ar' ? 'العدد' : 'Count']: item.count,
+    [t('db_count')]: item.count,
     fill: COLORS[idx % COLORS.length]
   }));
 
@@ -172,7 +172,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
         <div className="relative w-full md:w-80">
           <input
             type="text"
-            placeholder={isRtl ? 'بحث شامل (رقم كرت، لوحة، عميل...)' : 'Global search (card, plate, client...)'}
+            placeholder={t('db_globalSearchCardPlate')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full rounded-xl bg-zinc-900 border border-zinc-800 p-3 ${isRtl ? 'pr-10' : 'pl-10'} text-xs text-white placeholder-zinc-500 focus:border-primary focus:outline-none`}
@@ -183,13 +183,13 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           {searchQuery.trim() !== '' && (
             <div className={`absolute top-full right-0 left-0 mt-2 z-50 glass-panel border border-zinc-800 rounded-xl p-3 shadow-2xl space-y-3 max-h-96 overflow-y-auto ${isRtl ? 'text-right' : 'text-left'}`}>
               {searching ? (
-                <p className="text-xs text-zinc-500 text-center py-2">{isRtl ? 'جاري البحث عن تطابقات...' : 'Searching for matches...'}</p>
+                <p className="text-xs text-zinc-500 text-center py-2">{t('db_searchingForMatches')}</p>
               ) : (
                 <>
                   {/* Job Cards Matches */}
                   {searchResults.jobCards?.length > 0 && (
                     <div className="space-y-1.5">
-                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{isRtl ? 'كروت العمل المطابقة' : 'Matching Job Cards'}</span>
+                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{t('db_matchingJobCards')}</span>
                       {searchResults.jobCards.map((job: any) => (
                         <button
                           key={job.id}
@@ -206,7 +206,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                   {/* Customers Matches */}
                   {searchResults.customers?.length > 0 && (
                     <div className="space-y-1.5 pt-2">
-                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{isRtl ? 'العملاء المطابقين' : 'Matching Customers'}</span>
+                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{t('db_matchingCustomers')}</span>
                       {searchResults.customers.map((c: any) => (
                         <div
                           key={c.id}
@@ -223,7 +223,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                   {/* Vehicles Matches */}
                   {searchResults.vehicles?.length > 0 && (
                     <div className="space-y-1.5 pt-2">
-                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{isRtl ? 'السيارات المطابقة' : 'Matching Vehicles'}</span>
+                      <span className="block text-[10px] text-zinc-500 font-bold border-b border-zinc-900 pb-1">{t('db_matchingVehicles')}</span>
                       {searchResults.vehicles.map((v: any) => (
                         <div
                           key={v.id}
@@ -238,7 +238,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                   )}
 
                   {searchResults.jobCards?.length === 0 && searchResults.customers?.length === 0 && searchResults.vehicles?.length === 0 && (
-                    <p className="text-xs text-zinc-500 text-center py-2">{isRtl ? 'لا توجد نتائج مطابقة لبحثك.' : 'No matching results found.'}</p>
+                    <p className="text-xs text-zinc-500 text-center py-2">{t('db_noMatchingResultsFound')}</p>
                   )}
                 </>
               )}
@@ -264,7 +264,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
             <GrowthBadge value={stats.totalCustomers.growth} />
             <button onClick={() => onNavigate?.('customers')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
-              {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
+              {t('db_view')} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
           </div>
         </div>
@@ -283,7 +283,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
             <GrowthBadge value={stats.totalVehicles.growth} />
             <button onClick={() => onNavigate?.('vehicles')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
-              {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
+              {t('db_view')} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           <div className="mt-2.5 flex items-center justify-between text-[10px]">
             <GrowthBadge value={stats.totalJobCards.growth} />
             <button onClick={() => onNavigate?.('jobCards')} className="text-zinc-500 hover:text-white transition flex items-center gap-0.5 cursor-pointer">
-              {isRtl ? 'عرض' : 'View'} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
+              {t('db_view')} {isRtl ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
             </button>
           </div>
         </div>
@@ -319,7 +319,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className={`mt-2.5 text-[10px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            <span className="text-zinc-500">{isRtl ? 'تجري عليها أعمال صيانة' : 'Under active maintenance'}</span>
+            <span className="text-zinc-500">{t('db_underActiveMaintenance')}</span>
           </div>
         </div>
 
@@ -335,7 +335,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className={`mt-2.5 text-[10px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            <span className="text-zinc-500">{isRtl ? 'بانتظار تسليم العميل' : 'Awaiting customer pickup'}</span>
+            <span className="text-zinc-500">{t('db_awaitingCustomerPickup')}</span>
           </div>
         </div>
 
@@ -351,7 +351,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
             </div>
           </div>
           <div className={`mt-2.5 text-[10px] ${isRtl ? 'text-left' : 'text-right'}`}>
-            <span className="text-zinc-500">{isRtl ? 'انتهت دورتها بالكامل' : 'Lifecycle finished fully'}</span>
+            <span className="text-zinc-500">{t('db_lifecycleFinishedFully')}</span>
           </div>
         </div>
 
@@ -365,20 +365,20 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           <div className="flex items-center justify-between pb-4 border-b border-zinc-900">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <BarChart4 size={16} className="text-primary-text" />
-              {isRtl ? 'نسب الحالات' : 'Status Share'}
+              {t('db_statusShare')}
             </h2>
             <div className="flex bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
               <button
                 onClick={() => setChartType('bar')}
                 className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer transition ${chartType === 'bar' ? 'bg-primary text-white' : 'text-zinc-500'}`}
-                title={isRtl ? 'مخطط الأعمدة' : 'Bar Chart'}
+                title={t('db_barChart')}
               >
                 <BarChart4 size={14} />
               </button>
               <button
                 onClick={() => setChartType('pie')}
                 className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer transition ${chartType === 'pie' ? 'bg-primary text-white' : 'text-zinc-500'}`}
-                title={isRtl ? 'المخطط الدائري' : 'Pie Chart'}
+                title={t('db_pieChart')}
               >
                 <PieIcon size={14} />
               </button>
@@ -387,7 +387,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
 
           <div className="h-64 mt-4">
             {mappedChartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-xs text-zinc-600">{isRtl ? 'لا توجد بيانات كافية للتحليل.' : 'No data available.'}</div>
+              <div className="flex h-full items-center justify-center text-xs text-zinc-600">{t('db_noDataAvailable')}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 {chartType === 'bar' ? (
@@ -395,13 +395,13 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                     <XAxis dataKey="name" stroke="#52525b" fontSize={10} tickLine={false} />
                     <YAxis stroke="#52525b" fontSize={10} tickLine={false} />
                     <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', textAlign: isRtl ? 'right' : 'left' }} />
-                    <Bar dataKey={lang === 'ar' ? 'العدد' : 'Count'} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey={t('db_count')} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 ) : (
                   <PieChart>
                     <Pie
                       data={mappedChartData}
-                      dataKey={lang === 'ar' ? 'العدد' : 'Count'}
+                      dataKey={t('db_count')}
                       nameKey="name"
                       cx="50%"
                       cy="50%"
@@ -426,13 +426,13 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
           <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Car size={16} className="text-primary-text" />
-              {isRtl ? 'أحدث كروت صيانة جارية بالورشة' : 'Recent Active Job Cards'}
+              {t('db_recentActiveJobCards')}
             </h2>
             <button
               onClick={() => onNavigate?.('reports')}
               className="text-xs text-primary-text hover:underline flex items-center gap-0.5 cursor-pointer"
             >
-              {isRtl ? 'كل كروت العمل والتقارير' : 'All Job Cards & Reports'} <ExternalLink size={12} />
+              {t('db_allJobCardsReports')} <ExternalLink size={12} />
             </button>
           </div>
 
@@ -444,15 +444,15 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                   <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{t('fullName')}</th>
                   <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{t('vehicleBrand')}</th>
                   <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{t('plateNumber')}</th>
-                  <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{isRtl ? 'التكلفة (ريال)' : 'Cost (SAR)'}</th>
-                  <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{isRtl ? 'الحالة' : 'Status'}</th>
+                  <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{t('rp_costSar')}</th>
+                  <th className={`pb-3 ${isRtl ? 'text-right' : 'text-left'}`}>{t('rp_status')}</th>
                   <th className="pb-3 text-center">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900/60">
                 {recentJobs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-6 text-center text-zinc-600 font-semibold">{isRtl ? 'لا توجد كروت جارية حالياً.' : 'No active cards currently.'}</td>
+                    <td colSpan={7} className="py-6 text-center text-zinc-600 font-semibold">{t('db_noActiveCardsCurrently')}</td>
                   </tr>
                 ) : (
                   recentJobs.map((job) => (
@@ -476,7 +476,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                         <button
                           onClick={() => setSelectedJob(job)}
                           className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-white"
-                          title={isRtl ? 'معاينة تفاصيل الكرت' : 'Preview job card'}
+                          title={t('db_previewJobCard')}
                         >
                           <Eye size={14} />
                         </button>

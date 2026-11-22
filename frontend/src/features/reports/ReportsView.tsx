@@ -156,7 +156,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
     
-    const title = lang === 'ar' ? 'تقرير كروت استقبال وصيانة السيارات - Au2Ka CRM' : 'Job Cards Intake & Maintenance Report - Au2Ka CRM';
+    const title = t('rp_jobCardsIntakeMaintenance');
     const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     
     const rowsHtml = data.map((job) => `
@@ -186,19 +186,19 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
       <body>
         <table>
           <tr><td colspan="9" class="title-row">${title}</td></tr>
-          <tr><td colspan="9">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
+          <tr><td colspan="9">${t('rp_exportDate')} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>${lang === 'ar' ? 'رقم الكرت' : 'Card Number'}</th>
-              <th>${lang === 'ar' ? 'اسم العميل' : 'Customer Name'}</th>
-              <th>${lang === 'ar' ? 'رقم الهاتف' : 'Phone Number'}</th>
-              <th>${lang === 'ar' ? 'السيارة' : 'Vehicle'}</th>
-              <th>${lang === 'ar' ? 'رقم اللوحة' : 'Plate Number'}</th>
-              <th>${lang === 'ar' ? 'التكلفة (ريال)' : 'Cost (SAR)'}</th>
-              <th>${lang === 'ar' ? 'حالة الاعتماد' : 'Approval Status'}</th>
-              <th>${lang === 'ar' ? 'حالة العمل' : 'Work Status'}</th>
-              <th>${lang === 'ar' ? 'تاريخ الدخول' : 'Entry Date'}</th>
+              <th>${t('rp_cardNumber')}</th>
+              <th>${t('rp_customerName')}</th>
+              <th>${t('rp_phoneNumber')}</th>
+              <th>${t('rp_vehicle')}</th>
+              <th>${t('rp_plateNumber')}</th>
+              <th>${t('rp_costSar')}</th>
+              <th>${t('rp_approvalStatus')}</th>
+              <th>${t('rp_workStatus')}</th>
+              <th>${t('rp_entryDate')}</th>
             </tr>
           </thead>
           <tbody>
@@ -232,7 +232,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
         <div className={`grid gap-4 grid-cols-2 md:grid-cols-5 ${isRtl ? 'text-right' : 'text-left'}`}>
           {/* Search */}
           <div className="col-span-2 md:col-span-1">
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{lang === 'ar' ? 'بحث شامل' : 'Search'}</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{t('rp_search')}</label>
             <div className="relative">
               <input
                 type="text"
@@ -247,7 +247,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
 
           {/* Status */}
           <div>
-            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{lang === 'ar' ? 'حالة الكرت' : 'Card Status'}</label>
+            <label className="block text-[10px] text-zinc-600 mb-1 font-semibold">{t('rp_cardStatus')}</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -343,7 +343,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                 <th className="p-3">{t('plateNumber')}</th>
                 <th className="p-3">{t('cost')}</th>
                 <th className="p-3">{t('approvalDecision')}</th>
-                <th className="p-3">{lang === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="p-3">{t('rp_status')}</th>
                 <th className="p-3">{t('entryDate')}</th>
                 <th className="p-3 text-center">{t('actions')}</th>
               </tr>
@@ -404,7 +404,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                       <button
                         onClick={() => onViewJob(job)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded text-zinc-500 transition hover:bg-zinc-800 hover:text-white cursor-pointer"
-                        title={lang === 'ar' ? 'عرض كامل كرت العمل' : 'View Full Job Card'}
+                        title={t('rp_viewFullJobCard')}
                       >
                         <Eye size={14} />
                       </button>
@@ -430,7 +430,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
+              {t('ui_pageOf').replace('{page}', String(pagination.page)).replace('{total}', String(pagination.pages))}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
@@ -469,7 +469,7 @@ function JobCardsReportTab({ onViewJob }: SubReportProps) {
                 {t('cancel')}
               </button>
               <a
-                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير كروت صيانة المركبات الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the vehicle maintenance job cards report generated by Au2Ka CRM 🚗')}`}
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(t('rp_helloAttachedIsThe'))}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowWhatsAppAlert(false)}
@@ -525,7 +525,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
   // Export Excel and Share via WhatsApp
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
-    const title = lang === 'ar' ? 'تقرير حركة العملاء بالكامل - Au2Ka CRM' : 'Full Customer Analytics Report - Au2Ka CRM';
+    const title = t('rp_fullCustomerAnalyticsReport');
     const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     const rowsHtml = data.map((c) => `
       <tr>
@@ -533,7 +533,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">+${c.mobileNumber}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.vehiclesCount}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.jobCardsCount}</td>
-        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (lang === 'ar' ? 'لا يوجد' : 'None')}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (t('rp_none'))}</td>
       </tr>
     `).join('');
 
@@ -550,15 +550,15 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
       <body>
         <table>
           <tr><td colspan="5" class="title-row">${title}</td></tr>
-          <tr><td colspan="5">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
+          <tr><td colspan="5">${t('rp_exportDate')} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>${lang === 'ar' ? 'الاسم الكامل للعميل' : 'Customer Full Name'}</th>
-              <th>${lang === 'ar' ? 'رقم الجوال' : 'Mobile Number'}</th>
-              <th>${lang === 'ar' ? 'عدد السيارات' : 'Vehicles Count'}</th>
-              <th>${lang === 'ar' ? 'إجمالي الكروت' : 'Total Job Cards'}</th>
-              <th>${lang === 'ar' ? 'تاريخ آخر زيارة' : 'Last Visit Date'}</th>
+              <th>${t('rp_customerFullName')}</th>
+              <th>${t('rp_mobileNumber')}</th>
+              <th>${t('rp_vehiclesCount')}</th>
+              <th>${t('rp_totalJobCards')}</th>
+              <th>${t('rp_lastVisitDate')}</th>
             </tr>
           </thead>
           <tbody>
@@ -604,7 +604,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
             {t('exportExcel')}
           </button>
         </div>
-        <div className="text-xs text-zinc-500">{lang === 'ar' ? 'تحليل فترات الزيارة وسجل حركة الكروت لكل عميل بالورشة.' : 'Analysis of visit periods and lifecycle history for each customer.'}</div>
+        <div className="text-xs text-zinc-500">{t('rp_analysisOfVisitPeriods')}</div>
       </div>
 
       <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
@@ -644,7 +644,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
                     <td className="p-3 font-semibold text-zinc-400 font-mono">{c.vehiclesCount}</td>
                     <td className="p-3 font-semibold text-zinc-400 font-mono">{c.jobCardsCount}</td>
                     <td className="p-3 text-zinc-400 font-mono">
-                      {c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (lang === 'ar' ? 'لا يوجد' : 'None')}
+                      {c.lastVisit ? new Date(c.lastVisit).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : (t('rp_none'))}
                     </td>
                   </tr>
                 ))
@@ -667,7 +667,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
+              {t('ui_pageOf').replace('{page}', String(pagination.page)).replace('{total}', String(pagination.pages))}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
@@ -705,7 +705,7 @@ function CustomersReportTab({ onViewJob }: SubReportProps) {
                 {t('cancel')}
               </button>
               <a
-                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير حركة العملاء بالكامل الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the complete customer analytics report generated by Au2Ka CRM 🚗')}`}
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(t('rp_helloAttachedIsThe2'))}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowWhatsAppAlert(false)}
@@ -761,13 +761,13 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
   // Export Excel and Share via WhatsApp
   function handleExportExcelAndWhatsApp() {
     if (data.length === 0) return;
-    const title = lang === 'ar' ? 'تقرير المركبات وصيانة السيارات - Au2Ka CRM' : 'Vehicles Maintenance Report - Au2Ka CRM';
+    const title = t('rp_vehiclesMaintenanceReportAu2ka');
     const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US');
     const rowsHtml = data.map((v) => `
       <tr>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: bold;">${v.brand} ${v.model}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.plateNumber}</td>
-        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.mileage} ${lang === 'ar' ? 'كم' : 'km'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.mileage} ${t('jc_km')}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px;">${v.owner?.fullName || ''}</td>
         <td style="border: 1px solid #cbd5e1; padding: 8px; font-family: monospace;">${v.repairsCount}</td>
       </tr>
@@ -786,15 +786,15 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
       <body>
         <table>
           <tr><td colspan="5" class="title-row">${title}</td></tr>
-          <tr><td colspan="5">${lang === 'ar' ? 'تاريخ استخراج التقرير:' : 'Export Date:'} ${dateStr}</td></tr>
+          <tr><td colspan="5">${t('rp_exportDate')} ${dateStr}</td></tr>
           <tr></tr>
           <thead>
             <tr>
-              <th>${lang === 'ar' ? 'السيارة والموديل' : 'Vehicle & Model'}</th>
-              <th>${lang === 'ar' ? 'رقم اللوحة' : 'Plate Number'}</th>
-              <th>${lang === 'ar' ? 'قراءة العداد' : 'Mileage'}</th>
-              <th>${lang === 'ar' ? 'المالك (العميل)' : 'Owner (Customer)'}</th>
-              <th>${lang === 'ar' ? 'إجمالي زيارات الإصلاح' : 'Total Repairs'}</th>
+              <th>${t('rp_vehicleModel')}</th>
+              <th>${t('rp_plateNumber')}</th>
+              <th>${t('rp_mileage')}</th>
+              <th>${t('rp_ownerCustomer')}</th>
+              <th>${t('rp_totalRepairs')}</th>
             </tr>
           </thead>
           <tbody>
@@ -840,7 +840,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
             {t('exportExcel')}
           </button>
         </div>
-        <div className="text-xs text-zinc-500">{lang === 'ar' ? 'متابعة سجلات تشخيص وأعطال وعدد إصلاحات السيارات بالكامل.' : 'Follow up complete logs of diagnostics, faults, and total repairs for all vehicles.'}</div>
+        <div className="text-xs text-zinc-500">{t('rp_followUpCompleteLogs')}</div>
       </div>
 
       <div className="glass-panel rounded-xl border border-zinc-900 overflow-hidden">
@@ -848,10 +848,10 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
           <table className={`w-full text-xs ${isRtl ? 'text-right' : 'text-left'}`}>
             <thead className="bg-zinc-900/60 text-zinc-400 font-bold border-b border-zinc-800">
               <tr>
-                <th className="p-3">{lang === 'ar' ? 'السيارة والموديل' : 'Vehicle & Model'}</th>
+                <th className="p-3">{t('rp_vehicleModel')}</th>
                 <th className="p-3">{t('plateNumber')}</th>
                 <th className="p-3">{t('mileage')}</th>
-                <th className="p-3">{lang === 'ar' ? 'المالك (العميل)' : 'Owner (Customer)'}</th>
+                <th className="p-3">{t('rp_ownerCustomer')}</th>
                 <th className="p-3">{t('visitsCountLabel')}</th>
               </tr>
             </thead>
@@ -877,7 +877,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
                   <tr key={v.id} className="hover:bg-zinc-900/30 transition">
                     <td className="p-3 font-bold text-white">{v.brand} {v.model}</td>
                     <td className="p-3 font-mono text-zinc-400">{v.plateNumber}</td>
-                    <td className="p-3 font-semibold text-zinc-400 font-mono">{v.mileage} {lang === 'ar' ? 'كم' : 'km'}</td>
+                    <td className="p-3 font-semibold text-zinc-400 font-mono">{v.mileage} {t('jc_km')}</td>
                     <td className="p-3 text-zinc-400">{v.owner?.fullName}</td>
                     <td className="p-3 font-bold text-zinc-300 font-mono">{v.repairsCount}</td>
                   </tr>
@@ -901,7 +901,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
               <ChevronRight size={16} className={isRtl ? '' : 'rotate-180'} />
             </button>
             <span className="text-xs text-zinc-400 font-bold font-mono">
-              {lang === 'ar' ? `صفحة ${pagination.page} من ${pagination.pages}` : `Page ${pagination.page} of ${pagination.pages}`}
+              {t('ui_pageOf').replace('{page}', String(pagination.page)).replace('{total}', String(pagination.pages))}
             </span>
             <button
               onClick={() => setPagination(p => ({ ...p, page: Math.min(p.pages, p.page + 1) }))}
@@ -939,7 +939,7 @@ function VehiclesReportTab({ onViewJob }: SubReportProps) {
                 {t('cancel')}
               </button>
               <a
-                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(lang === 'ar' ? 'السلام عليكم، مرفق لكم تقرير حركة المركبات بالكامل الصادر من نظام Au2Ka CRM 🚗' : 'Hello, attached is the vehicle maintenance report generated by Au2Ka CRM 🚗')}`}
+                href={`https://api.whatsapp.com/send?phone=${localStorage.getItem('whatsappNumber') || '201015657091'}&text=${encodeURIComponent(t('rp_helloAttachedIsThe3'))}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowWhatsAppAlert(false)}

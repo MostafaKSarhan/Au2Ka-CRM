@@ -429,13 +429,13 @@ export function SubscriptionsView() {
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3 pt-2">
             <GhostButton disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              {isAr ? 'السابق' : 'Previous'}
+              {t('cu_previous')}
             </GhostButton>
             <span className="text-xs text-zinc-500">
               {page} / {totalPages}
             </span>
             <GhostButton disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-              {isAr ? 'التالي' : 'Next'}
+              {t('cu_next')}
             </GhostButton>
           </div>
         )}
