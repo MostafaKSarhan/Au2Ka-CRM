@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Shield, Phone, KeyRound, LogOut, Car, Wrench, FileBarChart, CalendarDays,
   BadgeCheck, Gift, Clock, ChevronLeft, ChevronRight, X, Check, AlertTriangle,
-  AlertOctagon, Gauge, Receipt,
+  AlertOctagon, Gauge, Receipt, QrCode, Share2, Copy,
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { portalApi, getPortalToken, setPortalToken } from './portalApi';
 import { useTranslation } from '../../store/LanguageContext';
 import { PwaBanner } from '../pwa/PwaBanner';
@@ -127,6 +128,11 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
+  // من فتح البوابة من رمز إحالة صديقه. الربط نفسه يبقى بيد الورشة —
+  // فلو صنعه العميل بنفسه لنسب كل زائر إحالةً لمن شاء — لكن إخفاء الكود
+  // عنه يجعل الرمز بلا فائدة، فيُعرض ليذكره عند التسجيل.
+  const invitedBy = new URLSearchParams(window.location.search).get('ref');
+
   useEffect(() => {
     if (window.location.search.includes('portal-expired')) {
       setError(t('pt_sessionExpired'));
@@ -181,6 +187,18 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
           </h1>
           <p className="mt-1 text-xs text-zinc-400">{t('pt_loginSubtitle')}</p>
         </div>
+
+        {invitedBy && (
+          <div className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-center">
+            <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-primary-text">
+              <Gift size={13} /> {t('pt_invitedBy')}
+            </p>
+            <p className="mt-1 font-mono text-lg font-black tracking-widest text-white">
+              {invitedBy}
+            </p>
+            <p className="mt-1 text-[10px] text-zinc-400">{t('pt_invitedHint')}</p>
+          </div>
+        )}
 
         {error && (
           <p className="rounded-lg border border-red-500/20 bg-red-500/10 p-2.5 text-xs font-bold text-red-400">
@@ -353,13 +371,7 @@ function PortalHome() {
           </div>
         )}
 
-        <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-center">
-          <p className="text-[11px] text-zinc-500">{t('pt_yourReferralCode')}</p>
-          <p className="font-mono text-xl font-black tracking-widest text-primary-text">
-            {data.referralCode}
-          </p>
-          <p className="mt-1 text-[10px] text-zinc-600">{t('pt_referralHint')}</p>
-        </div>
+        <ReferralCard code={data.referralCode} />
       </div>
 
       <div className="glass-panel space-y-2 rounded-xl p-5">
@@ -393,6 +405,84 @@ function PortalHome() {
       </div>
 
       {file && <VehicleFileSheet file={file} onClose={() => setFile(null)} />}
+    </div>
+  );
+}
+
+/**
+ * كود الإحالة ورمزه.
+ *
+ * الكود وحده يُقرأ بالعين ويُكتب باليد، والعميل الذي يريد مشاركته مع زميل
+ * يملي عليه ستة أحرف ويخطئ أحدهما. الرمز هنا يحمل الرابط كاملًا، فيصوّره
+ * الزميل بكاميرا جواله ويفتح البوابة والكود مُطبَّق. وزر المشاركة يفتح
+ * قائمة المشاركة في الجوال مباشرة إلى واتساب.
+ *
+ * خلفية الرمز بيضاء دائمًا: الرموز تُقرأ بوحدات داكنة على فاتح، وعلى
+ * خلفية التطبيق الداكنة لا تلتقطها الكاميرا.
+ */
+function ReferralCard({ code }: { code: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+
+  const link = `${window.location.origin}/?ref=${encodeURIComponent(code)}`;
+
+  async function share() {
+    const text = t('pt_referralShareText').replace('{code}', code);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Au2Ka', text, url: link });
+        return;
+      } catch {
+        // أغلق المستخدم قائمة المشاركة — لا شيء يُفعل
+        return;
+      }
+    }
+    copy();
+  }
+
+  function copy() {
+    navigator.clipboard?.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-center">
+      <p className="text-[11px] text-zinc-500">{t('pt_yourReferralCode')}</p>
+      <p className="font-mono text-xl font-black tracking-widest text-primary-text">{code}</p>
+
+      {showQr && (
+        <div className="mt-3 flex justify-center">
+          <div className="rounded-xl bg-white p-3">
+            <QRCodeCanvas value={link} size={148} level="M" />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <button
+          onClick={() => setShowQr(v => !v)}
+          className="flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-2 text-[11px] font-bold text-zinc-300 transition hover:text-white"
+        >
+          <QrCode size={14} /> {showQr ? t('pt_hideQr') : t('pt_showQr')}
+        </button>
+        <button
+          onClick={share}
+          className="flex cursor-pointer items-center justify-center gap-1 rounded-lg bg-primary px-2 py-2 text-[11px] font-bold text-white transition hover:bg-primary-hover"
+        >
+          <Share2 size={14} /> {t('pt_share')}
+        </button>
+        <button
+          onClick={copy}
+          className="flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-2 text-[11px] font-bold text-zinc-300 transition hover:text-white"
+        >
+          {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+          {copied ? t('pt_copied') : t('pt_copyLink')}
+        </button>
+      </div>
+
+      <p className="mt-2 text-[10px] text-zinc-600">{t('pt_referralHint')}</p>
     </div>
   );
 }
