@@ -12,7 +12,8 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed:ref": "ts-node prisma/seed-reference.ts",
     "check:system": "node tests/full-system-check.mjs",
-    "check:reset": "node tests/reset-test-data.mjs"
+    "check:reset": "node tests/reset-test-data.mjs",
+    "demo:seed": "node tests/seed-demo.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
