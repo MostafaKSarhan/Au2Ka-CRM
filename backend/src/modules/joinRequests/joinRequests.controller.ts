@@ -3,13 +3,18 @@ import { z } from 'zod';
 import { prisma } from '../../config/db';
 import { AppError } from '../../utils/appError';
 import { approveJoinRequest, rejectJoinRequest, submitJoinRequest } from './joinRequests.service';
+import { normalizeMobile } from '../../utils/mobile';
 
 const submitSchema = z.object({
   fullName: z.string().trim().min(3, 'الاسم مطلوب'),
+  // يقبل صور الرقم السعودي كلها (05… و +966… و 00966…) وغير السعودي
+  // أيضًا، ويوحّدها قبل الحفظ. كان مقصورًا على 05XXXXXXXX وحده، فرفض
+  // +966 ورفض أرقام المقيمين — وباقي النظام يقبل أي رقم أصلًا.
   mobileNumber: z
     .string()
     .trim()
-    .regex(/^05\d{8}$/, 'رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام'),
+    .transform(v => normalizeMobile(v))
+    .refine((v): v is string => v !== null, 'رقم جوال غير صحيح'),
   brand: z.string().trim().optional().nullable(),
   model: z.string().trim().optional().nullable(),
   plateNumber: z.string().trim().optional().nullable(),
@@ -19,7 +24,11 @@ const submitSchema = z.object({
 
 const approveSchema = z.object({
   fullName: z.string().trim().min(3).optional(),
-  mobileNumber: z.string().trim().regex(/^05\d{8}$/).optional(),
+  mobileNumber: z
+    .string()
+    .trim()
+    .transform(v => normalizeMobile(v) || v)
+    .optional(),
   brand: z.string().trim().optional().nullable(),
   model: z.string().trim().optional().nullable(),
   plateNumber: z.string().trim().optional().nullable(),

@@ -333,7 +333,22 @@ function JoinRequestForm({
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  const canSend = form.fullName.trim().length >= 3 && /^05\d{8}$/.test(form.mobileNumber.trim());
+  // الأرقام العربية الهندية والمسافات والشرطات تُنظَّف قبل العدّ، فمن كتب
+  // ٠٥٥ أو 055-100-0108 أو +966… لا يُرفض. والخادم يوحّد الصيغة بعد ذلك.
+  const digitsOnly = form.mobileNumber
+    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/\D/g, '');
+
+  const nameOk = form.fullName.trim().length >= 3;
+  const mobileOk = digitsOnly.length >= 8 && digitsOnly.length <= 15;
+  const canSend = nameOk && mobileOk;
+
+  // الزر المعطّل بلا سبب يُحيّر: هذا السطر يقول ما الناقص.
+  const missing = !nameOk
+    ? t('pt_joinNeedName')
+    : !mobileOk
+      ? t('pt_joinNeedMobile')
+      : '';
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -418,11 +433,12 @@ function JoinRequestForm({
               <input
                 className={field}
                 dir="ltr"
-                inputMode="numeric"
+                inputMode="tel"
                 value={form.mobileNumber}
                 onChange={e => setForm({ ...form, mobileNumber: e.target.value })}
                 placeholder="05xxxxxxxx"
               />
+              <p className="mt-1 text-[10px] text-zinc-600" dir="ltr">{t('pt_mobileHint')}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -466,6 +482,10 @@ function JoinRequestForm({
               <p className="rounded-lg border border-red-500/20 bg-red-500/10 p-2.5 text-xs font-bold text-red-400">
                 {error}
               </p>
+            )}
+
+            {missing && (
+              <p className="text-center text-[11px] font-semibold text-amber-400">{missing}</p>
             )}
 
             <button
