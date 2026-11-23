@@ -19,6 +19,15 @@ export function renderTemplate(body: string, values: Record<string, string | num
   });
 }
 
+/**
+ * Every placeholder in a body, in order of appearance and including repeats —
+ * the order Meta assigns to {{1}}, {{2}} … when the same text is registered as
+ * an approved template.
+ */
+export function placeholdersOf(body: string): string[] {
+  return Array.from(body.matchAll(/\{\{\s*([\w.]+)\s*\}\}/g), m => m[1]);
+}
+
 /** Normalises a Saudi mobile number into the international form wa.me expects. */
 export function toWhatsAppNumber(raw: string | null | undefined): string | null {
   if (!raw) return null;
@@ -100,21 +109,20 @@ export async function queueMessage(options: QueueOptions): Promise<QueueResult> 
     return { queued: false, reason: 'NO_RECIPIENT' };
   }
 
-  // M8 — the same values, in the order the template declares them, so an
-  // approved Meta template can be sent for this message later.
+  // M8 — the values that fill {{1}}, {{2}} … of the approved Meta template.
+  // They are read from the body itself, in order of appearance, and not from
+  // the `variables` list: that list names every value a template may use, and
+  // five of the seven system templates declare one the body never prints.
+  // Meta counts parameters rather than naming them, and rejects the whole
+  // send (132000) when the count differs from the approved body's.
   let templateValues: string | null = null;
-  if (template?.variables && options.values) {
-    try {
-      const names: string[] = JSON.parse(template.variables);
-      templateValues = JSON.stringify(
-        names.map(name => {
-          const value = options.values?.[name];
-          return value === undefined || value === null ? '' : String(value);
-        }),
-      );
-    } catch {
-      templateValues = null;
-    }
+  if (template && options.values) {
+    templateValues = JSON.stringify(
+      placeholdersOf(rawBody).map(name => {
+        const value = options.values?.[name];
+        return value === undefined || value === null ? '' : String(value);
+      }),
+    );
   }
 
   const message = await prisma.outboundMessage.create({
