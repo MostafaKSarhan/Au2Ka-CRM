@@ -16,6 +16,7 @@ set -euo pipefail
 BRANCH="${BRANCH:-main}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/../backups}"
+DB_CONTAINER="${DB_CONTAINER:-au2ka-db}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 cd "$ROOT"
@@ -31,11 +32,31 @@ if [[ -n "$DB_URL" ]]; then
   DB_PASS="$(sed -E 's|^mysql://[^:]+:([^@]*)@.*|\1|' <<<"$DB_URL")"
   DB_HOST="$(sed -E 's|^mysql://[^@]+@([^:/]+).*|\1|' <<<"$DB_URL")"
   DB_NAME="$(sed -E 's|.*/([^/?]+)(\?.*)?$|\1|' <<<"$DB_URL")"
+  # قاعدة البيانات في حاوية Docker معزولة، والخادم نفسه بلا عميل mysql.
+  # فإن لم تكن أداة النسخ على الخادم نُفِّذت داخل الحاوية — وهي موجودة فيها
+  # دائمًا. وبغير هذا كان النشر يتوقف عند «mysqldump: command not found».
+  DUMP_BIN="$(command -v mariadb-dump || command -v mysqldump || true)"
+  DUMP_ARGS=(-h "$DB_HOST" -u "$DB_USER"
+    --single-transaction --routines --default-character-set=utf8mb4 "$DB_NAME")
+
   # كلمة المرور عبر البيئة لا عبر سطر الأوامر، حتى لا تظهر في قائمة العمليات
-  MYSQL_PWD="$DB_PASS" mysqldump -h "$DB_HOST" -u "$DB_USER" \
-    --single-transaction --routines --default-character-set=utf8mb4 \
-    "$DB_NAME" | gzip > "$BACKUP_DIR/au2ka-$STAMP.sql.gz"
-  echo "    حُفظت في $BACKUP_DIR/au2ka-$STAMP.sql.gz"
+  if [[ -n "$DUMP_BIN" ]]; then
+    MYSQL_PWD="$DB_PASS" "$DUMP_BIN" "${DUMP_ARGS[@]}" \
+      | gzip > "$BACKUP_DIR/au2ka-$STAMP.sql.gz"
+  elif docker ps --format '{{.Names}}' | grep -qx "$DB_CONTAINER"; then
+    docker exec -e MYSQL_PWD="$DB_PASS" "$DB_CONTAINER" \
+      mariadb-dump "${DUMP_ARGS[@]}" | gzip > "$BACKUP_DIR/au2ka-$STAMP.sql.gz"
+  else
+    echo "!!! لا أداة نسخ على الخادم ولا حاوية $DB_CONTAINER تعمل — توقّف" >&2
+    exit 1
+  fi
+
+  # نسخة فارغة تعني أن النسخ فشل صامتًا، والنشر بعدها قفزة بلا شبكة
+  if [[ ! -s "$BACKUP_DIR/au2ka-$STAMP.sql.gz" ]]; then
+    echo "!!! النسخة الاحتياطية فارغة — توقّف" >&2
+    exit 1
+  fi
+  echo "    حُفظت في $BACKUP_DIR/au2ka-$STAMP.sql.gz ($(du -h "$BACKUP_DIR/au2ka-$STAMP.sql.gz" | cut -f1))"
 else
   echo "!!! لم يُقرأ DATABASE_URL من backend/.env — توقّف" >&2
   exit 1
