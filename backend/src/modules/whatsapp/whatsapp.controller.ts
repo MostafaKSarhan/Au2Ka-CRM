@@ -9,14 +9,19 @@ import {
   verifyConnection,
 } from './whatsapp.service';
 
-const settingsSchema = z.object({
-  phoneNumberId: z.string().trim().optional().nullable(),
-  businessAccountId: z.string().trim().optional().nullable(),
-  accessToken: z.string().trim().optional().nullable(),
-  apiVersion: z.string().trim().regex(/^v\d+\.\d+$/, 'صيغة الإصدار مثل v21.0').optional(),
-  webhookVerifyToken: z.string().trim().optional().nullable(),
-  isEnabled: z.boolean().optional(),
-});
+// strict: حقل باسم خاطئ يُرفض بدل أن يُسقَط بصمت. هذه الشاشة تُملأ يدويًا
+// مرة واحدة عند الربط، وكان إرسال verifyToken بدل webhookVerifyToken يرد
+// «تم حفظ الإعدادات» دون أن يحفظ شيئًا، فيبحث من يربط عن عطل غير موجود.
+const settingsSchema = z
+  .object({
+    phoneNumberId: z.string().trim().optional().nullable(),
+    businessAccountId: z.string().trim().optional().nullable(),
+    accessToken: z.string().trim().optional().nullable(),
+    apiVersion: z.string().trim().regex(/^v\d+\.\d+$/, 'صيغة الإصدار مثل v21.0').optional(),
+    webhookVerifyToken: z.string().trim().optional().nullable(),
+    isEnabled: z.boolean().optional(),
+  })
+  .strict();
 
 const metaLinkSchema = z.object({
   metaTemplateName: z.string().trim().max(120).optional().nullable(),
