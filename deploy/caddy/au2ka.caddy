@@ -11,6 +11,22 @@
 au2ka.faslacloud.com {
 	encode gzip zstd
 
+	# بلا سجلّ وصول لم يكن لأي طلب داخل أثر: لا يُعرف هل نادت Meta الـ
+	# webhook أصلًا، ولا من أين جاء خطأ. ورمز تحقق الـ webhook يصل في
+	# مسار الطلب نفسه، فيُحجب قبل الكتابة حتى لا يستقر سرٌّ في ملف سجلّ.
+	log {
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "(hub.verify_token=)[^&]*" "${1}REDACTED"
+			}
+		}
+		output file /var/log/caddy/access-au2ka.log {
+			roll_size 20mb
+			roll_keep 3
+		}
+	}
+
 	# صور السيارات حتى 10 ميجابايت في الباكند
 	request_body {
 		max_size 20MB
