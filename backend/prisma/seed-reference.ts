@@ -326,6 +326,20 @@ const TEMPLATES = [
       'A friendly reminder, {{customerName}} 🔔\nYour appointment at Au2Ka is tomorrow, {{date}} at {{time}}.\nBooking reference: {{reference}}\nSee you then.',
     variables: '["customerName","date","time","reference"]',
   },
+  {
+    // قالب مصادقة عند Meta، ونصّه ليس من عندنا: Meta تكتبه وتترجمه ولا
+    // تسمح بتغييره. المكتوب هنا هو نصّها العربي حرفًا بحرف، حتى يكون
+    // سجلّ الرسائل صادقًا فيما وصل العميل فعلًا.
+    code: 'PORTAL_LOGIN_CODE',
+    nameAr: 'رمز الدخول إلى بوابة العملاء',
+    nameEn: 'Customer portal login code',
+    channel: 'WHATSAPP' as const,
+    bodyAr:
+      '{{code}} هو كود التحقق الخاص بك. للحفاظ على أمانك، لا تشارك هذا الكود مع أي شخص.\nتنتهي صلاحيتها خلال ١٠ دقائق.',
+    bodyEn:
+      '{{code}} is your verification code. For your safety, do not share this code with anyone.\nIt expires in 10 minutes.',
+    variables: '["code"]',
+  },
 ];
 
 /**

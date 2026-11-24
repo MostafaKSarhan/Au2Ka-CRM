@@ -38,6 +38,9 @@ const EXPECTED = {
   DOCUMENT_EXPIRING: ['customerName', 'documentTitle', 'plateNumber', 'expiryDate'],
   APPOINTMENT_CONFIRMED: ['date', 'time', 'reference'],
   APPOINTMENT_REMINDER: ['customerName', 'date', 'time', 'reference'],
+  // قالب مصادقة: Meta تكتب نصّه، ومعامله الوحيد هو الرمز — ويُرسل مرتين،
+  // في النص وفي زر «نسخ الرمز».
+  PORTAL_LOGIN_CODE: ['code'],
 };
 
 /** The seeded templates, read from the seed so no database is needed. */

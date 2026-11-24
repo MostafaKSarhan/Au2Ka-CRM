@@ -323,6 +323,8 @@ async function deliverViaWhatsApp(message: {
       template.metaTemplateName,
       template.metaLanguage || message.lang,
       values,
+      // The code goes in the copy-code button too, not only in the text.
+      { buttonValue: template.metaHasCodeButton ? values[0] : null },
     );
   }
 

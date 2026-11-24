@@ -45,14 +45,32 @@ export class PortalController {
     const otp = await issueOtp(mobileNumber);
 
     // The code goes out through the messaging queue, so it is logged like any
-    // other message. Automatic WhatsApp delivery arrives with M8; until then
-    // the queue hands reception a ready-to-send message.
-    await queueMessage({
+    // other message, and the queue is also where reception reads it from while
+    // the WhatsApp link is still being set up.
+    //
+    // It must carry a template: a customer signing in for the first time has
+    // never written to the workshop, so the 24-hour service window is always
+    // shut and Meta accepts nothing but an approved template. Sent as plain
+    // text this message failed every single time — in exactly the one case it
+    // exists for.
+    const queued = await queueMessage({
+      templateCode: 'PORTAL_LOGIN_CODE',
       channel: 'WHATSAPP',
       customerId: otp.customerId,
-      body: `رمز الدخول إلى بوابة عملاء Au2Ka هو: ${otp.code}\nصالح لمدة ١٠ دقائق. لا تشاركه مع أحد.`,
-      values: {},
+      values: { code: otp.code },
     });
+
+    // Losing the template must not lock the customer out: reception still
+    // needs the code in the queue even if it can no longer leave on its own.
+    if (!queued.queued && queued.reason !== 'OPTED_OUT') {
+      request.log.warn({ reason: queued.reason }, 'portal OTP fell back to plain text');
+      await queueMessage({
+        channel: 'WHATSAPP',
+        customerId: otp.customerId,
+        body: `رمز الدخول إلى بوابة عملاء Au2Ka هو: ${otp.code}\nصالح لمدة ١٠ دقائق. لا تشاركه مع أحد.`,
+        values: {},
+      });
+    }
 
     // In development the code is logged so the portal can be tried locally
     // without a WhatsApp connection. It is never returned in the response.

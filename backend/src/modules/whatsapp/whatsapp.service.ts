@@ -130,6 +130,16 @@ export async function sendText(to: string, body: string): Promise<SendResult> {
   });
 }
 
+export interface SendTemplateOptions {
+  /**
+   * The value the template's first button carries. Meta's authentication
+   * templates put the code in a "copy code" button as well as in the text,
+   * and expect it in both components; sending only the body rejects the whole
+   * message. Ordinary templates have no such button and leave this unset.
+   */
+  buttonValue?: string | null;
+}
+
 /**
  * An approved template — the only way to reach someone outside the window.
  * Values fill {{1}}, {{2}} … in the order Meta registered them.
@@ -139,18 +149,28 @@ export async function sendTemplate(
   templateName: string,
   language: string,
   values: string[],
+  options: SendTemplateOptions = {},
 ): Promise<SendResult> {
   const config = await getConfig();
   if (!config) return { ok: false, error: 'الربط بواتساب الرسمي غير مفعّل', retryable: false };
 
-  const components = values.length
-    ? [
-        {
-          type: 'body',
-          parameters: values.map(v => ({ type: 'text', text: v })),
-        },
-      ]
-    : undefined;
+  const components: Array<Record<string, unknown>> = [];
+
+  if (values.length) {
+    components.push({
+      type: 'body',
+      parameters: values.map(v => ({ type: 'text', text: v })),
+    });
+  }
+
+  if (options.buttonValue) {
+    components.push({
+      type: 'button',
+      sub_type: 'url',
+      index: '0',
+      parameters: [{ type: 'text', text: options.buttonValue }],
+    });
+  }
 
   return callGraph(config, {
     to,
@@ -158,7 +178,7 @@ export async function sendTemplate(
     template: {
       name: templateName,
       language: { code: language || 'ar' },
-      ...(components ? { components } : {}),
+      ...(components.length ? { components } : {}),
     },
   });
 }
