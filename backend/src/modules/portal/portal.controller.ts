@@ -3,7 +3,7 @@ import { prisma } from '../../config/db';
 import { AppError } from '../../utils/appError';
 import { z } from 'zod';
 import { issueOtp, revokeSession, verifyOtp } from './portal.auth';
-import { queueMessage } from '../messaging/messaging.service';
+import { deliverNow, queueMessage } from '../messaging/messaging.service';
 import * as whatsapp from '../whatsapp/whatsapp.service';
 import { buildVehicleFile } from '../vehicleFile/vehicleFile.service';
 import { bookAppointment, getDayPlan } from '../appointments/appointments.service';
@@ -59,6 +59,12 @@ export class PortalController {
       customerId: otp.customerId,
       values: { code: otp.code },
     });
+
+    // The queue worker ticks every five minutes and the code lives ten, so
+    // waiting for it would spend half the code's life. This one goes now.
+    if (queued.queued && queued.messageId) {
+      await deliverNow(queued.messageId);
+    }
 
     // Losing the template must not lock the customer out: reception still
     // needs the code in the queue even if it can no longer leave on its own.

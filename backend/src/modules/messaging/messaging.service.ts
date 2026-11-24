@@ -262,6 +262,42 @@ export async function processQueue(): Promise<{ delivered: number; pendingWhatsA
 }
 
 /**
+ * Sends one queued message at once instead of waiting for the next tick.
+ *
+ * The worker runs every five minutes, which is fine for «سيارتك جاهزة» and
+ * wrong for a login code: the code lives ten minutes, so a customer could
+ * spend half its life watching a screen that already told them it was sent.
+ * Reserved for what the customer is waiting on; everything else keeps its
+ * place in the queue.
+ *
+ * It never throws: the message stays PENDING and the worker tries again, so
+ * a hiccup at Meta delays the code rather than failing the sign-in request.
+ */
+export async function deliverNow(messageId: string): Promise<boolean> {
+  try {
+    const message = await prisma.outboundMessage.findFirst({
+      where: { id: messageId, status: 'PENDING', channel: 'WHATSAPP' },
+      select: {
+        id: true,
+        recipientNumber: true,
+        body: true,
+        lang: true,
+        attempts: true,
+        customerId: true,
+        templateId: true,
+        templateValues: true,
+      },
+    });
+    if (!message) return false;
+    if (!(await whatsapp.isEnabled())) return false;
+
+    return await deliverViaWhatsApp(message);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * M8 — hands one queued message to the official WhatsApp API.
  *
  * Outside the 24-hour service window Meta only accepts an approved template,
