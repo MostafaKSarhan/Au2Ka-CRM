@@ -456,6 +456,9 @@ const translations = {
     pt_joinNeedName: 'اكتب الاسم كاملًا',
     pt_joinNeedMobile: 'اكتب رقم جوال صحيح — بصيغته المحلية أو الدولية',
     pt_mobileHint: 'مثال: 0551234567 أو +966551234567',
+    // لا يُرسل الرمز لحظة التسجيل بل عند الدخول بعد اعتماد الطلب، فتُقال
+    // الخطوة كاملةً: من ينتظر رسالةً لن تأتي الآن يظن الصفحة معطّلة.
+    pt_mobileOtpNote: 'سيصلك رمز الدخول على هذا الرقم عبر واتساب بعد اعتماد طلبك',
     pt_fullNamePlaceholder: 'الاسم الثلاثي',
     pt_brandPlaceholder: 'تويوتا',
     pt_modelPlaceholder: 'كامري',
@@ -1701,6 +1704,7 @@ const translations = {
     pt_joinNeedName: 'Enter the full name',
     pt_joinNeedMobile: 'Enter a valid mobile number — local or international',
     pt_mobileHint: 'e.g. 0551234567 or +966551234567',
+    pt_mobileOtpNote: 'Your sign-in code will reach this number on WhatsApp once your request is approved',
     pt_fullNamePlaceholder: 'Full name',
     pt_brandPlaceholder: 'Toyota',
     pt_modelPlaceholder: 'Camry',

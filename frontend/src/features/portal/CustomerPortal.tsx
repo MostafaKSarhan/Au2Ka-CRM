@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Shield, Phone, KeyRound, LogOut, Car, Wrench, FileBarChart, CalendarDays,
   BadgeCheck, Gift, Clock, ChevronLeft, ChevronRight, X, Check, AlertTriangle,
-  AlertOctagon, Gauge, Receipt, QrCode, Share2, Copy,
+  AlertOctagon, Gauge, Receipt, QrCode, Share2, Copy, MessageCircle,
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { portalApi, getPortalToken, setPortalToken, submitJoinRequest } from './portalApi';
@@ -441,6 +441,14 @@ function JoinRequestForm({
                 placeholder="05xxxxxxxx"
               />
               <p className="mt-1 text-[10px] text-zinc-600" dir="ltr">{t('pt_mobileHint')}</p>
+              {/* الرقم هنا ليس بيانًا يُملأ: هو الباب الذي يدخل منه العميل
+                  لاحقًا. فيُقال ذلك تحته، لا في صفحة يصلها بعد أسبوع. */}
+              {/* نبرة محايدة لا حمراء: الأحمر في هذه الشاشة للتحقق الفاشل،
+                  وملاحظةٌ تُلبس لونَ الخطأ تُقرأ خطأً. */}
+              <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-zinc-300">
+                <MessageCircle size={13} className="mt-0.5 shrink-0 text-primary-text" />
+                <span>{t('pt_mobileOtpNote')}</span>
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
