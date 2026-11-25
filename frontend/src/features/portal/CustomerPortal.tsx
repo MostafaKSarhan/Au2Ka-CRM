@@ -8,6 +8,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { portalApi, getPortalToken, setPortalToken, submitJoinRequest } from './portalApi';
 import { useTranslation } from '../../store/LanguageContext';
 import { PwaBanner } from '../pwa/PwaBanner';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 type Tab = 'home' | 'cards' | 'booking' | 'reports';
 
@@ -1052,18 +1053,18 @@ function PortalBooking() {
           <div className="space-y-3 border-t border-zinc-800 pt-3">
             <div>
               <label className="mb-1 block text-xs font-semibold text-zinc-400">{t('sub_vehicle')}</label>
-              <select
+              {/* عميلٌ واحد قد يكون أسطولًا: «الدفاع المدني» في بيانات
+                  الورشة له سيارات كثيرة، فالبحث هنا ليس ترفًا. */}
+              <SearchableSelect
                 value={vehicleId}
-                onChange={e => setVehicleId(e.target.value)}
-                className="w-full cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-white outline-none focus:border-primary/60"
-              >
-                <option value="">{t('appt_noVehicle')}</option>
-                {vehicles.map(v => (
-                  <option key={v.id} value={v.id}>
-                    {v.brand} {v.model} — {v.plateNumber}
-                  </option>
-                ))}
-              </select>
+                onChange={setVehicleId}
+                placeholder={t('appt_noVehicle')}
+                options={vehicles.map(v => ({
+                  value: v.id,
+                  label: `${v.brand} ${v.model}`,
+                  hint: v.plateNumber,
+                }))}
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-zinc-400">{t('appt_complaint')}</label>

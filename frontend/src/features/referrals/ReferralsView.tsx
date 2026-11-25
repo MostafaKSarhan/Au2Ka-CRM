@@ -6,6 +6,7 @@ import {
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import {
   Field, TextInput, Select, PrimaryButton, GhostButton, Banner, Modal, TableShell,
 } from '../admin/ui';
@@ -491,18 +492,16 @@ export function ReferralsView() {
               />
             </Field>
             <Field label={t('ref_newCustomer')}>
-              <Select
-                required
+              <SearchableSelect
                 value={linkForm.referredId}
-                onChange={e => setLinkForm({ ...linkForm, referredId: e.target.value })}
-              >
-                <option value="">{t('sub_selectCustomer')}</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName} — {c.mobileNumber}
-                  </option>
-                ))}
-              </Select>
+                onChange={v => setLinkForm({ ...linkForm, referredId: v })}
+                placeholder={t('sub_selectCustomer')}
+                options={customers.map(c => ({
+                  value: c.id,
+                  label: c.fullName,
+                  hint: c.mobileNumber,
+                }))}
+              />
             </Field>
             <div className="flex gap-2 pt-2">
               <PrimaryButton type="submit" disabled={saving} className="flex-1">

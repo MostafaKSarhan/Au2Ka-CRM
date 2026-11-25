@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapPin, PlusCircle, Edit2, Trash2, Globe } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useTranslation } from '../../store/LanguageContext';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import {
   SectionHeader, Field, TextInput, Select, PrimaryButton, GhostButton,
   IconButton, Banner, StatusPill, Modal, TableShell, SearchBox,
@@ -298,14 +299,12 @@ export function CitiesTab() {
         <Modal title={editingCity ? t('md_editCity') : t('md_addCity')} onClose={() => setCityModal(false)}>
           <form onSubmit={submitCity} className="space-y-3">
             <Field label={t('md_country')}>
-              <Select required value={cityForm.countryId} onChange={e => setCityForm({ ...cityForm, countryId: e.target.value })}>
-                <option value="">{t('md_selectCountry')}</option>
-                {countries.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {isAr ? c.nameAr : c.nameEn}
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={cityForm.countryId}
+                onChange={v => setCityForm({ ...cityForm, countryId: v })}
+                placeholder={t('md_selectCountry')}
+                options={countries.map(c => ({ value: c.id, label: isAr ? c.nameAr : c.nameEn }))}
+              />
             </Field>
             <Field label={t('md_nameAr')}>
               <TextInput required value={cityForm.nameAr} onChange={e => setCityForm({ ...cityForm, nameAr: e.target.value })} />

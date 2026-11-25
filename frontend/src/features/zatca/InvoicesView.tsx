@@ -6,6 +6,7 @@ import {
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import {
   Field, TextInput, Select, PrimaryButton, GhostButton, Banner, Modal, TableShell,
 } from '../admin/ui';
@@ -243,14 +244,16 @@ export function InvoicesView() {
         <Modal title={t('zt_issue')} onClose={() => setShowIssue(false)}>
           <form onSubmit={issue} className="space-y-3">
             <Field label={t('vf_linkJobCard')} hint={t('zt_jobCardHint')}>
-              <Select value={issueForm.jobCardId} onChange={e => setIssueForm({ ...issueForm, jobCardId: e.target.value })}>
-                <option value="">{t('vf_noJobCard')}</option>
-                {jobCards.map(jc => (
-                  <option key={jc.id} value={jc.id}>
-                    {jc.jobNumber} — {jc.customer?.fullName} ({jc.vehicle?.plateNumber})
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={issueForm.jobCardId}
+                onChange={v => setIssueForm({ ...issueForm, jobCardId: v })}
+                placeholder={t('vf_noJobCard')}
+                options={jobCards.map(jc => ({
+                  value: jc.id,
+                  label: `${jc.jobNumber} — ${jc.customer?.fullName || ''}`,
+                  hint: jc.vehicle?.plateNumber,
+                }))}
+              />
             </Field>
 
             <Field label={t('zt_type')} hint={t('zt_typeHint')}>

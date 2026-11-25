@@ -4,6 +4,7 @@ import {
   Wallet, Users, Ticket, CalendarClock, X,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
 import {
@@ -446,47 +447,46 @@ export function SubscriptionsView() {
         <Modal title={t('sub_add')} onClose={() => setShowForm(false)}>
           <form onSubmit={handleSubmit} className="space-y-3">
             <Field label={t('sub_customer')}>
-              <Select required value={form.customerId} onChange={e => setForm({ ...form, customerId: e.target.value })}>
-                <option value="">{t('sub_selectCustomer')}</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName} — {c.mobileNumber}
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={form.customerId}
+                onChange={v => setForm({ ...form, customerId: v })}
+                placeholder={t('sub_selectCustomer')}
+                options={customers.map(c => ({
+                  value: c.id,
+                  label: c.fullName,
+                  hint: c.mobileNumber,
+                }))}
+              />
             </Field>
 
             <Field label={t('sub_vehicle')} hint={t('sub_vehicleHint')}>
-              <Select
+              <SearchableSelect
                 value={form.vehicleId}
-                onChange={e => setForm({ ...form, vehicleId: e.target.value })}
+                onChange={v => setForm({ ...form, vehicleId: v })}
                 disabled={!form.customerId}
-              >
-                <option value="">{t('sub_allVehicles')}</option>
-                {vehicles.map(v => (
-                  <option key={v.id} value={v.id}>
-                    {v.brand} {v.model} — {v.plateNumber}
-                  </option>
-                ))}
-              </Select>
+                placeholder={t('sub_allVehicles')}
+                options={vehicles.map(v => ({
+                  value: v.id,
+                  label: `${v.brand} ${v.model}`,
+                  hint: v.plateNumber,
+                }))}
+              />
             </Field>
 
             <Field label={t('sub_plan')}>
-              <Select
-                required
+              <SearchableSelect
                 value={form.planId}
-                onChange={e => {
-                  const p = plans.find(x => x.id === e.target.value);
-                  setForm({ ...form, planId: e.target.value, paidAmount: p ? String(p.price) : form.paidAmount });
+                onChange={v => {
+                  const p = plans.find(x => x.id === v);
+                  setForm({ ...form, planId: v, paidAmount: p ? String(p.price) : form.paidAmount });
                 }}
-              >
-                <option value="">{t('sub_selectPlan')}</option>
-                {plans.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {(isAr ? p.nameAr : p.nameEn)} — {Number(p.price).toLocaleString()} {t('sub_currency')}
-                  </option>
-                ))}
-              </Select>
+                placeholder={t('sub_selectPlan')}
+                options={plans.map(p => ({
+                  value: p.id,
+                  label: isAr ? p.nameAr : p.nameEn,
+                  hint: `${Number(p.price).toLocaleString()} ${t('sub_currency')}`,
+                }))}
+              />
             </Field>
 
             {selectedPlan && (
@@ -548,13 +548,16 @@ export function SubscriptionsView() {
             </div>
 
             <Field label={t('sub_plan')}>
-              <Select value={form.planId} onChange={e => setForm({ ...form, planId: e.target.value })}>
-                {plans.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {(isAr ? p.nameAr : p.nameEn)} — {Number(p.price).toLocaleString()} {t('sub_currency')}
-                  </option>
-                ))}
-              </Select>
+              <SearchableSelect
+                value={form.planId}
+                onChange={v => setForm({ ...form, planId: v })}
+                placeholder={t('sub_selectPlan')}
+                options={plans.map(p => ({
+                  value: p.id,
+                  label: isAr ? p.nameAr : p.nameEn,
+                  hint: `${Number(p.price).toLocaleString()} ${t('sub_currency')}`,
+                }))}
+              />
             </Field>
 
             <div className="grid gap-3 sm:grid-cols-2">

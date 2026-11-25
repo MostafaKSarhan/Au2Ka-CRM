@@ -4,6 +4,7 @@ import {
   Coins, Search, Archive,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
 import {
@@ -249,14 +250,13 @@ export function InventoryView() {
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
           <h2 className="text-lg font-bold text-white">{t('inv_movements')}</h2>
           <div className="flex flex-wrap gap-2">
-            <Select value={partFilter} onChange={e => setPartFilter(e.target.value)} className="!w-auto !py-1.5 text-xs">
-              <option value="">{t('inv_allParts')}</option>
-              {parts.map(p => (
-                <option key={p.id} value={p.id}>
-                  {isAr ? p.nameAr : p.nameEn}
-                </option>
-              ))}
-            </Select>
+            <SearchableSelect
+              value={partFilter}
+              onChange={setPartFilter}
+              placeholder={t('inv_allParts')}
+              className="!w-auto min-w-[11rem]"
+              options={parts.map(p => ({ value: p.id, label: isAr ? p.nameAr : p.nameEn }))}
+            />
             <Select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="!w-auto !py-1.5 text-xs">
               <option value="">{t('inv_allTypes')}</option>
               <option value="IN">{t('inv_typeIn')}</option>
@@ -328,21 +328,19 @@ export function InventoryView() {
             className="space-y-3"
           >
             <Field label={t('vf_part')}>
-              <Select
-                required
+              <SearchableSelect
                 value={intakeForm.partId}
-                onChange={e => {
-                  const p = parts.find(x => x.id === e.target.value);
-                  setIntakeForm({ ...intakeForm, partId: e.target.value, unitPrice: p ? String(p.purchasePrice) : '' });
+                onChange={v => {
+                  const p = parts.find(x => x.id === v);
+                  setIntakeForm({ ...intakeForm, partId: v, unitPrice: p ? String(p.purchasePrice) : '' });
                 }}
-              >
-                <option value="">{t('inv_selectPart')}</option>
-                {parts.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {(isAr ? p.nameAr : p.nameEn)} — {p.partNumber} ({p.quantity})
-                  </option>
-                ))}
-              </Select>
+                placeholder={t('inv_selectPart')}
+                options={parts.map(p => ({
+                  value: p.id,
+                  label: isAr ? p.nameAr : p.nameEn,
+                  hint: p.partNumber + ' (' + p.quantity + ')',
+                }))}
+              />
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label={t('inv_quantity')}>
@@ -402,36 +400,32 @@ export function InventoryView() {
             <p className="text-[11px] leading-relaxed text-zinc-500">{t('inv_issueHint')}</p>
 
             <Field label={t('vf_part')}>
-              <Select
-                required
+              <SearchableSelect
                 value={issueForm.partId}
-                onChange={e => {
-                  const p = parts.find(x => x.id === e.target.value);
-                  setIssueForm({ ...issueForm, partId: e.target.value, unitPrice: p ? String(p.sellPrice) : '' });
+                onChange={v => {
+                  const p = parts.find(x => x.id === v);
+                  setIssueForm({ ...issueForm, partId: v, unitPrice: p ? String(p.sellPrice) : '' });
                 }}
-              >
-                <option value="">{t('inv_selectPart')}</option>
-                {parts.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {(isAr ? p.nameAr : p.nameEn)} — {t('md_quantity')}: {p.quantity}
-                  </option>
-                ))}
-              </Select>
+                placeholder={t('inv_selectPart')}
+                options={parts.map(p => ({
+                  value: p.id,
+                  label: isAr ? p.nameAr : p.nameEn,
+                  hint: t('md_quantity') + ': ' + p.quantity,
+                }))}
+              />
             </Field>
 
             <Field label={t('vf_linkJobCard')}>
-              <Select
-                required
+              <SearchableSelect
                 value={issueForm.jobCardId}
-                onChange={e => setIssueForm({ ...issueForm, jobCardId: e.target.value })}
-              >
-                <option value="">{t('inv_selectJobCard')}</option>
-                {jobCards.map(jc => (
-                  <option key={jc.id} value={jc.id}>
-                    {jc.jobNumber} — {jc.customer?.fullName} ({jc.vehicle?.plateNumber})
-                  </option>
-                ))}
-              </Select>
+                onChange={v => setIssueForm({ ...issueForm, jobCardId: v })}
+                placeholder={t('inv_selectJobCard')}
+                options={jobCards.map(jc => ({
+                  value: jc.id,
+                  label: jc.jobNumber + ' — ' + (jc.customer?.fullName || ''),
+                  hint: jc.vehicle?.plateNumber,
+                }))}
+              />
             </Field>
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -496,18 +490,16 @@ export function InventoryView() {
             <p className="text-[11px] leading-relaxed text-zinc-500">{t('inv_countHint')}</p>
 
             <Field label={t('vf_part')}>
-              <Select
-                required
+              <SearchableSelect
                 value={countForm.partId}
-                onChange={e => setCountForm({ ...countForm, partId: e.target.value })}
-              >
-                <option value="">{t('inv_selectPart')}</option>
-                {parts.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {(isAr ? p.nameAr : p.nameEn)} — {t('inv_bookBalance')}: {p.quantity}
-                  </option>
-                ))}
-              </Select>
+                onChange={v => setCountForm({ ...countForm, partId: v })}
+                placeholder={t('inv_selectPart')}
+                options={parts.map(p => ({
+                  value: p.id,
+                  label: isAr ? p.nameAr : p.nameEn,
+                  hint: t('inv_bookBalance') + ': ' + p.quantity,
+                }))}
+              />
             </Field>
 
             <Field

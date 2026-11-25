@@ -6,6 +6,7 @@ import {
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../store/LanguageContext';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import {
   Field, TextInput, TextArea, Select, PrimaryButton, GhostButton, IconButton, Banner, Modal,
 } from '../admin/ui';
@@ -458,33 +459,30 @@ export function AppointmentsView() {
             </div>
 
             <Field label={t('sub_customer')}>
-              <Select
-                required
+              <SearchableSelect
                 value={bookForm.customerId}
-                onChange={e => setBookForm({ ...bookForm, customerId: e.target.value, vehicleId: '' })}
-              >
-                <option value="">{t('sub_selectCustomer')}</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName} — {c.mobileNumber}
-                  </option>
-                ))}
-              </Select>
+                onChange={v => setBookForm({ ...bookForm, customerId: v, vehicleId: '' })}
+                placeholder={t('sub_selectCustomer')}
+                options={customers.map(c => ({
+                  value: c.id,
+                  label: c.fullName,
+                  hint: c.mobileNumber,
+                }))}
+              />
             </Field>
 
             <Field label={t('sub_vehicle')} hint={t('appt_vehicleHint')}>
-              <Select
+              <SearchableSelect
                 value={bookForm.vehicleId}
-                onChange={e => setBookForm({ ...bookForm, vehicleId: e.target.value })}
+                onChange={v => setBookForm({ ...bookForm, vehicleId: v })}
                 disabled={!bookForm.customerId}
-              >
-                <option value="">{t('appt_noVehicle')}</option>
-                {vehicles.map((v: any) => (
-                  <option key={v.id} value={v.id}>
-                    {v.brand} {v.model} — {v.plateNumber}
-                  </option>
-                ))}
-              </Select>
+                placeholder={t('appt_noVehicle')}
+                options={vehicles.map((v: any) => ({
+                  value: v.id,
+                  label: `${v.brand} ${v.model}`,
+                  hint: v.plateNumber,
+                }))}
+              />
             </Field>
 
             <Field label={t('appt_time')}>
