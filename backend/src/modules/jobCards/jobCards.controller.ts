@@ -6,6 +6,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import { notify, queueMessage } from '../messaging/messaging.service';
+import { recordSpend } from '../referrals/referrals.service';
+import { applyJobCardOpening, jobCardWorth, nextJobNumber } from './jobCard.open';
+
+/** M6 — which status change tells the customer something, and with what wording. */
+const STATUS_TEMPLATES: Record<string, string> = {
+  WAITING_APPROVAL: 'JOB_WAITING_APPROVAL',
+  COMPLETED: 'JOB_COMPLETED',
+  DELIVERED: 'JOB_DELIVERED',
+};
 
 const pump = promisify(pipeline);
 
@@ -20,6 +30,8 @@ const createJobCardSchema = z.object({
   notes: z.string().optional(),
   isVehiclePhotographed: z.boolean().optional(),
   additionalServices: z.string().optional(),
+  // M3 — the odometer reading taken at reception, recorded on the vehicle file.
+  mileage: z.coerce.number().int().min(0).optional(),
 });
 
 const updateJobCardSchema = z.object({
@@ -93,6 +105,13 @@ export class JobCardsController {
           customer: true,
           vehicle: true,
           photos: true,
+          subscription: {
+            select: {
+              id: true,
+              subscriptionNumber: true,
+              plan: { select: { nameAr: true, nameEn: true } },
+            },
+          },
         },
         skip,
         take: limit,
@@ -120,6 +139,9 @@ export class JobCardsController {
         customer: true,
         vehicle: true,
         photos: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
         activities: {
           include: {
             user: {
@@ -158,43 +180,71 @@ export class JobCardsController {
     const vehicle = await prisma.vehicle.findFirst({ where: { id: vehicleId, deletedAt: null } });
     if (!vehicle) throw new AppError('Vehicle not found', 404);
 
-    // Generate Sequential unique jobNumber WRK-YYYYMMDD-XXXX
-    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    // Sequential unique jobNumber WRK-YYYYMMDD-XXXX
+    const jobNumber = await nextJobNumber();
 
-    const countToday = await prisma.jobCard.count({
-      where: {
-        createdAt: {
-          gte: startOfToday,
-        },
+    const { mileage: readingAtEntry, ...cardData } = parseResult.data;
+
+    const created = await prisma.jobCard.create({
+      data: {
+        jobNumber,
+        branchId: customer.branchId,
+        ...cardData,
       },
     });
 
-    const sequenceNum = String(countToday + 1).padStart(4, '0');
-    const jobNumber = `WRK-${todayStr}-${sequenceNum}`;
+    // M3 — every visit adds a point to the vehicle's odometer history. A
+    // reading lower than the last one is ignored rather than rejected, so a
+    // typo at reception can never block opening the card.
+    const reading =
+      readingAtEntry !== undefined && readingAtEntry >= vehicle.mileage
+        ? readingAtEntry
+        : vehicle.mileage;
 
-    const jobCard = await prisma.jobCard.create({
+    await prisma.vehicleMileageLog.create({
       data: {
-        jobNumber,
-        ...parseResult.data,
+        vehicleId,
+        jobCardId: created.id,
+        mileage: reading,
+        source: 'JOB_CARD',
+        note: `قراءة العداد عند فتح الكرت ${jobNumber}`,
       },
-      include: {
-        customer: true,
-        vehicle: true,
-      },
+    });
+
+    if (reading > vehicle.mileage) {
+      await prisma.vehicle.update({ where: { id: vehicleId }, data: { mileage: reading } });
+    }
+
+    // Subscription coverage and the referral reward, shared with the
+    // appointment route so neither door can skip them.
+    const { coverageNote, referralNote } = await applyJobCardOpening({
+      jobCardId: created.id,
+      customerId,
+      vehicleId,
+      onError: (err, what) => request.log.error({ err }, what),
     });
 
     // Log Activity in Arabic
     if (request.user) {
       await prisma.jobCardActivity.create({
         data: {
-          jobCardId: jobCard.id,
+          jobCardId: created.id,
           userId: request.user.id,
-          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)`,
+          action: `تم فتح كرت استقبال مركبة جديد برقم ${jobNumber} (الحالة: تم الاستلام)${coverageNote}${referralNote}`,
         }
       });
     }
+
+    const jobCard = await prisma.jobCard.findUnique({
+      where: { id: created.id },
+      include: {
+        customer: true,
+        vehicle: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
+      },
+    });
 
     return reply.status(201).send({
       message: 'Job card created successfully',
@@ -265,6 +315,9 @@ export class JobCardsController {
         customer: true,
         vehicle: true,
         photos: true,
+        subscription: {
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+        },
         activities: {
           include: {
             user: {
@@ -279,6 +332,55 @@ export class JobCardsController {
         }
       },
     });
+
+    // M6 — a status change the customer cares about queues a message to them
+    // and alerts the floor. Never let this fail the status change itself.
+    if (updates.status && updates.status !== jobCardExists.status) {
+      const templateCode = STATUS_TEMPLATES[updates.status];
+
+      try {
+        if (templateCode) {
+          await queueMessage({
+            templateCode,
+            customerId: jobCard.customerId,
+            jobCardId: jobCard.id,
+            createdById: request.user?.id || null,
+            values: {
+              customerName: jobCard.customer?.fullName,
+              jobNumber: jobCard.jobNumber,
+              plateNumber: jobCard.vehicle?.plateNumber,
+              vehicle: `${jobCard.vehicle?.brand ?? ''} ${jobCard.vehicle?.model ?? ''}`.trim(),
+              status: statusLabels[updates.status] || updates.status,
+              cost: jobCard.estimatedCost ? String(jobCard.estimatedCost) : '',
+            },
+          });
+        }
+
+        await notify({
+          role: 'RECEPTION',
+          type: 'JOB_CARD',
+          titleAr: `الكرت ${jobCard.jobNumber}: ${statusLabels[updates.status] || updates.status}`,
+          titleEn: `Card ${jobCard.jobNumber} moved to ${updates.status}`,
+          bodyAr: `${jobCard.customer?.fullName || ''} — ${jobCard.vehicle?.plateNumber || ''}`,
+          bodyEn: `${jobCard.customer?.fullName || ''} — ${jobCard.vehicle?.plateNumber || ''}`,
+          linkType: 'JOB_CARD',
+          linkId: jobCard.id,
+        });
+      } catch (err) {
+        request.log.error({ err }, 'failed to queue job card notifications');
+      }
+
+      // M5 — a delivered card is money actually spent: it feeds the
+      // customer's lifetime total, their points and their tier.
+      if (updates.status === 'DELIVERED') {
+        try {
+          const total = await jobCardWorth(jobCard);
+          await recordSpend(jobCard.customerId, total, jobCard.id);
+        } catch (err) {
+          request.log.error({ err }, 'failed to record customer spend');
+        }
+      }
+    }
 
     return reply.send({
       message: 'Job card updated successfully',

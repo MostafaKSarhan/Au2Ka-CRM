@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useTranslation } from '../../store/LanguageContext';
-import { Search, Car, User, PlusCircle } from 'lucide-react';
+import { VehicleFileView } from '../vehicleFile/VehicleFileView';
+import { Search, Car, User, PlusCircle, FolderOpen } from 'lucide-react';
 
 const POPULAR_BRANDS = [
   'تويوتا', 'هيونداي', 'كيا', 'نيسان', 'فورد',
@@ -20,6 +22,7 @@ export function VehiclesView() {
 
   // Modal controls
   const [showAddModal, setShowAddModal] = useState(false);
+  const [fileVehicleId, setFileVehicleId] = useState<string | null>(null);
 
   // Forms
   const [form, setForm] = useState({
@@ -73,7 +76,7 @@ export function VehiclesView() {
     setErrorMsg('');
     const finalBrand = isCustomBrand ? form.customBrand.trim() : form.brand;
     if (!finalBrand) {
-      setErrorMsg(lang === 'ar' ? 'يرجى تحديد أو كتابة ماركة السيارة' : 'Please select or type the vehicle brand');
+      setErrorMsg(t('vh_pleaseSelectOrType'));
       return;
     }
 
@@ -90,7 +93,7 @@ export function VehiclesView() {
       setIsCustomBrand(false);
       loadVehicles();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || (lang === 'ar' ? 'فشل حفظ بيانات السيارة' : 'Failed to save vehicle details'));
+      setErrorMsg(err.response?.data?.message || (t('cu_failedToSaveVehicle')));
     }
   }
 
@@ -140,13 +143,13 @@ export function VehiclesView() {
           {vehicles.map((v) => (
             <div key={v.id} className={`glass-panel rounded-xl p-5 space-y-4 flex flex-col justify-between ${isRtl ? 'text-right' : 'text-left'}`}>
               <div className="flex items-start gap-4">
-                <div className={`rounded-lg bg-primary/10 p-3 text-primary ${isRtl ? 'ml-2' : 'mr-2'}`}>
+                <div className={`rounded-lg bg-primary/10 p-3 text-primary-text ${isRtl ? 'ml-2' : 'mr-2'}`}>
                   <Car size={24} />
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">{v.brand} {v.model}</h3>
                   <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                    {isRtl ? `رقم اللوحة: ${v.plateNumber}` : `Plate Number: ${v.plateNumber}`}
+                    {t('ui_plateLabel').replace('{plate}', v.plateNumber)}
                   </p>
                 </div>
               </div>
@@ -154,12 +157,20 @@ export function VehiclesView() {
               <div className="border-t border-zinc-800/80 pt-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-zinc-400">
                   <User size={14} className={isRtl ? 'ml-1' : 'mr-1'} />
-                  <span>{v.customer?.fullName || (isRtl ? 'مالك غير معروف' : 'Unknown Owner')}</span>
+                  <span>{v.customer?.fullName || (t('vh_unknownOwner'))}</span>
                 </div>
                 <div className="text-zinc-500 font-medium font-mono">
-                  {isRtl ? `${v.mileage.toLocaleString('ar-EG')} كم` : `${v.mileage.toLocaleString('en-US')} km`}
+                  {t('ui_kmValue').replace('{km}', v.mileage.toLocaleString(isRtl ? 'ar-EG' : 'en-US'))}
                 </div>
               </div>
+
+              {/* M3 — opens the vehicle's lifetime file */}
+              <button
+                onClick={() => setFileVehicleId(v.id)}
+                className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 py-2 text-xs font-bold text-zinc-300 transition hover:border-primary/40 hover:text-white"
+              >
+                <FolderOpen size={14} /> {t('vf_openFile')}
+              </button>
             </div>
           ))}
         </div>
@@ -169,7 +180,7 @@ export function VehiclesView() {
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-zinc-800 pt-4">
           <p className="text-xs text-zinc-500">
-            {isRtl ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+            {t('ui_pageOf').replace('{page}', String(page)).replace('{total}', String(totalPages))}
           </p>
           <div className="flex gap-2">
             <button
@@ -177,14 +188,14 @@ export function VehiclesView() {
               onClick={() => setPage(p => Math.max(1, p - 1))}
               className="rounded bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-white hover:bg-zinc-800 disabled:opacity-50 cursor-pointer"
             >
-              {isRtl ? 'السابق' : 'Previous'}
+              {t('cu_previous')}
             </button>
             <button
               disabled={page === totalPages}
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               className="rounded bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-white hover:bg-zinc-800 disabled:opacity-50 cursor-pointer"
             >
-              {isRtl ? 'التالي' : 'Next'}
+              {t('cu_next')}
             </button>
           </div>
         </div>
@@ -201,25 +212,24 @@ export function VehiclesView() {
             <form onSubmit={handleAddVehicle} className={`space-y-4 ${isRtl ? 'text-right' : 'text-left'}`}>
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('selectCustomer')}</label>
-                <select
+                <SearchableSelect
                   value={form.customerId}
-                  onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-                  className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                >
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.fullName} ({c.mobileNumber})
-                    </option>
-                  ))}
-                </select>
+                  placeholder={t('selectCustomer')}
+                  options={customers.map(c => ({ value: c.id, label: c.fullName, hint: c.mobileNumber }))}
+                  onChange={(val) => setForm({ ...form, customerId: val })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                  <select
+                  <SearchableSelect
                     value={isCustomBrand ? 'CUSTOM' : form.brand}
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    placeholder={t('vehicleBrand')}
+                    options={[
+                      ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                      { value: 'CUSTOM', label: t('cu_otherManualEntry'), pinned: true },
+                    ]}
+                    onChange={(val) => {
                       if (val === 'CUSTOM') {
                         setIsCustomBrand(true);
                       } else {
@@ -227,11 +237,7 @@ export function VehiclesView() {
                         setForm({ ...form, brand: val });
                       }
                     }}
-                    className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                  >
-                    {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                    <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                  </select>
+                  />
 
                   {isCustomBrand && (
                     <input
@@ -239,7 +245,7 @@ export function VehiclesView() {
                       required
                       value={form.customBrand}
                       onChange={(e) => setForm({ ...form, customBrand: e.target.value })}
-                      placeholder={isRtl ? 'اكتب ماركة السيارة هنا...' : 'Type vehicle brand here...'}
+                      placeholder={t('cu_typeVehicleBrandHere')}
                       className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white mt-2 focus:outline-none"
                     />
                   )}
@@ -290,12 +296,16 @@ export function VehiclesView() {
                   type="submit"
                   className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover cursor-pointer"
                 >
-                  {isRtl ? 'حفظ السيارة' : 'Save Vehicle'}
+                  {t('cu_saveVehicle')}
                 </button>
               </div>
             </form>
           </div>
         </div>
+      )}
+
+      {fileVehicleId && (
+        <VehicleFileView vehicleId={fileVehicleId} onClose={() => setFileVehicleId(null)} />
       )}
     </div>
   );

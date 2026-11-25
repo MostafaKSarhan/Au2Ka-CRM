@@ -7,8 +7,14 @@
   --color-card: #0f172a;
   /* Slate 900 card */
   --color-primary: #dc2626;
-  /* Crimson Red from logo */
+  /* Crimson Red from logo — for fills, where white text sits on top */
   --color-primary-hover: #b91c1c;
+  /* The same red is too dark to READ on the navy background: #dc2626 on
+     #080d1a measures 3.7:1, under the 4.5:1 small text needs, and most of
+     the red text in the system is 10–14px Arabic. So text keeps the brand
+     family but in a lighter shade that measures about 6.4:1. Fills stay
+     --color-primary. */
+  --color-primary-text: #f87171;
   --color-accent: #0f2c59;
   /* Navy Blue from logo border */
   --color-accent-hover: #0a1e3f;

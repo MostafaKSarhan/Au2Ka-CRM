@@ -30,7 +30,7 @@ enum JobStatus {
 
 model User {
   id           String    @id @default(uuid())
-  mobileNumber String   @unique
+  mobileNumber String    @unique
   passwordHash String
   firstName    String
   lastName     String
@@ -40,7 +40,19 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  activities   JobCardActivity[]
+  activities           JobCardActivity[]
+  branch               Branch?           @relation(fields: [branchId], references: [id])
+  branchId             String?
+  sentMessages         OutboundMessage[]
+  notifications        Notification[]
+  inspections          Inspection[]
+  appointments         Appointment[]
+  pointsEntries        PointsEntry[]
+  stockMovements       StockMovement[]
+  invoices             Invoice[]
+  joinRequestsReviewed JoinRequest[]
+
+  @@index([branchId])
 }
 
 model Customer {
@@ -52,11 +64,36 @@ model Customer {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  vehicles     Vehicle[]
-  jobCards     JobCard[]
+  // M6 — the customer asked not to be messaged again.
+  messagingOptOut Boolean   @default(false)
+  optedOutAt      DateTime?
+
+  // M5 — referrals, points and tiers
+  referralCode  String?      @unique
+  tier          CustomerTier @default(REGULAR)
+  pointsBalance Int          @default(0)
+  lifetimeSpend Decimal      @default(0) @db.Decimal(12, 2)
+
+  vehicles         Vehicle[]
+  jobCards         JobCard[]
+  subscriptions    Subscription[]
+  messages         OutboundMessage[]
+  branch           Branch?           @relation(fields: [branchId], references: [id])
+  branchId         String?
+  monthlyReports   MonthlyReport[]
+  appointments     Appointment[]
+  referralsMade    Referral[]        @relation("ReferralsMade")
+  referralReceived Referral?         @relation("ReferralReceived")
+  pointsEntries    PointsEntry[]
+  otps             CustomerOtp[]
+  portalSessions   CustomerSession[]
+  invoices         Invoice[]
+  joinRequests     JoinRequest[]
 
   @@index([fullName])
+  @@index([branchId])
   @@index([mobileNumber])
+  @@index([tier])
 }
 
 model Vehicle {
@@ -71,9 +108,22 @@ model Vehicle {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  jobCards    JobCard[]
+  // M3 — secure share link that opens the vehicle file for the customer
+  shareToken String? @unique
+
+  jobCards       JobCard[]
+  subscriptions  Subscription[]
+  vehicleModel   VehicleModel?            @relation(fields: [vehicleModelId], references: [id])
+  vehicleModelId String?
+  documents      VehicleDocument[]
+  replacements   VehiclePartReplacement[]
+  mileageLogs    VehicleMileageLog[]
+  inspections    Inspection[]
+  monthlyReports MonthlyReport[]
+  appointments   Appointment[]
 
   @@index([plateNumber])
+  @@index([vehicleModelId])
 }
 
 model JobCard {
@@ -98,10 +148,28 @@ model JobCard {
   updatedAt             DateTime       @updatedAt
   deletedAt             DateTime?
 
-  photos                JobCardPhotos[]
-  activities            JobCardActivity[]
+  // Subscription coverage applied when the card was opened (M1)
+  subscriptionId       String?
+  subscription         Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionDiscount Decimal?      @db.Decimal(5, 2)
+  isFreeVisit          Boolean       @default(false)
+
+  photos         JobCardPhotos[]
+  activities     JobCardActivity[]
+  usages         SubscriptionUsage[]
+  branch         Branch?                  @relation(fields: [branchId], references: [id])
+  branchId       String?
+  replacements   VehiclePartReplacement[]
+  mileageLogs    VehicleMileageLog[]
+  messages       OutboundMessage[]
+  inspection     Inspection?
+  appointment    Appointment?
+  stockMovements StockMovement[]
+  invoice        Invoice?
 
   @@index([jobNumber])
+  @@index([branchId])
+  @@index([subscriptionId])
 }
 
 model JobCardPhotos {
@@ -120,4 +188,983 @@ model JobCardActivity {
   user      User     @relation(fields: [userId], references: [id])
   action    String
   createdAt DateTime @default(now())
+}
+
+// =====================================================================
+// المرحلة الثانية — R0: البيانات المرجعية ولوحة التحكم
+// كل الحقول الجديدة على الجداول القائمة اختيارية حتى لا تتأثر بيانات v1.0
+// =====================================================================
+
+model Country {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  cities City[]
+}
+
+model City {
+  id        String    @id @default(uuid())
+  countryId String
+  country   Country   @relation(fields: [countryId], references: [id])
+  nameAr    String
+  nameEn    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  branches Branch[]
+
+  @@index([countryId])
+}
+
+model Branch {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  cityId    String
+  city      City      @relation(fields: [cityId], references: [id])
+  address   String?   @db.Text
+  phone     String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users         User[]
+  customers     Customer[]
+  jobCards      JobCard[]
+  subscriptions Subscription[]
+  appointments  Appointment[]
+
+  @@index([cityId])
+}
+
+model VehicleBrand {
+  id        String    @id @default(uuid())
+  nameAr    String
+  nameEn    String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  models VehicleModel[]
+}
+
+model VehicleModel {
+  id        String       @id @default(uuid())
+  brandId   String
+  brand     VehicleBrand @relation(fields: [brandId], references: [id])
+  nameAr    String
+  nameEn    String
+  yearFrom  Int?
+  yearTo    Int?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  vehicles Vehicle[]
+
+  @@unique([brandId, nameEn])
+  @@index([brandId])
+}
+
+model Part {
+  id            String    @id @default(uuid())
+  partNumber    String    @unique
+  nameAr        String
+  nameEn        String
+  category      String?
+  unit          String    @default("PCS")
+  purchasePrice Decimal   @default(0) @db.Decimal(10, 2)
+  sellPrice     Decimal   @default(0) @db.Decimal(10, 2)
+  quantity      Int       @default(0)
+  reorderLevel  Int       @default(0)
+  location      String?
+  notes         String?   @db.Text
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  replacements VehiclePartReplacement[]
+  movements    StockMovement[]
+
+  @@index([nameAr])
+  @@index([category])
+}
+
+// =====================================================================
+// المرحلة الثانية — M1: الاشتراكات والباقات السنوية
+// =====================================================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionUsageType {
+  FREE_VISIT
+  DISCOUNT
+}
+
+model Plan {
+  id              String    @id @default(uuid())
+  nameAr          String
+  nameEn          String
+  descriptionAr   String?   @db.Text
+  descriptionEn   String?   @db.Text
+  price           Decimal   @default(0) @db.Decimal(10, 2)
+  durationMonths  Int       @default(12)
+  freeVisits      Int       @default(0)
+  discountPercent Decimal   @default(0) @db.Decimal(5, 2)
+  benefitsAr      String?   @db.Text
+  benefitsEn      String?   @db.Text
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                 String   @id @default(uuid())
+  subscriptionNumber String   @unique
+  customerId         String
+  customer           Customer @relation(fields: [customerId], references: [id])
+  vehicleId          String?
+  vehicle            Vehicle? @relation(fields: [vehicleId], references: [id])
+  planId             String
+  plan               Plan     @relation(fields: [planId], references: [id])
+  branchId           String?
+  branch             Branch?  @relation(fields: [branchId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+
+  // Snapshot of the plan at purchase time, so later plan edits never
+  // change what a customer already paid for.
+  freeVisitsTotal Int     @default(0)
+  freeVisitsUsed  Int     @default(0)
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+
+  // Collection is recorded by hand — no payment gateway in this scope.
+  paidAmount    Decimal @default(0) @db.Decimal(10, 2)
+  paymentMethod String?
+  paymentNote   String?
+  notes         String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  usages   SubscriptionUsage[]
+  jobCards JobCard[]
+
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([endDate])
+}
+
+model SubscriptionUsage {
+  id              String                @id @default(uuid())
+  subscriptionId  String
+  subscription    Subscription          @relation(fields: [subscriptionId], references: [id])
+  jobCardId       String
+  jobCard         JobCard               @relation(fields: [jobCardId], references: [id])
+  type            SubscriptionUsageType
+  discountPercent Decimal?              @db.Decimal(5, 2)
+  note            String?
+  createdAt       DateTime              @default(now())
+
+  @@index([subscriptionId])
+  @@index([jobCardId])
+}
+
+// =====================================================================
+// المرحلة الثانية — M3: الملف الكامل للسيارة
+// الملف يُبنى من البيانات المسجلة في النظام من تاريخ التشغيل فصاعدًا
+// =====================================================================
+
+enum VehicleDocumentType {
+  REGISTRATION
+  INSURANCE
+  PERIODIC_INSPECTION
+  OTHER
+}
+
+enum MileageSource {
+  MANUAL
+  JOB_CARD
+}
+
+model VehicleDocument {
+  id             String              @id @default(uuid())
+  vehicleId      String
+  vehicle        Vehicle             @relation(fields: [vehicleId], references: [id])
+  type           VehicleDocumentType
+  title          String?
+  documentNumber String?
+  issuer         String?
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  filePath       String?
+  notes          String?             @db.Text
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+
+  @@index([vehicleId])
+  @@index([expiryDate])
+}
+
+model VehiclePartReplacement {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  jobCardId String?
+  jobCard   JobCard? @relation(fields: [jobCardId], references: [id])
+  partId    String?
+  part      Part?    @relation(fields: [partId], references: [id])
+
+  // Name and number are copied in, so the record survives a catalogue edit
+  // and still reads correctly for parts bought outside the catalogue.
+  partName             String
+  partNumber           String?
+  quantity             Int       @default(1)
+  unitPrice            Decimal   @default(0) @db.Decimal(10, 2)
+  mileageAtReplacement Int?
+  replacedAt           DateTime  @default(now())
+  warrantyMonths       Int?
+  warrantyUntil        DateTime?
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  @@index([vehicleId])
+  @@index([jobCardId])
+  @@index([replacedAt])
+}
+
+model VehicleMileageLog {
+  id         String        @id @default(uuid())
+  vehicleId  String
+  vehicle    Vehicle       @relation(fields: [vehicleId], references: [id])
+  jobCardId  String?
+  jobCard    JobCard?      @relation(fields: [jobCardId], references: [id])
+  mileage    Int
+  source     MileageSource @default(MANUAL)
+  note       String?
+  recordedAt DateTime      @default(now())
+  createdAt  DateTime      @default(now())
+
+  @@index([vehicleId])
+  @@index([recordedAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M6: الرسائل والتنبيهات
+// القنوات المشمولة: واتساب والتنبيهات الداخلية. الـ SMS غير مشمول.
+// الإرسال التلقائي عبر واتساب الرسمي يأتي في M8؛ هنا يُجهَّز الطابور
+// ويُسلَّم للموظف رابط إرسال، ويُسجَّل كل شيء.
+// =====================================================================
+
+enum MessageChannel {
+  WHATSAPP
+  INTERNAL
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum NotificationType {
+  JOB_CARD
+  SUBSCRIPTION
+  DOCUMENT
+  JOIN_REQUEST
+  SYSTEM
+}
+
+model MessageTemplate {
+  id        String         @id @default(uuid())
+  code      String         @unique
+  nameAr    String
+  nameEn    String
+  channel   MessageChannel @default(WHATSAPP)
+  bodyAr    String         @db.Text
+  bodyEn    String         @db.Text
+  // Placeholder names this template understands, as a JSON array — shown to
+  // whoever edits the text so they do not invent a variable that never fills.
+  variables String?        @db.Text
+  isSystem  Boolean        @default(false)
+  isActive  Boolean        @default(true)
+
+  // M8 — the matching template registered with Meta. Free text may only be
+  // sent inside the 24-hour service window; outside it, Meta requires one of
+  // these approved templates, so a code with no Meta name cannot go out.
+  metaTemplateName String?
+  metaLanguage     String?            @default("ar")
+  metaStatus       MetaTemplateStatus @default(NOT_SUBMITTED)
+  metaStatusNote   String?            @db.Text
+  // قوالب المصادقة عند Meta تحمل زر «نسخ الرمز»، والرمز يُرسل مرتين:
+  // مرة في النص ومرة في الزر. إغفال الثانية يرد خطأ ١٣٢٠٠٠ ولا تصل رسالة.
+  metaHasCodeButton Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  messages OutboundMessage[]
+}
+
+model OutboundMessage {
+  id         String           @id @default(uuid())
+  templateId String?
+  template   MessageTemplate? @relation(fields: [templateId], references: [id])
+  channel    MessageChannel   @default(WHATSAPP)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  jobCardId  String?
+  jobCard    JobCard?  @relation(fields: [jobCardId], references: [id])
+
+  recipientName   String?
+  recipientNumber String?
+  lang            String  @default("ar")
+  // The rendered text is stored as it was sent, so the log stays truthful
+  // even after the template is edited.
+  body            String  @db.Text
+
+  status      MessageStatus @default(PENDING)
+  scheduledAt DateTime      @default(now())
+  sentAt      DateTime?
+  attempts    Int           @default(0)
+  lastError   String?
+
+  // M8 — the values that filled this message, in the order Meta registered
+  // them, so an approved template can be sent for the same message later.
+  templateValues String? @db.Text
+
+  // M8 — what Meta tells us about the message after we hand it over.
+  providerMessageId String?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([customerId])
+  @@index([jobCardId])
+  @@index([providerMessageId])
+}
+
+model Notification {
+  id     String  @id @default(uuid())
+  // A notification is either for one user, or for everyone in a role.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+  role   Role?
+
+  type    NotificationType @default(SYSTEM)
+  titleAr String
+  titleEn String
+  bodyAr  String?          @db.Text
+  bodyEn  String?          @db.Text
+
+  // What the notification points at, so the UI can open it.
+  linkType  String?
+  linkId    String?
+  // Stops the scheduler raising the same alert twice for the same thing.
+  dedupeKey String? @unique
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([role])
+  @@index([readAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M2: التقرير الفني الشهري
+// قائمة بنود الفحص يعتمدها العميل (حتى 25 بندًا) وتبقى قابلة للتعديل.
+// =====================================================================
+
+enum InspectionRating {
+  NOT_CHECKED
+  OK
+  NEEDS_ATTENTION
+  CRITICAL
+}
+
+model InspectionItem {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  nameAr    String
+  nameEn    String
+  category  String?
+  // How the technician is told to judge this item, shown under its name.
+  hintAr    String?   @db.Text
+  hintEn    String?   @db.Text
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  results InspectionResult[]
+
+  @@index([sortOrder])
+}
+
+model Inspection {
+  id           String  @id @default(uuid())
+  // One inspection per job card — the form the technician fills on the card.
+  jobCardId    String  @unique
+  jobCard      JobCard @relation(fields: [jobCardId], references: [id])
+  vehicleId    String
+  vehicle      Vehicle @relation(fields: [vehicleId], references: [id])
+  technicianId String?
+  technician   User?   @relation(fields: [technicianId], references: [id])
+
+  mileage            Int?
+  // 0–100, derived from the ratings; stored so history keeps its own value
+  // even after the checklist itself changes.
+  healthScore        Int       @default(0)
+  summaryAr          String?   @db.Text
+  summaryEn          String?   @db.Text
+  nextServiceMileage Int?
+  nextServiceDate    DateTime?
+  completedAt        DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  results InspectionResult[]
+
+  @@index([vehicleId])
+  @@index([completedAt])
+}
+
+model InspectionResult {
+  id           String           @id @default(uuid())
+  inspectionId String
+  inspection   Inspection       @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         InspectionItem   @relation(fields: [itemId], references: [id])
+  rating       InspectionRating @default(NOT_CHECKED)
+  note         String?          @db.Text
+
+  @@unique([inspectionId, itemId])
+  @@index([itemId])
+}
+
+model MonthlyReport {
+  id         String   @id @default(uuid())
+  vehicleId  String
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  year       Int
+  month      Int
+
+  visits            Int     @default(0)
+  totalCost         Decimal @default(0) @db.Decimal(10, 2)
+  partsReplaced     Int     @default(0)
+  startMileage      Int?
+  endMileage        Int?
+  healthScore       Int?
+  // Written for the customer in plain language, not in technical terms.
+  recommendationsAr String? @db.Text
+  recommendationsEn String? @db.Text
+  // The inspection findings as they stood when the report was generated.
+  findings          String? @db.Text
+
+  generatedAt DateTime  @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([vehicleId, year, month])
+  @@index([customerId])
+  @@index([year, month])
+}
+
+// =====================================================================
+// المرحلة الثانية — M4: حجز المواعيد وأولوية المشتركين
+// طاقة يومية واحدة قابلة للضبط، دون جدولة موارد مركّبة.
+// =====================================================================
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  ARRIVED
+  CONVERTED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  RECEPTION
+  CUSTOMER_PORTAL
+}
+
+/// Working hours and daily capacity, one row per weekday (0 = Sunday).
+model WorkingDay {
+  id                     String   @id @default(uuid())
+  weekday                Int      @unique
+  isOpen                 Boolean  @default(true)
+  openTime               String   @default("08:00")
+  closeTime              String   @default("18:00")
+  slotMinutes            Int      @default(60)
+  dailyCapacity          Int      @default(8)
+  // Slots held back for subscribers until the day itself.
+  reservedForSubscribers Int      @default(2)
+  updatedAt              DateTime @updatedAt
+}
+
+/// A day the workshop is closed, or runs at a different capacity.
+model Holiday {
+  id        String    @id @default(uuid())
+  date      DateTime  @unique @db.Date
+  nameAr    String
+  nameEn    String
+  isClosed  Boolean   @default(true)
+  capacity  Int?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model Appointment {
+  id         String   @id @default(uuid())
+  reference  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  vehicleId  String?
+  vehicle    Vehicle? @relation(fields: [vehicleId], references: [id])
+  branchId   String?
+  branch     Branch?  @relation(fields: [branchId], references: [id])
+
+  scheduledAt  DateTime
+  durationMin  Int               @default(60)
+  status       AppointmentStatus @default(BOOKED)
+  source       AppointmentSource @default(RECEPTION)
+  // Recorded at booking: a subscriber keeps their priority even if the
+  // subscription lapses before the appointment comes round.
+  isSubscriber Boolean           @default(false)
+  complaint    String?           @db.Text
+  notes        String?           @db.Text
+
+  reminderSentAt DateTime?
+  // The card this appointment turned into, once the customer arrives.
+  jobCardId      String?   @unique
+  jobCard        JobCard?  @relation(fields: [jobCardId], references: [id])
+
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([customerId])
+}
+
+// =====================================================================
+// المرحلة الثانية — M5: الإحالات والعملاء المميزون
+// قاعدة مكافأة واحدة قابلة للضبط. الحملات المتزامنة والقواعد المركّبة
+// غير مشمولة في هذا النطاق.
+// =====================================================================
+
+/// مستوى العميل — يُحسب تلقائيًا من إنفاقه التراكمي، ولا يشتريه ولا يدفع ثمنه.
+enum CustomerTier {
+  REGULAR
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum ReferralStatus {
+  PENDING
+  REGISTERED
+  COMPLETED
+  EXPIRED
+}
+
+enum RewardType {
+  POINTS
+  DISCOUNT
+  FREE_SERVICE
+}
+
+enum PointsEntryType {
+  EARNED_REFERRAL
+  EARNED_SPEND
+  REDEEMED
+  ADJUSTMENT
+}
+
+enum TierBasis {
+  SPEND
+  SUBSCRIPTION
+}
+
+/// One row holds the workshop's single adjustable reward rule.
+model ReferralSettings {
+  id         String     @id @default("default")
+  rewardType RewardType @default(POINTS)
+
+  referrerPoints          Int     @default(100)
+  referredPoints          Int     @default(50)
+  referrerDiscountPercent Decimal @default(0) @db.Decimal(5, 2)
+  referredDiscountPercent Decimal @default(0) @db.Decimal(5, 2)
+  freeServiceAr           String?
+  freeServiceEn           String?
+
+  /// What one point is worth on an invoice, in riyals.
+  pointValue     Decimal @default(1) @db.Decimal(10, 2)
+  /// Points granted per riyal spent; 0 turns spend-earning off.
+  pointsPerRiyal Decimal @default(0) @db.Decimal(10, 4)
+
+  tierBasis         TierBasis @default(SPEND)
+  /// حدود الإنفاق التراكمي التي ينتقل عندها العميل من مستوى إلى الذي يليه.
+  silverThreshold   Decimal   @default(1000) @db.Decimal(10, 2)
+  goldThreshold     Decimal   @default(5000) @db.Decimal(10, 2)
+  platinumThreshold Decimal   @default(15000) @db.Decimal(10, 2)
+
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model Referral {
+  id         String    @id @default(uuid())
+  code       String
+  referrerId String
+  referrer   Customer  @relation("ReferralsMade", fields: [referrerId], references: [id])
+  /// The referred customer, once they register. One referral per customer.
+  referredId String?   @unique
+  referred   Customer? @relation("ReferralReceived", fields: [referredId], references: [id])
+
+  status         ReferralStatus @default(PENDING)
+  registeredAt   DateTime?
+  /// Set on the referred customer's first job card — this is what earns the reward.
+  firstVisitAt   DateTime?
+  jobCardId      String?
+  rewardedAt     DateTime?
+  referrerReward Int            @default(0)
+  referredReward Int            @default(0)
+  notes          String?        @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+/// Every movement on a customer's points balance, so the balance is auditable.
+model PointsEntry {
+  id           String          @id @default(uuid())
+  customerId   String
+  customer     Customer        @relation(fields: [customerId], references: [id])
+  type         PointsEntryType
+  points       Int
+  balanceAfter Int
+  reasonAr     String
+  reasonEn     String
+  referralId   String?
+  jobCardId    String?
+  createdById  String?
+  createdBy    User?           @relation(fields: [createdById], references: [id])
+  createdAt    DateTime        @default(now())
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M10: إدارة المخزون وقطع الغيار
+// مستودع واحد. أوامر الشراء وحسابات الموردين وتعدد المستودعات
+// غير مشمولة في هذا النطاق.
+// =====================================================================
+
+enum StockMovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id           String            @id @default(uuid())
+  partId       String
+  part         Part              @relation(fields: [partId], references: [id])
+  type         StockMovementType
+  /// Always the signed change: +10 for an intake, -2 for an issue.
+  quantity     Int
+  balanceAfter Int
+  unitPrice    Decimal?          @db.Decimal(10, 2)
+  /// The job card the part went out on, when it was issued to a repair.
+  jobCardId    String?
+  jobCard      JobCard?          @relation(fields: [jobCardId], references: [id])
+  reference    String?
+  reasonAr     String
+  reasonEn     String
+  createdById  String?
+  createdBy    User?             @relation(fields: [createdById], references: [id])
+  createdAt    DateTime          @default(now())
+
+  @@index([partId])
+  @@index([jobCardId])
+  @@index([createdAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M7: بوابة العميل
+// بوابة عرض وحجز. لا تشمل دفعًا إلكترونيًا ولا محادثة مباشرة مع الورشة.
+// =====================================================================
+
+/// A one-time code sent to the customer's mobile to let them in without a password.
+model CustomerOtp {
+  id           String    @id @default(uuid())
+  customerId   String
+  customer     Customer  @relation(fields: [customerId], references: [id])
+  mobileNumber String
+  /// Stored hashed — a leaked database row must not grant access.
+  codeHash     String
+  expiresAt    DateTime
+  attempts     Int       @default(0)
+  consumedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([mobileNumber])
+  @@index([expiresAt])
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// طلب انضمام يرسله زائر ليس عميلًا بعد، غالبًا وصل من رمز إحالة صديقه.
+///
+/// لا يصير عميلًا بإرسال النموذج: يبقى الطلب معلّقًا حتى يعتمده موظف. ولو
+/// فُتح التسجيل الذاتي على مصراعيه لامتلأ سجل العملاء بحسابات لم تزر
+/// الورشة قط، ولنسب كل واحد نفسه لأي كود إحالة وحصد نقاطًا بلا زيارة.
+model JoinRequest {
+  id           String            @id @default(uuid())
+  fullName     String
+  mobileNumber String
+  /// بيانات السيارة كما كتبها الزائر؛ تُراجع عند الاعتماد.
+  brand        String?
+  model        String?
+  plateNumber  String?
+  note         String?           @db.Text
+  /// كود الإحالة الذي وصل به، إن وُجد. يُربط عند الاعتماد لا قبله.
+  referralCode String?
+  status       JoinRequestStatus @default(PENDING)
+
+  /// يُملأ عند الاعتماد: العميل الذي أُنشئ من هذا الطلب.
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation(fields: [reviewedById], references: [id])
+  rejectReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+  @@index([mobileNumber])
+}
+
+/// A signed-in portal session. Revoking a row ends that device's access.
+model CustomerSession {
+  id         String    @id @default(uuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  lastSeenAt DateTime  @default(now())
+  userAgent  String?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
+// =====================================================================
+// المرحلة الثانية — M8: الربط الرسمي بواتساب للأعمال
+// اعتماد قوالب الرسائل يتم من Meta وهو خارج سيطرة المنفّذ.
+// =====================================================================
+
+enum MetaTemplateStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// One row holds the workshop's WhatsApp Business connection.
+model WhatsAppSettings {
+  id                 String  @id @default("default")
+  phoneNumberId      String?
+  businessAccountId  String?
+  /// Stored server-side only and never returned by the API. The environment
+  /// variable WHATSAPP_ACCESS_TOKEN takes precedence over this column.
+  accessToken        String? @db.Text
+  apiVersion         String  @default("v21.0")
+  /// Meta calls the webhook with this to prove the endpoint is ours.
+  webhookVerifyToken String?
+  displayNumber      String?
+
+  isEnabled      Boolean   @default(false)
+  lastVerifiedAt DateTime?
+  lastError      String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =====================================================================
+// المرحلة الثانية — M9: الفوترة الإلكترونية ZATCA (المرحلة الثانية)
+// يتطلب الرقم الضريبي وصلاحيات المنشأة على بوابة ZATCA من العميل.
+// لا يشمل التدقيق المحاسبي ولا إعداد الإقرارات الضريبية.
+// =====================================================================
+
+enum ZatcaEnvironment {
+  SANDBOX
+  SIMULATION
+  PRODUCTION
+}
+
+enum InvoiceType {
+  /// B2C — a simplified invoice, reported to ZATCA within 24 hours.
+  SIMPLIFIED
+  /// B2B — a standard tax invoice, cleared by ZATCA before it is handed over.
+  STANDARD
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SIGNED
+  REPORTED
+  CLEARED
+  FAILED
+  CANCELLED
+}
+
+/// One row holds the seller's details and onboarding state.
+model ZatcaSettings {
+  id             String  @id @default("default")
+  sellerNameAr   String?
+  sellerNameEn   String?
+  vatNumber      String?
+  crnNumber      String?
+  street         String?
+  buildingNumber String?
+  district       String?
+  city           String?
+  postalCode     String?
+  countryCode    String  @default("SA")
+
+  environment ZatcaEnvironment @default(SANDBOX)
+  vatRate     Decimal          @default(15) @db.Decimal(5, 2)
+
+  /// Onboarding artefacts. Secrets are never returned by the API.
+  privateKeyPem    String?   @db.Text
+  csr              String?   @db.Text
+  complianceCsid   String?   @db.Text
+  complianceSecret String?   @db.Text
+  productionCsid   String?   @db.Text
+  productionSecret String?   @db.Text
+  onboardedAt      DateTime?
+
+  isEnabled Boolean @default(false)
+  lastError String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  /// Sequential and unbroken, as ZATCA requires.
+  invoiceNumber String        @unique
+  sequence      Int           @unique
+  uuid          String        @unique
+  type          InvoiceType   @default(SIMPLIFIED)
+  status        InvoiceStatus @default(DRAFT)
+
+  jobCardId  String?   @unique
+  jobCard    JobCard?  @relation(fields: [jobCardId], references: [id])
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  issuedAt DateTime @default(now())
+
+  // Buyer details are copied in: a later edit to the customer must not change
+  // an invoice that has already been issued.
+  buyerName      String?
+  buyerVatNumber String?
+
+  netAmount   Decimal @default(0) @db.Decimal(12, 2)
+  vatAmount   Decimal @default(0) @db.Decimal(12, 2)
+  totalAmount Decimal @default(0) @db.Decimal(12, 2)
+  vatRate     Decimal @default(15) @db.Decimal(5, 2)
+  lines       String? @db.Text
+
+  /// The hash chain ZATCA requires: each invoice carries the previous one's.
+  previousHash String? @db.Text
+  invoiceHash  String? @db.Text
+  /// Base64 TLV, exactly what the printed QR encodes.
+  qrCode       String? @db.Text
+  signedXml    String? @db.LongText
+  signature    String? @db.Text
+
+  zatcaStatus   String?
+  zatcaResponse String?   @db.LongText
+  reportedAt    DateTime?
+
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([status])
+  @@index([issuedAt])
+  @@index([customerId])
 }

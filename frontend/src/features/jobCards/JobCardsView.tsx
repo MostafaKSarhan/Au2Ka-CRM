@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera } from 'lucide-react';
+import { Search, PlusCircle, Wrench, Clock, CheckCircle, UploadCloud, User, FileText, Receipt, Printer, Share2, UserPlus, Car as CarIcon, Download, X, ZoomIn, Camera, ClipboardCheck } from 'lucide-react';
 import { UPLOADS_BASE_URL } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import html2canvas from 'html2canvas-pro';
 import { QRCodeCanvas } from 'qrcode.react';
+import { InspectionModal } from '../inspections/InspectionModal';
 import { useTranslation } from '../../store/LanguageContext';
 
 const STATUS_COLUMNS = [
@@ -54,6 +56,7 @@ export function JobCardsView() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [inspectionJobId, setInspectionJobId] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   // Creation Form
@@ -626,7 +629,7 @@ export function JobCardsView() {
                 <div className="flex-1 space-y-2.5 overflow-y-auto min-h-[300px] max-h-[500px] scrollbar-thin">
                   {colJobs.length === 0 ? (
                     <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-zinc-900 text-center text-xs text-zinc-700">
-                      {isRtl ? 'لا يوجد كروت' : 'No cards'}
+                      {t('jc_noCards')}
                     </div>
                   ) : (
                     colJobs.map((job) => (
@@ -636,7 +639,10 @@ export function JobCardsView() {
                         className={`glass-card hover:border-zinc-700/60 p-4 rounded-lg cursor-pointer space-y-3 border border-zinc-800/50 hover:bg-zinc-800/10 transition ${isRtl ? 'text-right' : 'text-left'}`}
                       >
                         <div>
-                          <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="text-xs font-bold text-white tracking-wider font-mono">{job.jobNumber}</p>
+                            <CoverageBadge job={job} t={t} />
+                          </div>
                           <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{job.customerComplaint}</p>
                         </div>
 
@@ -660,7 +666,7 @@ export function JobCardsView() {
           <div className="w-full max-w-2xl glass-panel rounded-xl p-6 space-y-5 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className={`text-xl font-bold text-white ${isRtl ? 'text-right' : 'text-left'}`}>
-                {isRtl ? 'فتح كرت استقبال سيارة جديد' : 'Create New Intake Job Card'}
+                {t('jc_createNewIntakeJob')}
               </h2>
               <button type="button" onClick={() => { setShowAddModal(false); setShowNewCustomerForm(false); setShowNewVehicleForm(false); setInlineMsg(''); }} className="text-zinc-400 hover:text-white text-lg cursor-pointer">✕</button>
             </div>
@@ -673,12 +679,16 @@ export function JobCardsView() {
 
             {/* ─── Customer Section ─── */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><User size={15} className="text-primary" /> {t('selectCustomer')}</label>
+              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><User size={15} className="text-primary-text" /> {t('selectCustomer')}</label>
 
-              <select
+              <SearchableSelect
                 value={showNewCustomerForm ? '__add_new__' : form.customerId}
-                onChange={(e) => {
-                  const val = e.target.value;
+                placeholder={t('jc_chooseOrSearchA')}
+                options={[
+                  { value: '__add_new__', label: t('jc_addNewCustomer'), pinned: true },
+                  ...customers.map(c => ({ value: c.id, label: c.fullName, hint: c.mobileNumber })),
+                ]}
+                onChange={(val) => {
                   if (val === '__add_new__') {
                     setShowNewCustomerForm(true);
                     setShowNewVehicleForm(false);
@@ -689,18 +699,11 @@ export function JobCardsView() {
                     setInlineMsg('');
                   }
                 }}
-                className="w-full rounded-lg bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none focus:border-primary"
-              >
-                <option value="__add_new__" className="text-emerald-400">{isRtl ? '➕ إضافة عميل جديد' : '➕ Add New Customer'}</option>
-                <option value="">{isRtl ? '-- اختر العميل الموجود --' : '-- Select Existing Customer --'}</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.fullName} — {c.mobileNumber}</option>
-                ))}
-              </select>
+              />
 
               {showNewCustomerForm && (
                 <form onSubmit={handleCreateCustomerInline} className="space-y-3 border-t border-zinc-800 pt-3">
-                  <p className="text-xs text-amber-400 font-semibold">{isRtl ? '📝 بيانات العميل الجديد' : '📝 New Customer Details'}</p>
+                  <p className="text-xs text-amber-400 font-semibold"><UserPlus size={13} className="inline-block me-1 align-text-bottom" />{t('jc_newCustomerDetails')}</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] text-zinc-400 mb-1">{t('fullName')} *</label>
@@ -709,7 +712,7 @@ export function JobCardsView() {
                         required
                         value={newCustomerForm.fullName}
                         onChange={(e) => setNewCustomerForm({ ...newCustomerForm, fullName: e.target.value })}
-                        placeholder={isRtl ? 'مثال: محمد أحمد' : 'e.g. Mohammad Ahmad'}
+                        placeholder={t('jc_eGMohammadAhmad')}
                         className="w-full rounded bg-zinc-800 border border-zinc-700 p-2 text-sm text-white focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -726,12 +729,12 @@ export function JobCardsView() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[11px] text-zinc-400 mb-1">{t('notesLabel')} ({isRtl ? 'اختياري' : 'Optional'})</label>
+                    <label className="block text-[11px] text-zinc-400 mb-1">{t('notesLabel')} ({t('jc_optional')})</label>
                     <input
                       type="text"
                       value={newCustomerForm.notes}
                       onChange={(e) => setNewCustomerForm({ ...newCustomerForm, notes: e.target.value })}
-                      placeholder={isRtl ? 'أي ملاحظة إضافية...' : 'Any remarks...'}
+                      placeholder={t('jc_anyRemarks')}
                       className="w-full rounded bg-zinc-800 border border-zinc-700 p-2 text-sm text-white focus:outline-none focus:border-primary"
                     />
                   </div>
@@ -741,7 +744,7 @@ export function JobCardsView() {
                       disabled={inlineLoading}
                       className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 py-2 text-sm font-bold text-white transition disabled:opacity-50 cursor-pointer"
                     >
-                      {inlineLoading ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? '✓ حفظ العميل الجديد واختياره' : '✓ Save & Select New Customer')}
+                      {inlineLoading ? (t('jc_saving')) : (t('jc_saveSelectNewCustomer'))}
                     </button>
                     <button
                       type="button"
@@ -757,17 +760,25 @@ export function JobCardsView() {
 
             {/* ─── Vehicle Section ─── */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><CarIcon size={15} className="text-primary" /> {t('vehicleInfo')}</label>
+              <label className="text-sm font-bold text-zinc-300 flex items-center gap-2"><CarIcon size={15} className="text-primary-text" /> {t('vehicleInfo')}</label>
 
               {!form.customerId && !showNewVehicleForm && (
-                <p className="text-xs text-zinc-500 italic">{isRtl ? 'اختر عميلاً أولاً لعرض سياراته.' : 'Select a customer first to view their vehicles.'}</p>
+                <p className="text-xs text-zinc-500 italic">{t('jc_selectACustomerFirst')}</p>
               )}
 
               {form.customerId && (
-                <select
+                <SearchableSelect
                   value={showNewVehicleForm ? '__add_new__' : form.vehicleId}
-                  onChange={(e) => {
-                    const val = e.target.value;
+                  placeholder={t('jc_chooseOrSearchA2')}
+                  options={[
+                    { value: '__add_new__', label: t('jc_addNewVehicle'), pinned: true },
+                    ...vehicles.map(v => ({
+                      value: v.id,
+                      label: `${v.brand} ${v.model}`,
+                      hint: v.plateNumber,
+                    })),
+                  ]}
+                  onChange={(val) => {
                     if (val === '__add_new__') {
                       setShowNewVehicleForm(true);
                       setShowNewCustomerForm(false);
@@ -778,21 +789,14 @@ export function JobCardsView() {
                       setInlineMsg('');
                     }
                   }}
-                  className="w-full rounded-lg bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none focus:border-primary"
-                >
-                <option value="__add_new__" className="text-emerald-400">{isRtl ? '➕ إضافة سيارة جديدة' : '➕ Add New Vehicle'}</option>
-                <option value="">{isRtl ? '-- اختر السيارة --' : '-- Select Vehicle --'}</option>
-                {vehicles.map((v) => (
-                  <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plateNumber}</option>
-                ))}
-                </select>
+                />
               )}
 
               {showNewVehicleForm && (
                 <form onSubmit={handleCreateVehicleInline} className="space-y-3 border-t border-zinc-800 pt-3">
-                  <p className="text-xs text-amber-400 font-semibold">{isRtl ? '🚗 بيانات السيارة الجديدة' : '🚗 New Vehicle Details'}</p>
+                  <p className="text-xs text-amber-400 font-semibold"><CarIcon size={13} className="inline-block me-1 align-text-bottom" />{t('jc_newVehicleDetails')}</p>
                   {!form.customerId && (
-                    <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded">{isRtl ? '⚠️ يجب اختيار العميل أولاً قبل إضافة السيارة' : '⚠️ Select customer first before adding vehicle'}</p>
+                    <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded">{t('jc_selectCustomerFirstBefore')}</p>
                   )}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -829,7 +833,7 @@ export function JobCardsView() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">{t('mileage')} ({isRtl ? 'كم' : 'km'})</label>
+                      <label className="block text-[11px] text-zinc-400 mb-1">{t('mileage')} ({t('jc_km')})</label>
                       <input
                         type="number"
                         value={newVehicleForm.mileage}
@@ -845,7 +849,7 @@ export function JobCardsView() {
                       disabled={inlineLoading || !form.customerId}
                       className="flex-1 rounded-lg bg-blue-600 hover:bg-blue-700 py-2 text-sm font-bold text-white transition disabled:opacity-50 cursor-pointer"
                     >
-                      {inlineLoading ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? '✓ حفظ السيارة الجديدة واختيارها' : '✓ Save & Select New Vehicle')}
+                      {inlineLoading ? (t('jc_saving')) : (t('jc_saveSelectNewVehicle'))}
                     </button>
                     <button
                       type="button"
@@ -867,7 +871,7 @@ export function JobCardsView() {
                   required
                   value={form.customerComplaint}
                   onChange={(e) => setForm({ ...form, customerComplaint: e.target.value })}
-                  placeholder={isRtl ? 'وصف المشاكل والأعطال التي أبلغ عنها العميل...' : 'Description of complaints and faults reported by the customer...'}
+                  placeholder={t('jc_descriptionOfComplaintsAnd')}
                   className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white h-20 focus:outline-none focus:border-primary"
                 />
               </div>
@@ -887,7 +891,7 @@ export function JobCardsView() {
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">
                     {t('assignTechnician')}
                     {user?.role === 'TECHNICIAN' && (
-                      <span className="mr-2 text-[10px] text-amber-400 font-normal">({isRtl ? 'مُعبَّأ تلقائياً من حسابك' : 'Autofilled from your account'})</span>
+                      <span className="mr-2 text-[10px] text-amber-400 font-normal">({t('jc_autofilledFromYourAccount')})</span>
                     )}
                   </label>
                   {user?.role === 'TECHNICIAN' ? (
@@ -898,19 +902,16 @@ export function JobCardsView() {
                       className="w-full rounded bg-zinc-900/50 border border-zinc-800 p-2 text-sm text-amber-300 font-semibold focus:outline-none cursor-not-allowed"
                     />
                   ) : (
-                    <select
+                    <SearchableSelect
                       value={form.technicianName}
-                      onChange={(e) => setForm({ ...form, technicianName: e.target.value })}
-                      className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white focus:outline-none focus:border-primary"
-                    >
-                      <option value="">{t('selectTechnician')}</option>
-                      {technicians.map((t: any) => (
-                        <option key={t.id} value={`${t.firstName} ${t.lastName}`}>
-                          {t.firstName} {t.lastName}
-                        </option>
-                      ))}
-                      <option value="__custom__" disabled>─────────────</option>
-                    </select>
+                      placeholder={t('selectTechnician')}
+                      options={technicians.map((tech: any) => ({
+                        value: `${tech.firstName} ${tech.lastName}`,
+                        label: `${tech.firstName} ${tech.lastName}`,
+                        hint: tech.branch ? (isRtl ? tech.branch.nameAr : tech.branch.nameEn) : undefined,
+                      }))}
+                      onChange={(val) => setForm({ ...form, technicianName: val })}
+                    />
                   )}
                 </div>
               </div>
@@ -949,16 +950,27 @@ export function JobCardsView() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs font-bold text-zinc-500 font-mono">{t('jobDetailsTitle')}</span>
-                <h2 className="text-2xl font-bold text-white mt-0.5 font-mono">{selectedJob.jobNumber}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-white mt-0.5 font-mono">
+                  {selectedJob.jobNumber}
+                  <CoverageBadge job={selectedJob} t={t} />
+                </h2>
               </div>
               <div className="flex items-center gap-2">
+                {/* M2 — structured technical inspection form */}
+                <button
+                  onClick={() => setInspectionJobId(selectedJob.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-bold text-zinc-200 rounded transition cursor-pointer"
+                >
+                  <ClipboardCheck size={14} /> {t('insp_title')}
+                </button>
+
                 {/* Invoice Button Trigger */}
                 {(selectedJob.status === 'WAITING_APPROVAL' || selectedJob.status === 'COMPLETED' || selectedJob.status === 'DELIVERED') && (
                   <button
                     onClick={() => { setShowInvoiceModal(true); setShowDetailModal(false); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded transition cursor-pointer ml-4"
                   >
-                    <Receipt size={14} /> {selectedJob.status === 'WAITING_APPROVAL' ? (isRtl ? 'معاينة واعتماد الفاتورة' : 'Preview & Approve Invoice') : (isRtl ? 'إصدار الفاتورة الإلكترونية' : 'Issue Electronic Invoice')}
+                    <Receipt size={14} /> {selectedJob.status === 'WAITING_APPROVAL' ? (t('jc_previewApproveInvoice')) : (t('jc_issueElectronicInvoice'))}
                   </button>
                 )}
                 <button
@@ -966,7 +978,7 @@ export function JobCardsView() {
                   onClick={() => setShowDetailModal(false)}
                   className="text-zinc-400 hover:text-white"
                 >
-                  {isRtl ? '✕ إغلاق' : '✕ Close'}
+                  {t('jc_close')}
                 </button>
               </div>
             </div>
@@ -981,10 +993,10 @@ export function JobCardsView() {
               <div>
                 <p className="text-[10px] uppercase font-semibold text-zinc-500">{t('vehicleInfo')}</p>
                 <p className="text-sm font-bold text-white mt-0.5">{selectedJob.vehicle?.brand} {selectedJob.vehicle?.model}</p>
-                <p className="text-xs text-zinc-400 font-mono">{isRtl ? 'اللوحة:' : 'Plate:'} {selectedJob.vehicle?.plateNumber}</p>
+                <p className="text-xs text-zinc-400 font-mono">{t('jc_plate')} {selectedJob.vehicle?.plateNumber}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase font-semibold text-zinc-500">{isRtl ? 'حالة الكرت الحالية' : 'Current Status'}</p>
+                <p className="text-[10px] uppercase font-semibold text-zinc-500">{t('jc_currentStatus')}</p>
                 <span className="inline-block rounded px-2.5 py-0.5 text-xs font-bold bg-zinc-800 text-zinc-300 mt-1">
                   {t('status_' + selectedJob.status)}
                 </span>
@@ -1029,7 +1041,7 @@ export function JobCardsView() {
                     <textarea
                       value={editForm.initialInspection}
                       onChange={(e) => setEditForm({ ...editForm, initialInspection: e.target.value })}
-                      placeholder={isRtl ? 'نتائج الفحص والتشخيص المبدئي للسيارة...' : 'Inspection results and initial diagnosis...'}
+                      placeholder={t('jc_inspectionResultsAndInitial')}
                       className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white h-20 focus:outline-none"
                     />
                   </div>
@@ -1038,14 +1050,14 @@ export function JobCardsView() {
                     <textarea
                       value={editForm.requiredRepairs}
                       onChange={(e) => setEditForm({ ...editForm, requiredRepairs: e.target.value })}
-                      placeholder={isRtl ? 'الأعمال والقطع وخطوات الإصلاح...' : 'Repairs, parts and service tasks...'}
+                      placeholder={t('jc_repairsPartsAndService')}
                       className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white h-20 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-400 mb-1">{isRtl ? 'التكلفة التقريبية (ريال)' : 'Estimated Cost (SAR)'}</label>
+                    <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('jc_estimatedCostSar')}</label>
                     <input
                       type="number"
                       value={editForm.estimatedCost}
@@ -1074,7 +1086,7 @@ export function JobCardsView() {
                       {t('jobAddServicesTitle')}
                     </h4>
                     <span className="text-[10px] font-black text-emerald-500 font-mono">
-                      {t('jobAddServicesTotal')}: {servicesList.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0)} {isRtl ? 'ريال' : 'SAR'}
+                      {t('jobAddServicesTotal')}: {servicesList.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0)} {t('jc_sar')}
                     </span>
                   </div>
 
@@ -1087,7 +1099,7 @@ export function JobCardsView() {
                         <div key={idx} className="flex justify-between items-center bg-zinc-900/50 p-2 rounded border border-zinc-800 text-xs">
                           <span className="text-zinc-300 font-semibold">{srv.name}</span>
                           <div className="flex items-center gap-3">
-                            <span className="font-bold text-white font-mono">{srv.price} {isRtl ? 'ريال' : 'SAR'}</span>
+                            <span className="font-bold text-white font-mono">{srv.price} {t('jc_sar')}</span>
                             <button
                               type="button"
                               onClick={() => {
@@ -1148,7 +1160,7 @@ export function JobCardsView() {
 
                 <div className="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 space-y-4">
                   <h4 className="text-xs font-bold text-zinc-200 border-b border-zinc-900 pb-2 flex items-center gap-1.5">
-                    <User size={14} className="text-primary" /> {t('jobTechSecTitle')}
+                    <User size={14} className="text-primary-text" /> {t('jobTechSecTitle')}
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1158,7 +1170,7 @@ export function JobCardsView() {
                         value={editForm.technicianName || ''}
                         onChange={(e) => setEditForm({ ...editForm, technicianName: e.target.value })}
                         className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-xs text-white focus:outline-none"
-                        placeholder={isRtl ? 'مثال: المهندس داود' : 'e.g. Eng. Dawood'}
+                        placeholder={t('jc_eGEngDawood')}
                       />
                     </div>
                     <div>
@@ -1178,7 +1190,7 @@ export function JobCardsView() {
                         type="checkbox"
                         checked={!!editForm.isVehiclePhotographed}
                         onChange={(e) => setEditForm({ ...editForm, isVehiclePhotographed: e.target.checked })}
-                        className="rounded border-zinc-800 bg-zinc-900 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-900 text-primary-text focus:ring-primary w-4 h-4 cursor-pointer"
                       />
                       {t('photoConfirmation')}
                     </label>
@@ -1188,7 +1200,7 @@ export function JobCardsView() {
                         type="checkbox"
                         checked={!!editForm.isDataCompleted}
                         onChange={(e) => setEditForm({ ...editForm, isDataCompleted: e.target.checked })}
-                        className="rounded border-zinc-800 bg-zinc-900 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-900 text-primary-text focus:ring-primary w-4 h-4 cursor-pointer"
                       />
                       {t('dataCompleteConfirmation')}
                     </label>
@@ -1222,7 +1234,7 @@ export function JobCardsView() {
                     <label className="flex-1 flex flex-col items-center justify-center p-4 rounded-lg border border-dashed border-zinc-800 cursor-pointer hover:bg-zinc-900/30 transition">
                       <Camera size={20} className="text-zinc-500 mb-1" />
                       <span className="text-[11px] text-zinc-400">
-                        {uploadLoading ? t('jobUploadLoading') : (isRtl ? 'تصوير بالكاميرا' : 'Take Photo')}
+                        {uploadLoading ? t('jobUploadLoading') : (t('jc_takePhoto'))}
                       </span>
                       <input
                         type="file"
@@ -1236,7 +1248,7 @@ export function JobCardsView() {
                     <label className="flex-1 flex flex-col items-center justify-center p-4 rounded-lg border border-dashed border-zinc-800 cursor-pointer hover:bg-zinc-900/30 transition">
                       <UploadCloud size={20} className="text-zinc-500 mb-1" />
                       <span className="text-[11px] text-zinc-400">
-                        {uploadLoading ? t('jobUploadLoading') : (isRtl ? 'من المعرض' : 'From Gallery')}
+                        {uploadLoading ? t('jobUploadLoading') : (t('jc_fromGallery'))}
                       </span>
                       <input
                         type="file"
@@ -1281,7 +1293,7 @@ export function JobCardsView() {
                               </div>
                             )}
                             <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 text-[10px] text-white font-semibold transition">
-                              <ZoomIn size={12} /> {isRtl ? 'معاينة' : 'Preview'}
+                              <ZoomIn size={12} /> {t('jc_preview')}
                             </span>
                           </button>
                         );
@@ -1341,7 +1353,7 @@ export function JobCardsView() {
                   onClick={downloadInvoiceAsImage}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white rounded cursor-pointer transition shadow-sm"
                 >
-                  📥 {isRtl ? 'تحميل كصورة' : 'Download as Image'}
+                  <Download size={14} /> {t('jc_downloadAsImage')}
                 </button>
                 <button
                   onClick={() => window.print()}
@@ -1353,7 +1365,7 @@ export function JobCardsView() {
                   onClick={() => { setShowInvoiceModal(false); viewJobDetails(selectedJob); }}
                   className="text-zinc-400 hover:text-white px-2 py-1 text-sm"
                 >
-                  {isRtl ? '✕ إغلاق' : '✕ Close'}
+                  {t('jc_close')}
                 </button>
               </div>
             </div>
@@ -1411,7 +1423,7 @@ export function JobCardsView() {
                     </div>
                     <div className="flex items-baseline gap-1 min-w-0">
                       <span className="font-semibold text-zinc-500 shrink-0">{t('mileage')}:</span>
-                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono break-words">{selectedJob.vehicle?.mileage} {isRtl ? 'كم' : 'km'}</span>
+                      <span className="border-b border-dashed border-zinc-400 flex-1 min-w-0 pb-0.5 text-zinc-800 font-bold font-mono break-words">{selectedJob.vehicle?.mileage} {t('jc_km')}</span>
                     </div>
                   </div>
                 </div>
@@ -1442,7 +1454,7 @@ export function JobCardsView() {
                          backgroundSize: '100% 24px',
                          lineHeight: '24px'
                        }}>
-                    {selectedJob.initialInspection || (isRtl ? 'لم يتم البدء بالفحص المبدئي.' : 'Initial inspection has not started.')}
+                    {selectedJob.initialInspection || (t('jc_initialInspectionHasNot'))}
                   </div>
                 </div>
 
@@ -1457,7 +1469,7 @@ export function JobCardsView() {
                          backgroundSize: '100% 24px',
                          lineHeight: '24px'
                        }}>
-                    {selectedJob.requiredRepairs || (isRtl ? 'لم يتم تسجيل صيانة مطلوبة.' : 'No repairs recorded.')}
+                    {selectedJob.requiredRepairs || (t('jc_noRepairsRecorded'))}
                   </div>
                 </div>
 
@@ -1489,7 +1501,7 @@ export function JobCardsView() {
                             {invoiceServices.map((srv, idx) => (
                               <tr key={idx} className="border-b border-zinc-150 hover:bg-zinc-50/55">
                                 <td className="p-2 sm:p-2.5 text-zinc-700 font-medium break-words align-top">{srv.name}</td>
-                                <td className={`p-2 sm:p-2.5 text-zinc-900 font-bold font-mono align-top whitespace-nowrap ${isRtl ? 'text-left' : 'text-right'}`}>{srv.price} {isRtl ? 'ريال' : 'SAR'}</td>
+                                <td className={`p-2 sm:p-2.5 text-zinc-900 font-bold font-mono align-top whitespace-nowrap ${isRtl ? 'text-left' : 'text-right'}`}>{srv.price} {t('jc_sar')}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1521,17 +1533,17 @@ export function JobCardsView() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-baseline border-b border-dashed border-zinc-200 pb-1">
                             <span className="text-zinc-500 font-semibold">{t('baseCost')}:</span>
-                            <span className="text-zinc-800 font-bold font-mono">{baseCost > 0 ? `${baseCost} ${isRtl ? 'ريال' : 'SAR'}` : (isRtl ? 'غير محدد' : 'Not set')}</span>
+                            <span className="text-zinc-800 font-bold font-mono">{baseCost > 0 ? `${baseCost} ${t('jc_sar')}` : (t('jc_notSet'))}</span>
                           </div>
                           {servicesTotal > 0 && (
                             <div className="flex justify-between items-baseline border-b border-dashed border-zinc-200 pb-1">
                               <span className="text-zinc-500 font-semibold">{t('additionalCost')}:</span>
-                              <span className="text-zinc-800 font-bold font-mono">{servicesTotal} {isRtl ? 'ريال' : 'SAR'}</span>
+                              <span className="text-zinc-800 font-bold font-mono">{servicesTotal} {t('jc_sar')}</span>
                             </div>
                           )}
                           <div className="flex justify-between items-baseline pt-1">
                             <span className="text-zinc-900 font-black">{t('grandTotal')}:</span>
-                            <span className="text-emerald-600 font-black text-sm font-mono">{grandTotal} {isRtl ? 'ريال' : 'SAR'}</span>
+                            <span className="text-emerald-600 font-black text-sm font-mono">{grandTotal} {t('jc_sar')}</span>
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 justify-center text-zinc-700 font-semibold pt-1 border-t sm:border-t-0 border-dashed border-zinc-200 sm:pt-1 pt-3">
@@ -1584,7 +1596,7 @@ export function JobCardsView() {
                          backgroundSize: '100% 24px',
                          lineHeight: '24px'
                        }}>
-                    {selectedJob.notes || (isRtl ? 'لم يتم تسجيل ملاحظات إضافية.' : 'No additional notes recorded.')}
+                    {selectedJob.notes || (t('jc_noAdditionalNotesRecorded'))}
                   </div>
                 </div>
 
@@ -1615,7 +1627,7 @@ export function JobCardsView() {
                     <div 
                       onClick={() => { setShowZoomedQR(true); markQRAsScanned(); }} 
                       className="cursor-zoom-in relative group bg-white p-3 rounded-lg border border-zinc-200/80 shadow-sm shrink-0 transition-transform hover:scale-105"
-                      title={isRtl ? 'تكبير الباركود ملء الشاشة وتوثيق الموافقة' : 'Zoom barcode fullscreen and verify approval'}
+                      title={t('jc_zoomBarcodeFullscreenAnd')}
                     >
                       <QRCodeCanvas
                         value={getWhatsAppQRLink()}
@@ -1625,8 +1637,8 @@ export function JobCardsView() {
                         className="w-28 h-28"
                       />
                       <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-white font-bold transition rounded-lg">
-                        <span>{isRtl ? 'تكبير الكود 🔍' : 'Zoom Code 🔍'}</span>
-                        <span className="text-[8px] mt-1 text-emerald-300">{isRtl ? 'لتوثيق الموافقة' : 'To verify approval'}</span>
+                        <span>{t('jc_zoomCode')}</span>
+                        <span className="text-[8px] mt-1 text-emerald-300">{t('jc_toVerifyApproval')}</span>
                       </div>
                     </div>
 
@@ -1670,7 +1682,7 @@ export function JobCardsView() {
                   onClick={downloadInvoiceAsImage}
                   className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm"
                 >
-                  📥 {isRtl ? 'تحميل الكارت كصورة' : 'Download Card as Image'}
+                  <Download size={14} /> {t('jc_downloadCardAsImage')}
                 </button>
                 <a
                   href={getWhatsAppShareLink()}
@@ -1679,7 +1691,7 @@ export function JobCardsView() {
                   onClick={() => markQRAsScanned()}
                   className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-lg transition cursor-pointer shadow-sm text-center"
                 >
-                  <Share2 size={14} className="shrink-0" /> <span className="break-all">{isRtl ? 'إرسال عبر واتساب' : 'Send via WhatsApp'} (+{activeWhatsappNumber})</span>
+                  <Share2 size={14} className="shrink-0" /> <span className="break-all">{t('jc_sendViaWhatsapp')} (+{activeWhatsappNumber})</span>
                 </a>
               </div>
             </div>
@@ -1735,7 +1747,7 @@ export function JobCardsView() {
           <button
             onClick={() => setPreviewMedia(null)}
             className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer backdrop-blur-md`}
-            title={isRtl ? 'إغلاق' : 'Close'}
+            title={t('jc_close2')}
           >
             <X size={20} />
           </button>
@@ -1755,7 +1767,7 @@ export function JobCardsView() {
             ) : (
               <img
                 src={previewMedia.url}
-                alt={isRtl ? 'معاينة صورة الكرت' : 'Card media preview'}
+                alt={t('jc_cardMediaPreview')}
                 className="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl border border-white/10"
               />
             )}
@@ -1770,17 +1782,54 @@ export function JobCardsView() {
               onClick={() => downloadMedia(previewMedia.url)}
               className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-sm font-bold text-white rounded-xl transition cursor-pointer backdrop-blur-md border border-white/10"
             >
-              <Download size={16} /> {isRtl ? 'تحميل' : 'Download'}
+              <Download size={16} /> {t('jc_download')}
             </button>
             <button
               onClick={() => shareMedia(previewMedia.url)}
               className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-sm font-bold text-white rounded-xl transition cursor-pointer shadow-lg"
             >
-              <Share2 size={16} /> {isRtl ? 'مشاركة' : 'Share'}
+              <Share2 size={16} /> {t('jc_share')}
             </button>
           </div>
         </div>
       )}
+
+      {/* M2 — the technical inspection form for the open card */}
+      {inspectionJobId && (
+        <InspectionModal jobCardId={inspectionJobId} onClose={() => setInspectionJobId(null)} />
+      )}
     </div>
+  );
+}
+
+/**
+ * Shows how a subscription covered this job card (M1): either the free visit
+ * that was deducted when the card was opened, or the plan discount applied.
+ */
+function CoverageBadge({ job, t }: { job: any; t: (key: string) => string }) {
+  if (!job?.subscriptionId) return null;
+
+  const discount = Number(job.subscriptionDiscount || 0);
+
+  if (job.isFreeVisit) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+        ✓ {t('sub_badgeFreeVisit')}
+      </span>
+    );
+  }
+
+  if (discount > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-400">
+        {t('sub_badgeDiscount')} {discount}%
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/60 px-2 py-0.5 text-[10px] font-bold text-zinc-400">
+      {t('sub_badge')}
+    </span>
   );
 }

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { SearchableSelect } from '../../components/SearchableSelect';
 import { useTranslation } from '../../store/LanguageContext';
-import { Search, UserPlus, Phone, BookOpen, PlusCircle, Car } from 'lucide-react';
+import { Search, UserPlus, Phone, BookOpen, PlusCircle, Car, BadgeCheck } from 'lucide-react';
 
 const POPULAR_BRANDS = [
   'تويوتا', 'هيونداي', 'كيا', 'نيسان', 'فورد',
@@ -72,7 +73,7 @@ export function CustomersView() {
     setErrorMsg('');
     const finalBrand = isCustomBrand ? custForm.customBrand.trim() : custForm.brand;
     if (!finalBrand) {
-      setErrorMsg(lang === 'ar' ? 'يرجى تحديد أو كتابة ماركة السيارة' : 'Please select or write the vehicle brand');
+      setErrorMsg(t('cu_pleaseSelectOrWrite'));
       return;
     }
 
@@ -110,7 +111,7 @@ export function CustomersView() {
       setIsCustomBrand(false);
       loadCustomers();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || (lang === 'ar' ? 'حدث خطأ أثناء حفظ بيانات العميل والسيارة' : 'Error occurred while saving customer and vehicle details'));
+      setErrorMsg(err.response?.data?.message || (t('cu_errorOccurredWhileSaving')));
     }
   }
 
@@ -119,7 +120,7 @@ export function CustomersView() {
     setErrorMsg('');
     const finalBrand = isSingleCustomBrand ? vehForm.customBrand.trim() : vehForm.brand;
     if (!finalBrand) {
-      setErrorMsg(lang === 'ar' ? 'يرجى تحديد أو كتابة ماركة السيارة' : 'Please select or write the vehicle brand');
+      setErrorMsg(t('cu_pleaseSelectOrWrite'));
       return;
     }
 
@@ -138,7 +139,7 @@ export function CustomersView() {
       setSelectedCustomer(res.data.customer);
       loadCustomers();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || (lang === 'ar' ? 'فشل حفظ بيانات السيارة' : 'Failed to save vehicle details'));
+      setErrorMsg(err.response?.data?.message || (t('cu_failedToSaveVehicle')));
     }
   }
 
@@ -210,17 +211,22 @@ export function CustomersView() {
                   <th className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{t('fullName')}</th>
                   <th className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{t('mobileNumber')}</th>
                   <th className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{t('vehiclesCountLabel')}</th>
-                  <th className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{isRtl ? 'تاريخ التسجيل' : 'Registration Date'}</th>
+                  <th className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{t('cu_registrationDate')}</th>
                   <th className={`px-6 py-4 ${isRtl ? 'text-left' : 'text-right'}`}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 bg-transparent">
                 {customers.map((c) => (
                   <tr key={c.id} className="hover:bg-zinc-900/30 transition">
-                    <td className={`px-6 py-4 font-medium text-white ${isRtl ? 'text-right' : 'text-left'}`}>{c.fullName}</td>
+                    <td className={`px-6 py-4 font-medium text-white ${isRtl ? 'text-right' : 'text-left'}`}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {c.fullName}
+                        <SubscriberBadge subscription={c.subscriptions?.[0]} isRtl={isRtl} t={t} />
+                      </div>
+                    </td>
                     <td className={`px-6 py-4 font-mono ${isRtl ? 'text-right' : 'text-left'}`}>{c.mobileNumber}</td>
                     <td className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {c.vehicles?.length || 0} {isRtl ? 'سيارات مسجلة' : 'Vehicles'}
+                      {c.vehicles?.length || 0} {t('cu_vehicles')}
                     </td>
                     <td className={`px-6 py-4 ${isRtl ? 'text-right' : 'text-left'}`}>{new Date(c.createdAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US')}</td>
                     <td className={`px-6 py-4 ${isRtl ? 'text-left' : 'text-right'}`}>
@@ -228,7 +234,7 @@ export function CustomersView() {
                         onClick={() => viewCustomerDetails(c)}
                         className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 text-xs text-white transition inline-flex items-center gap-1.5 cursor-pointer"
                       >
-                        <BookOpen size={12} /> {isRtl ? 'عرض التفاصيل والسجل' : 'View Details & History'}
+                        <BookOpen size={12} /> {t('cu_viewDetailsHistory')}
                       </button>
                     </td>
                   </tr>
@@ -242,7 +248,7 @@ export function CustomersView() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-zinc-800 px-6 py-4 bg-zinc-900/30">
             <p className="text-xs text-zinc-400">
-              {isRtl ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+              {t('ui_pageOf').replace('{page}', String(page)).replace('{total}', String(totalPages))}
             </p>
             <div className="flex gap-2">
               <button
@@ -250,14 +256,14 @@ export function CustomersView() {
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 className="rounded bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 disabled:opacity-50 cursor-pointer"
               >
-                {isRtl ? 'السابق' : 'Previous'}
+                {t('cu_previous')}
               </button>
               <button
                 disabled={page === totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 className="rounded bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 disabled:opacity-50 cursor-pointer"
               >
-                {isRtl ? 'التالي' : 'Next'}
+                {t('cu_next')}
               </button>
             </div>
           </div>
@@ -269,14 +275,14 @@ export function CustomersView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-xl glass-panel rounded-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <h2 className={`text-xl font-bold text-white border-b border-zinc-800 pb-2 ${isRtl ? 'text-right' : 'text-left'}`}>
-              {isRtl ? 'تسجيل عميل وسيارة جديدة (معاً)' : 'Register Customer & Vehicle'}
+              {t('cu_registerCustomerVehicle')}
             </h2>
             {errorMsg && <p className={`text-xs text-red-500 font-semibold ${isRtl ? 'text-right' : 'text-left'}`}>{errorMsg}</p>}
             <form onSubmit={handleAddCustomerAndVehicle} className={`space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
               
               {/* Part 1: Customer Info */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-primary">{isRtl ? 'أولاً: معلومات العميل' : '1. Customer Information'}</h3>
+                <h3 className="text-sm font-bold text-primary-text">{t('cu_1CustomerInformation')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('fullName')}</label>
@@ -307,7 +313,7 @@ export function CustomersView() {
                     type="text"
                     value={custForm.notes}
                     onChange={(e) => setCustForm({ ...custForm, notes: e.target.value })}
-                    placeholder={isRtl ? 'ملاحظات اختيارية عن العميل...' : 'Optional notes about customer...'}
+                    placeholder={t('cu_optionalNotesAboutCustomer')}
                     className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white focus:outline-none"
                   />
                 </div>
@@ -315,14 +321,18 @@ export function CustomersView() {
 
               {/* Part 2: Vehicle Info */}
               <div className="space-y-4 border-t border-zinc-800 pt-4">
-                <h3 className="text-sm font-bold text-accent">{isRtl ? 'ثانياً: معلومات السيارة' : '2. Vehicle Information'}</h3>
+                <h3 className="text-sm font-bold text-accent">{t('cu_2VehicleInformation')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                    <select
+                    <SearchableSelect
                       value={isCustomBrand ? 'CUSTOM' : custForm.brand}
-                      onChange={(e) => {
-                        const val = e.target.value;
+                      placeholder={t('vehicleBrand')}
+                      options={[
+                        ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                        { value: 'CUSTOM', label: t('cu_otherManualEntry'), pinned: true },
+                      ]}
+                      onChange={(val) => {
                         if (val === 'CUSTOM') {
                           setIsCustomBrand(true);
                         } else {
@@ -330,11 +340,7 @@ export function CustomersView() {
                           setCustForm({ ...custForm, brand: val });
                         }
                       }}
-                      className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                    >
-                      {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                      <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                    </select>
+                    />
 
                     {isCustomBrand && (
                       <input
@@ -342,7 +348,7 @@ export function CustomersView() {
                         required
                         value={custForm.customBrand}
                         onChange={(e) => setCustForm({ ...custForm, customBrand: e.target.value })}
-                        placeholder={isRtl ? 'اكتب ماركة السيارة هنا...' : 'Type vehicle brand here...'}
+                        placeholder={t('cu_typeVehicleBrandHere')}
                         className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white mt-2 focus:outline-none"
                       />
                     )}
@@ -397,7 +403,7 @@ export function CustomersView() {
                   type="submit"
                   className="rounded bg-primary px-5 py-2 text-sm text-white hover:bg-primary-hover font-semibold cursor-pointer"
                 >
-                  {isRtl ? 'حفظ العميل والسيارة معاً' : 'Save Customer & Vehicle'}
+                  {t('cu_saveCustomerVehicle')}
                 </button>
               </div>
             </form>
@@ -411,7 +417,14 @@ export function CustomersView() {
           <div className="w-full max-w-2xl glass-panel rounded-xl p-6 space-y-6 max-h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-start">
               <div className={isRtl ? 'text-right' : 'text-left'}>
-                <h2 className="text-2xl font-bold text-white">{selectedCustomer.fullName}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-white">
+                  {selectedCustomer.fullName}
+                  <SubscriberBadge
+                    subscription={selectedCustomer.subscriptions?.find((s: any) => s.status === 'ACTIVE')}
+                    isRtl={isRtl}
+                    t={t}
+                  />
+                </h2>
                 <p className="text-sm text-zinc-400 flex items-center gap-1.5 mt-1 font-mono">
                   <Phone size={14} /> {selectedCustomer.mobileNumber}
                 </p>
@@ -431,23 +444,23 @@ export function CustomersView() {
                 <h3 className="text-sm font-semibold text-zinc-300">{t('vehiclesCountLabel')}</h3>
                 <button
                   onClick={() => setShowAddVehicleModal(true)}
-                  className="text-xs text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-primary-text hover:text-white flex items-center gap-1 cursor-pointer"
                 >
-                  <PlusCircle size={14} /> {isRtl ? 'إضافة سيارة للعميل' : 'Add Vehicle for Customer'}
+                  <PlusCircle size={14} /> {t('cu_addVehicleForCustomer')}
                 </button>
               </div>
 
               {selectedCustomer.vehicles?.length === 0 ? (
-                <p className="text-xs text-zinc-500 bg-zinc-900/40 p-4 rounded border border-zinc-800">{isRtl ? 'لا توجد سيارات مسجلة لهذا العميل حالياً.' : 'No vehicles registered for this customer yet.'}</p>
+                <p className="text-xs text-zinc-500 bg-zinc-900/40 p-4 rounded border border-zinc-800">{t('cu_noVehiclesRegisteredFor')}</p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2">
                   {selectedCustomer.vehicles.map((v: any) => (
                     <div key={v.id} className="p-3 bg-zinc-900/60 rounded border border-zinc-800 flex items-center gap-3">
-                      <Car className="text-primary" size={20} />
+                      <Car className="text-primary-text" size={20} />
                       <div className={isRtl ? 'text-right' : 'text-left'}>
                         <p className="text-sm font-semibold text-white">{v.brand} {v.model}</p>
                         <p className="text-xs text-zinc-400 font-mono">
-                          {isRtl ? `رقم اللوحة: ${v.plateNumber} | العداد: ${v.mileage} كم` : `Plate: ${v.plateNumber} | Mileage: ${v.mileage} km`}
+                          {t('cu_plateAndMileage').replace('{plate}', v.plateNumber).replace('{km}', String(v.mileage))}
                         </p>
                       </div>
                     </div>
@@ -458,9 +471,9 @@ export function CustomersView() {
 
             {/* Historical Job Cards */}
             <div className={`space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
-              <h3 className="text-sm font-semibold text-zinc-300">{isRtl ? 'سجل كروت استقبال السيارات السابقة' : 'Past Job Cards History'}</h3>
+              <h3 className="text-sm font-semibold text-zinc-300">{t('cu_pastJobCardsHistory')}</h3>
               {selectedCustomer.jobCards?.length === 0 ? (
-                <p className="text-xs text-zinc-500 bg-zinc-900/40 p-4 rounded border border-zinc-800">{isRtl ? 'لا توجد سجلات سابقة.' : 'No past maintenance records found.'}</p>
+                <p className="text-xs text-zinc-500 bg-zinc-900/40 p-4 rounded border border-zinc-800">{t('cu_noPastMaintenanceRecords')}</p>
               ) : (
                 <div className="divide-y divide-zinc-800 bg-zinc-900/40 rounded border border-zinc-800">
                   {selectedCustomer.jobCards.map((j: any) => (
@@ -490,17 +503,21 @@ export function CustomersView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md glass-panel rounded-xl p-6 space-y-4">
             <h2 className={`text-xl font-bold text-white ${isRtl ? 'text-right' : 'text-left'}`}>
-              {isRtl ? `إضافة سيارة للعميل: ${selectedCustomer?.fullName}` : `Add Vehicle for: ${selectedCustomer?.fullName}`}
+              {t('cu_addVehicleFor').replace('{name}', selectedCustomer?.fullName || '')}
             </h2>
             {errorMsg && <p className={`text-xs text-red-500 ${isRtl ? 'text-right' : 'text-left'}`}>{errorMsg}</p>}
             <form onSubmit={handleAddVehicle} className={`space-y-4 ${isRtl ? 'text-right' : 'text-left'}`}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">{t('vehicleBrand')}</label>
-                  <select
+                  <SearchableSelect
                     value={isSingleCustomBrand ? 'CUSTOM' : vehForm.brand}
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    placeholder={t('vehicleBrand')}
+                    options={[
+                      ...POPULAR_BRANDS.map(b => ({ value: b, label: b })),
+                      { value: 'CUSTOM', label: t('cu_otherManualEntry'), pinned: true },
+                    ]}
+                    onChange={(val) => {
                       if (val === 'CUSTOM') {
                         setIsSingleCustomBrand(true);
                       } else {
@@ -508,11 +525,7 @@ export function CustomersView() {
                         setVehForm({ ...vehForm, brand: val });
                       }
                     }}
-                    className="w-full rounded bg-zinc-900 border border-zinc-800 p-2.5 text-sm text-white focus:outline-none"
-                  >
-                    {POPULAR_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                    <option value="CUSTOM">{isRtl ? 'أخرى (إدخال يدوي)' : 'Other (Manual Entry)'}</option>
-                  </select>
+                  />
 
                   {isSingleCustomBrand && (
                     <input
@@ -520,7 +533,7 @@ export function CustomersView() {
                       required
                       value={vehForm.customBrand}
                       onChange={(e) => setVehForm({ ...vehForm, customBrand: e.target.value })}
-                      placeholder={isRtl ? 'اكتب ماركة السيارة هنا...' : 'Type vehicle brand here...'}
+                      placeholder={t('cu_typeVehicleBrandHere')}
                       className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white mt-2 focus:outline-none"
                     />
                   )}
@@ -571,7 +584,7 @@ export function CustomersView() {
                   type="submit"
                   className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover cursor-pointer"
                 >
-                  {isRtl ? 'حفظ السيارة' : 'Save Vehicle'}
+                  {t('cu_saveVehicle')}
                 </button>
               </div>
             </form>
@@ -579,5 +592,45 @@ export function CustomersView() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * "Subscriber" badge (M1) — shows the plan and what is left on it, so the
+ * receptionist can see the customer's entitlement before opening a job card.
+ */
+function SubscriberBadge({
+  subscription,
+  isRtl,
+  t,
+}: {
+  subscription: any;
+  isRtl: boolean;
+  t: (key: string) => string;
+}) {
+  if (!subscription) return null;
+
+  const remaining = Math.max(0, subscription.freeVisitsTotal - subscription.freeVisitsUsed);
+  const discount = Number(subscription.discountPercent);
+  const planName = isRtl ? subscription.plan?.nameAr : subscription.plan?.nameEn;
+
+  // Show what the customer is entitled to next: a remaining free visit if any,
+  // otherwise the discount that will be applied instead.
+  const detail =
+    remaining > 0
+      ? `${remaining} ${t('sub_visitsLeftShort')}`
+      : discount > 0
+        ? `${t('sub_badgeDiscount')} ${discount}%`
+        : '';
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400"
+      title={`${planName || ''}${detail ? ' — ' + detail : ''}`}
+    >
+      <BadgeCheck size={12} />
+      {t('sub_badge')}
+      {detail && <span className="font-normal text-emerald-300/80">· {detail}</span>}
+    </span>
   );
 }

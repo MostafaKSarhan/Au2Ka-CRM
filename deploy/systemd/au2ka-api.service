@@ -1,0 +1,43 @@
+# خدمة باكند Au2Ka — تعمل من الملفات المبنية، لا من ts-node.
+#
+#   sudo cp deploy/systemd/au2ka-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now au2ka-api
+#   sudo systemctl status au2ka-api
+#   journalctl -u au2ka-api -f        # السجل الحي
+
+[Unit]
+Description=Au2Ka CRM API
+After=network.target mariadb.service mysql.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/faslatech/Au2Ka-CRM/backend
+
+# كل الأسرار في هذا الملف: صلاحياته 600 ومالكه www-data، وهو خارج Git.
+EnvironmentFile=/var/www/faslatech/Au2Ka-CRM/backend/.env
+
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=5
+
+# السجل يذهب لـ journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=au2ka-api
+
+# تضييق ما تستطيع الخدمة الوصول إليه
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+# الباكند يكتب الملفات المرفوعة داخل مجلده، فيبقى قابلًا للكتابة.
+# البادئة «-» تجعل المسار غير قاتل إن لم يكن موجودًا بعد: بدونها تفشل
+# الخدمة بـ 226/NAMESPACE على تثبيت جديد قبل رفع أول صورة.
+ReadWritePaths=-/var/www/faslatech/Au2Ka-CRM/backend/uploads
+
+[Install]
+WantedBy=multi-user.target

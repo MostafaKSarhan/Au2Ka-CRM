@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "frontend/src/features/jobCards/JobCardsView.tsx"
+        ],
+        "createdAt": "2026-11-21T22:18:12.766Z",
+        "reason": "Claude: printable invoice document, not app chrome. L1391 is the invoice body continuing the navy header band above it — border-x-2/border-b-2 in border-zinc-100 is a neutral hairline document edge paired with rounded-b-lg so the frame closes under the header. No accent colour and no clash; the rule targets thick coloured borders on rounded cards."
+      }
+    ]
+  }
+}

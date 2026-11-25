@@ -13,6 +13,23 @@ import { vehicleRoutes } from './modules/vehicles/vehicles.routes';
 import { jobCardRoutes } from './modules/jobCards/jobCards.routes';
 import { reportsRoutes } from './modules/reports/reports.routes';
 import { usersRoutes } from './modules/users/users.routes';
+import { locationsRoutes } from './modules/locations/locations.routes';
+import { branchesRoutes } from './modules/branches/branches.routes';
+import { vehicleCatalogRoutes } from './modules/vehicleCatalog/vehicleCatalog.routes';
+import { partsRoutes } from './modules/parts/parts.routes';
+import { backupRoutes } from './modules/backup/backup.routes';
+import { plansRoutes } from './modules/plans/plans.routes';
+import { subscriptionsRoutes } from './modules/subscriptions/subscriptions.routes';
+import { vehicleFileRoutes, publicVehicleFileRoutes } from './modules/vehicleFile/vehicleFile.routes';
+import { messagingRoutes } from './modules/messaging/messaging.routes';
+import { inspectionsRoutes, monthlyReportsRoutes } from './modules/inspections/inspections.routes';
+import { appointmentsRoutes } from './modules/appointments/appointments.routes';
+import { referralsRoutes } from './modules/referrals/referrals.routes';
+import { inventoryRoutes } from './modules/inventory/inventory.routes';
+import { portalRoutes } from './modules/portal/portal.routes';
+import { joinRequestsRoutes, publicJoinRoutes } from './modules/joinRequests/joinRequests.routes';
+import { whatsappRoutes, whatsappWebhookRoutes } from './modules/whatsapp/whatsapp.routes';
+import { zatcaRoutes } from './modules/zatca/zatca.routes';
 
 const app: FastifyInstance = fastify({ logger: true });
 
@@ -42,8 +59,19 @@ app.register(fastifySwaggerUi, {
 });
 
 // Register plugins
+//
+// CORS_ORIGINS is a comma-separated list of the sites allowed to call this
+// API — set it in production so only the workshop's own domains can. Left
+// unset (development, or a deployment where nginx serves the site and the API
+// on one origin and no cross-site call happens at all) any origin is
+// reflected, which is how this has always behaved.
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
 app.register(cors, {
-  origin: true,
+  origin: allowedOrigins.length ? allowedOrigins : true,
   credentials: true,
 });
 app.register(multipart, {
@@ -68,6 +96,51 @@ app.register(vehicleRoutes, { prefix: '/api/v1/vehicles' });
 app.register(jobCardRoutes, { prefix: '/api/v1/job-cards' });
 app.register(reportsRoutes, { prefix: '/api/v1' });
 app.register(usersRoutes, { prefix: '/api/v1/users' });
+
+// Phase 2 — R0: reference data & control panel
+app.register(locationsRoutes, { prefix: '/api/v1/locations' });
+app.register(branchesRoutes, { prefix: '/api/v1/branches' });
+app.register(vehicleCatalogRoutes, { prefix: '/api/v1/vehicle-catalog' });
+app.register(partsRoutes, { prefix: '/api/v1/parts' });
+app.register(backupRoutes, { prefix: '/api/v1/backup' });
+
+// Phase 2 — M1: subscriptions & annual plans
+app.register(plansRoutes, { prefix: '/api/v1/plans' });
+app.register(subscriptionsRoutes, { prefix: '/api/v1/subscriptions' });
+
+// Phase 2 — M3: vehicle lifetime file (plus the customer's public share link)
+app.register(vehicleFileRoutes, { prefix: '/api/v1/vehicle-file' });
+app.register(publicVehicleFileRoutes, { prefix: '/api/v1/public' });
+
+// Phase 2 — M6: messaging, templates and in-system alerts
+app.register(messagingRoutes, { prefix: '/api/v1/messaging' });
+
+// Phase 2 — M2: technical inspection checklist and monthly vehicle reports
+app.register(inspectionsRoutes, { prefix: '/api/v1/inspections' });
+app.register(monthlyReportsRoutes, { prefix: '/api/v1/monthly-reports' });
+
+// Phase 2 — M4: appointments, working hours and subscriber priority
+app.register(appointmentsRoutes, { prefix: '/api/v1/appointments' });
+
+// Phase 2 — M5: referrals, points and customer tiers
+app.register(referralsRoutes, { prefix: '/api/v1/referrals' });
+
+// Phase 2 — M10: inventory movements for the spare parts catalogue
+app.register(inventoryRoutes, { prefix: '/api/v1/inventory' });
+
+// Phase 2 — M7: the customer self-service portal (its own sign-in)
+app.register(portalRoutes, { prefix: '/api/v1/portal' });
+
+// طلبات الانضمام: الإرسال عام لمن ليس عميلًا بعد، والمراجعة للموظفين
+app.register(publicJoinRoutes, { prefix: '/api/v1/public' });
+app.register(joinRequestsRoutes, { prefix: '/api/v1/join-requests' });
+
+// Phase 2 — M8: official WhatsApp Business Cloud API
+app.register(whatsappRoutes, { prefix: '/api/v1/whatsapp' });
+app.register(whatsappWebhookRoutes, { prefix: '/api/v1/webhooks' });
+
+// Phase 2 — M9: ZATCA phase-two e-invoicing
+app.register(zatcaRoutes, { prefix: '/api/v1/zatca' });
 
 // Global Error Handler
 app.setErrorHandler((error, request, reply) => {

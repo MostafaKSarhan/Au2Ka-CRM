@@ -33,7 +33,28 @@ export class CustomersController {
         include: {
           vehicles: {
             where: { deletedAt: null }
-          }
+          },
+          // M1 — drives the "subscriber" badge in the customers list. Only the
+          // term actually in force today counts: a renewal booked ahead of time
+          // is ACTIVE but has not started, and must not be shown as coverage.
+          subscriptions: {
+            where: {
+              deletedAt: null,
+              status: 'ACTIVE',
+              startDate: { lte: new Date() },
+              endDate: { gte: new Date() },
+            },
+            select: {
+              id: true,
+              subscriptionNumber: true,
+              endDate: true,
+              freeVisitsTotal: true,
+              freeVisitsUsed: true,
+              discountPercent: true,
+              plan: { select: { nameAr: true, nameEn: true } },
+            },
+            orderBy: { endDate: 'desc' },
+          },
         },
         skip,
         take: limit,
@@ -64,6 +85,11 @@ export class CustomersController {
         jobCards: {
           where: { deletedAt: null },
           orderBy: { createdAt: 'desc' }
+        },
+        subscriptions: {
+          where: { deletedAt: null },
+          include: { plan: { select: { nameAr: true, nameEn: true } } },
+          orderBy: { endDate: 'desc' },
         }
       }
     });
